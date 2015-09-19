@@ -8,6 +8,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nd.android.sdp.common.photoviewpager.options.PhotoViewOptions;
+
 import java.util.ArrayList;
 
 public class PhotoViewPagerActivity extends AppCompatActivity {
@@ -17,9 +19,9 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
      */
     public static final String PARAM_URLS = "urls";
     /**
-     * 初始位置
+     * 现实选项
      */
-    public static final String PARAM_POSITION = "position";
+    public static final String PARAM_PHOTO_OPTIONS = "options";
 
     private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
@@ -41,7 +43,8 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
 
         final Intent intent = this.getIntent();
         ArrayList<String> images = intent.getStringArrayListExtra(PARAM_URLS);
-        mVpPhoto.init(images, intent.getIntExtra(PARAM_POSITION, 0));
+        mVpPhoto.init(images,
+                (PhotoViewOptions) intent.getSerializableExtra(PARAM_PHOTO_OPTIONS));
 
     }
 
@@ -64,10 +67,11 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
      * @param context the context
      * @author Young
      */
-    public static void start(Context context, ArrayList<String> urls, int position) {
+    public static void start(Context context, ArrayList<String> urls,
+                             PhotoViewOptions photoViewOptions) {
         Intent intent = new Intent(context, PhotoViewPagerActivity.class);
         intent.putExtra(PARAM_URLS, urls);
-        intent.putExtra(PARAM_POSITION, position);
+        intent.putExtra(PARAM_PHOTO_OPTIONS, photoViewOptions);
         context.startActivity(intent);
     }
 }
