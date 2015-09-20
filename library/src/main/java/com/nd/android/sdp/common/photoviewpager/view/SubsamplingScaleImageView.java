@@ -631,6 +631,7 @@ public class SubsamplingScaleImageView extends View {
             isZooming = false;
             isPanning = false;
             maxTouchCount = 0;
+            animateReset();
             return true;
         }
 
@@ -690,10 +691,10 @@ public class SubsamplingScaleImageView extends View {
 
                             if (scale <= minScale()) {
                                 // Minimum scale reached so don't pan. Adjust start settings so any expand will zoom in.
-                                vDistStart = vDistEnd;
-                                scaleStart = minScale();
-                                vCenterStart.set(vCenterEndX, vCenterEndY);
-                                vTranslateStart.set(vTranslate);
+//                                vDistStart = vDistEnd;
+//                                scaleStart = minScale();
+//                                vCenterStart.set(vCenterEndX, vCenterEndY);
+//                                vTranslateStart.set(vTranslate);
                             } else if (panEnabled) {
                                 // Translate to place the source image coordinate that was at the center of the pinch at the start
                                 // at the center of the pinch now, to give simultaneous pan + zoom.
@@ -834,6 +835,9 @@ public class SubsamplingScaleImageView extends View {
                     }
                     // Trigger load of tiles now required
                     refreshRequiredTiles(true);
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        animateReset();
+                    }
                     return true;
                 }
                 if (touchCount == 1) {
@@ -841,9 +845,19 @@ public class SubsamplingScaleImageView extends View {
                     isPanning = false;
                     maxTouchCount = 0;
                 }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    animateReset();
+                }
                 return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    private void animateReset() {
+        final float v = minScale();
+        if (scale < v) {
+            animateScale(v).start();
+        }
     }
 
     /**
@@ -968,7 +982,9 @@ public class SubsamplingScaleImageView extends View {
                                 setMatrixArray(dstArray, tile.vRect.left, tile.vRect.bottom, tile.vRect.left, tile.vRect.top, tile.vRect.right, tile.vRect.top, tile.vRect.right, tile.vRect.bottom);
                             }
                             matrix.setPolyToPoly(srcArray, 0, dstArray, 0, 4);
+
                             canvas.drawBitmap(tile.bitmap, matrix, bitmapPaint);
+
                             if (debug) {
                                 canvas.drawRect(tile.vRect, debugPaint);
                             }
@@ -2016,9 +2032,13 @@ public class SubsamplingScaleImageView extends View {
      * Adjust a requested scale to be within the allowed limits.
      */
     private float limitedScale(float targetScale) {
-        targetScale = Math.max(minScale(), targetScale);
-        targetScale = Math.min(maxScale, targetScale);
-        return targetScale;
+        if (targetScale == 0) {
+            targetScale = Math.max(minScale(), targetScale);
+            targetScale = Math.min(maxScale, targetScale);
+            return targetScale;
+        } else {
+            return targetScale;
+        }
     }
 
     /**

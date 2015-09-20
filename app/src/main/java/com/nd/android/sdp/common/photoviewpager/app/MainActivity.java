@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerActivity;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetter;
@@ -19,14 +20,20 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     String[] urls = new String[]{
-            "http://ww1.sinaimg.cn/bmiddle/c0788b86gw1ew7lxrfpbrj20go0m80tc.jpg"
+            "http://ww2.sinaimg.cn/mw1024/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
+    };
+
+    String[] preview_urls = new String[]{
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
     };
 
     @Override
@@ -36,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
         ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(this)
                 .build();
         ImageLoader.getInstance().init(imageLoaderConfiguration);
+        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        ImageView iv = ((ImageView) findViewById(R.id.iv));
+        ImageLoader.getInstance().displayImage(preview_urls[0], iv, displayImageOptions);
     }
 
     @Override
@@ -65,7 +78,11 @@ public class MainActivity extends AppCompatActivity {
                 .setDefaultPosition(0)
                 .setImaggerClass(DemoImageGetter.class)
                 .build();
-        PhotoViewPagerActivity.start(this, new ArrayList<>(Arrays.asList(urls)), photoViewOptions);
+        PhotoViewPagerActivity.start(this,
+                (ImageView) view,
+                new ArrayList<>(Arrays.asList(urls)),
+                new ArrayList<>(Arrays.asList(preview_urls)),
+                photoViewOptions);
     }
 
     public static class DemoImageGetter implements ImageGetter {
@@ -104,6 +121,16 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
+        }
+
+        @Override
+        public Bitmap getPreviewImage(String previewUrl) {
+            final List<Bitmap> cachedBitmapsForImageUri = MemoryCacheUtils.findCachedBitmapsForImageUri(previewUrl,
+                    ImageLoader.getInstance().getMemoryCache());
+            if (cachedBitmapsForImageUri.size() > 0) {
+                return cachedBitmapsForImageUri.get(0);
+            }
+            return null;
         }
     }
 }

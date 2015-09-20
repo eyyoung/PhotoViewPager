@@ -1,12 +1,44 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+    <View
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_material_dark"/>
 
     <com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <FrameLayout
+        android:layout_width="@dimen/photo_viewpager_preview_size"
+        android:layout_height="@dimen/photo_viewpager_preview_size"
+        android:layout_centerInParent="true">
+
+        <com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView
+            android:id="@+id/ivPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/photo_viewpager_preview_margin"
+            android:scaleType="centerCrop"/>
+
+        <com.github.rahatarmanahmed.cpv.CircularProgressView
+            android:id="@+id/pb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:cpv_animAutostart="true"
+            app:cpv_indeterminate="true"/>
+    </FrameLayout>
+
+    <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView
+        android:id="@+id/ivTemp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"/>
 
 </RelativeLayout>
