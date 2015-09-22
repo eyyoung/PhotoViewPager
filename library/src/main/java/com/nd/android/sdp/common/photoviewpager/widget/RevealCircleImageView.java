@@ -1,6 +1,5 @@
 package com.nd.android.sdp.common.photoviewpager.widget;
 
-import android.animation.IntEvaluator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -17,11 +16,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Property;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 public class RevealCircleImageView extends ImageView {
@@ -322,7 +318,7 @@ public class RevealCircleImageView extends ImageView {
         if (!mBorderOverlay) {
             mDrawableRect.inset(mBorderWidth, mBorderWidth);
         }
-        mDrawableRadius = Math.min(mDrawableRect.height() / 2.0f, mDrawableRect.width() / 2.0f);
+//        mDrawableRadius = 0;
 
         updateShaderMatrix();
         invalidate();

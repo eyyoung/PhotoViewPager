@@ -4,22 +4,29 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
-import com.kogitune.activity_transition.ActivityTransition;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetter;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
+import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 import com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView;
+import com.nd.android.sdp.common.photoviewpager.widget.HeightEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.RevealImageView;
+import com.nd.android.sdp.common.photoviewpager.widget.WidthEvaluator;
+import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
+import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
 
 import java.util.concurrent.TimeUnit;
 
@@ -128,7 +135,6 @@ public class ViewPagerFragment extends Fragment {
                                 0, 1);
                         AnimatorSet set = new AnimatorSet();
                         set.playTogether(animator, animator2);
-                        set.setInterpolator(new AccelerateInterpolator());
                         set.setDuration(300).start();
                         set.addListener(new AnimatorListenerAdapter() {
                             @Override
@@ -174,20 +180,42 @@ public class ViewPagerFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (mNeedTransition) {
-//            ActivityTransition.with(getActivity()
-//                    .getIntent())
-//                    .to(mIvPreview)
-//                    .duration(200).start(null);
             mNeedTransition = false;
-            int finalSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
+            Intent intent = getActivity().getIntent();
+            if (intent == null) {
+                return;
+            }
+            ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+            View targetView = getView().findViewById(R.id.flPreview);
+            // 边框大小
+            int frameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
+            // 边距大小
             int marginSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_margin);
+            final int screenWidth = getResources().getDisplayMetrics().widthPixels;
+            final int screenHeight = getResources().getDisplayMetrics().heightPixels;
+            final int statusBarHeight = Utils.getStatusBarHeight(getActivity());
+            final int startWidth = intent.getIntExtra(PhotoViewPagerActivity.PARAM_WIDTH, frameSize) + marginSize * 2;
+            final int startHeight = intent.getIntExtra(PhotoViewPagerActivity.PARAM_HEIGHT, frameSize) + marginSize * 2;
+            final int targetLeft = (screenWidth - frameSize) / 2;
+            final int targetTop = (screenHeight - frameSize) / 2 - statusBarHeight;
+            // 起始x位置
+            final int startLeft = intent.getIntExtra(PhotoViewPagerActivity.PARAM_LEFT, targetLeft) - marginSize;
+            // 起始y位置
+            final int startTop = intent.getIntExtra(PhotoViewPagerActivity.PARAM_TOP, targetTop) - marginSize - statusBarHeight;
+            final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(targetView), startWidth, frameSize);
+            final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(targetView), startHeight, frameSize);
+            final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(targetView), startLeft, targetLeft);
+            final ValueAnimator yAnimator = ValueAnimator.ofObject(new YEvaluator(targetView), startTop, targetTop);
+            AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
+            animatorSet.setDuration(500).start();
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvPreview, RevealCircleImageView.RADIUS,
-                    40f, (finalSize - marginSize * 2) / 2);
+                    0, (frameSize - marginSize * 2) / 2);
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(getView().findViewById(R.id.bg), View.ALPHA, 0, 1);
             AnimatorSet set = new AnimatorSet();
             set.playTogether(animator, animator1);
             set.setInterpolator(new AccelerateInterpolator());
-            set.setDuration(300).start();
+            set.setDuration(500).start();
             set.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animator) {
@@ -197,6 +225,7 @@ public class ViewPagerFragment extends Fragment {
                 @Override
                 public void onAnimationEnd(Animator animator) {
                     mPb.setVisibility(View.VISIBLE);
+                    ((AppCompatActivity) getActivity()).getSupportActionBar().show();
                     startGetImage();
                 }
             });

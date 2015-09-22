@@ -2,14 +2,15 @@ package com.nd.android.sdp.common.photoviewpager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.kogitune.activity_transition.core.TransitionBundleFactory;
 import com.nd.android.sdp.common.photoviewpager.options.PhotoViewOptions;
 
 import java.util.ArrayList;
@@ -25,6 +26,10 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
      * 现实选项
      */
     public static final String PARAM_PHOTO_OPTIONS = "options";
+    public static final String PARAM_TOP = "top";
+    public static final String PARAM_LEFT = "left";
+    public static final String PARAM_WIDTH = "width";
+    public static final String PARAM_HEIGHT = "height";
 
     private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
@@ -33,6 +38,10 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         this.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT < 16) {
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
         setContentView(R.layout.photo_viewpager_activity);
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
@@ -82,8 +91,12 @@ public class PhotoViewPagerActivity extends AppCompatActivity {
         intent.putExtra(PARAM_URLS, urls);
         intent.putExtra(PARAM_PREVIEW_URLS, previewUrls);
         intent.putExtra(PARAM_PHOTO_OPTIONS, photoViewOptions);
-        Bundle transitionBundle = TransitionBundleFactory.createTransitionBundle(context, imageView, null);
-        intent.putExtras(transitionBundle);
+        int[] locations = new int[2];
+        imageView.getLocationOnScreen(locations);
+        intent.putExtra(PARAM_LEFT, locations[0]);
+        intent.putExtra(PARAM_TOP, locations[1]);
+        intent.putExtra(PARAM_WIDTH, imageView.getWidth());
+        intent.putExtra(PARAM_HEIGHT, imageView.getHeight());
         context.startActivity(intent);
         context.overridePendingTransition(0, 0);
     }
