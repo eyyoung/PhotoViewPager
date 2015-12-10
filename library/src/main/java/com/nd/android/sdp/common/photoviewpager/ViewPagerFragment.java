@@ -5,15 +5,18 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.content.Intent;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.ImageView;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetter;
@@ -40,6 +43,8 @@ public class ViewPagerFragment extends Fragment {
 
     private static final String BUNDLE_URL = "url";
     private static final String PARAM_IMAGE_GETTER = "image_getter";
+    private static final int SCALE_DURATION = 1000;
+    private static final int EXIT_DURATION = 500;
     private ImageGetter mImageGetter;
     private View mView;
     private CircularProgressView mPb;
@@ -47,6 +52,11 @@ public class ViewPagerFragment extends Fragment {
     private RevealImageView mIvTemp;
     private boolean mNeedTransition;
     private Subscription mSubscription;
+    private SubsamplingScaleImageView mIvReal;
+    private int mStartWidth;// 起始宽度
+    private int mStartHeight; // 起始高度
+    private PhotoViewPagerFragment.Callback mActivityCallback;
+    private float mOrigScale;
 
     public void setUrl(String pUrl) {
         mUrl = pUrl;
@@ -76,11 +86,13 @@ public class ViewPagerFragment extends Fragment {
         }
     }
 
-    public static ViewPagerFragment newInstance(Class<? extends ImageGetter> getterClass) {
+    public static ViewPagerFragment newInstance(Class<? extends ImageGetter> getterClass, Bundle arguments) {
         ViewPagerFragment viewPagerFragment = new ViewPagerFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(PARAM_IMAGE_GETTER, getterClass);
-        viewPagerFragment.setArguments(bundle);
+        if (arguments == null) {
+            arguments = new Bundle();
+        }
+        arguments.putSerializable(PARAM_IMAGE_GETTER, getterClass);
+        viewPagerFragment.setArguments(arguments);
         return viewPagerFragment;
     }
 
@@ -100,6 +112,7 @@ public class ViewPagerFragment extends Fragment {
         mPb = (CircularProgressView) mView.findViewById(R.id.pb);
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
         mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
+        mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
 
         Bitmap bitmap = mImageGetter.getPreviewImage(mPreviewUrl);
         if (bitmap != null) {
@@ -142,13 +155,20 @@ public class ViewPagerFragment extends Fragment {
                                 if (!isAdded()) {
                                     return;
                                 }
-                                ((ViewGroup) getView()).removeView(mIvTemp);
                                 ((ViewGroup) getView()).removeView(mIvPreview);
-                                SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
-                                imageView.setMinimumDpi(120);
-                                imageView.setDoubleTapZoomDpi(120);
-                                imageView.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CUSTOM);
-                                imageView.setImage(ImageSource.cachedBitmap(bitmap));
+//                                ((ViewGroup) getView()).removeView(mIvTemp);
+                                mIvTemp.setVisibility(View.GONE);
+                                mIvReal.setMinimumDpi(120);
+                                mIvReal.setDoubleTapZoomDpi(120);
+                                mIvReal.setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CUSTOM);
+                                mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                                mOrigScale = mIvReal.getScale();
+                                mIvReal.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        finish();
+                                    }
+                                });
                             }
                         });
                         mSubscription.unsubscribe();
@@ -160,6 +180,98 @@ public class ViewPagerFragment extends Fragment {
                     }
                 });
 
+    }
+
+    private void finish() {
+        animateFinish();
+        mIvReal.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
+                final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
+                supportFragmentManager
+                        .beginTransaction()
+                        .remove(fragment)
+                        .commit();
+            }
+        }, SCALE_DURATION + EXIT_DURATION);
+        final ObjectAnimator animator1 = ObjectAnimator.ofFloat(getView().findViewById(R.id.bg), View.ALPHA, 1, 0);
+        animator1.setDuration(SCALE_DURATION + EXIT_DURATION);
+        animator1.start();
+    }
+
+    private void animateFinish() {
+        if (mActivityCallback == null) {
+            return;
+        }
+        final ImageView previewView = mActivityCallback.getPreviewView(mUrl);
+        if (previewView == null) {
+            return;
+        }
+        mIvReal.animateScale(mOrigScale)
+                .withDuration(SCALE_DURATION)
+                .withInterruptible(false)
+                .start();
+        final ImageView animateView = (ImageView) getView().findViewById(R.id.ivExitPreview);
+        final int startHeight = (int) ((float) mIvReal.getSHeight() / (float) mIvReal.getSWidth() * mIvReal.getWidth());
+        final Integer animatedValue = startHeight;
+        final ViewGroup.LayoutParams layoutParams = animateView.getLayoutParams();
+        layoutParams.height = animatedValue;
+        animateView.requestLayout();
+        animateView.setImageDrawable(previewView.getDrawable());
+        animateView.setScaleType(previewView.getScaleType());
+        final int startY = (mIvReal.getHeight() - startHeight) / 2;
+        animateView.setY(startY);
+        final ValueAnimator valueAnimator = ValueAnimator.ofInt(mIvReal.getWidth(), previewView.getWidth());
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final Integer animatedValue = (Integer) animation.getAnimatedValue();
+                final ViewGroup.LayoutParams layoutParams = animateView.getLayoutParams();
+                layoutParams.width = animatedValue;
+                animateView.requestLayout();
+            }
+        });
+        valueAnimator.setStartDelay(SCALE_DURATION);
+        valueAnimator.setDuration(EXIT_DURATION);
+        valueAnimator.start();
+        final ValueAnimator valueAnimator2 = ValueAnimator.ofInt(startHeight, previewView.getHeight());
+        valueAnimator2.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final Integer animatedValue = (Integer) animation.getAnimatedValue();
+                final ViewGroup.LayoutParams layoutParams = animateView.getLayoutParams();
+                layoutParams.height = animatedValue;
+                animateView.requestLayout();
+                Log.d("ViewPagerFragment", "height:" + animatedValue);
+            }
+        });
+        valueAnimator2.setStartDelay(SCALE_DURATION);
+        valueAnimator2.setDuration(EXIT_DURATION);
+        valueAnimator2.start();
+        final ValueAnimator valueAnimator3 = ValueAnimator.ofFloat(mIvReal.getX(), previewView.getX());
+        valueAnimator3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                animateView.setX((Float) animation.getAnimatedValue());
+            }
+        });
+        valueAnimator3.setStartDelay(SCALE_DURATION);
+        valueAnimator3.setDuration(EXIT_DURATION);
+        valueAnimator3.start();
+        final ValueAnimator valueAnimator4 = ValueAnimator.ofFloat(startY, previewView.getY());
+        valueAnimator4.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                final Float animatedValue = (Float) animation.getAnimatedValue();
+                animateView.setY(animatedValue);
+                Log.d("ViewPagerFragment", "setY:" + animatedValue);
+            }
+        });
+        valueAnimator4.setStartDelay(SCALE_DURATION);
+        valueAnimator4.setDuration(EXIT_DURATION);
+        valueAnimator4.start();
+        mIvReal.setVisibility(View.GONE);
     }
 
     @Override
@@ -181,11 +293,10 @@ public class ViewPagerFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         if (mNeedTransition) {
             mNeedTransition = false;
-            Intent intent = getActivity().getIntent();
-            if (intent == null) {
+            final Bundle arguments = getArguments();
+            if (arguments == null) {
                 return;
             }
-            ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
             View targetView = getView().findViewById(R.id.flPreview);
             // 边框大小
             int frameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
@@ -194,28 +305,29 @@ public class ViewPagerFragment extends Fragment {
             final int screenWidth = getResources().getDisplayMetrics().widthPixels;
             final int screenHeight = getResources().getDisplayMetrics().heightPixels;
             final int statusBarHeight = Utils.getStatusBarHeight(getActivity());
-            final int startWidth = intent.getIntExtra(PhotoViewPagerActivity.PARAM_WIDTH, frameSize) + marginSize * 2;
-            final int startHeight = intent.getIntExtra(PhotoViewPagerActivity.PARAM_HEIGHT, frameSize) + marginSize * 2;
+            mStartWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, frameSize) + marginSize * 2;
+            mStartHeight = arguments.getInt(PhotoViewPagerFragment.PARAM_HEIGHT, frameSize) + marginSize * 2;
             final int targetLeft = (screenWidth - frameSize) / 2;
             final int targetTop = (screenHeight - frameSize) / 2 - statusBarHeight;
             // 起始x位置
-            final int startLeft = intent.getIntExtra(PhotoViewPagerActivity.PARAM_LEFT, targetLeft) - marginSize;
+            final int startLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, targetLeft) - marginSize;
             // 起始y位置
-            final int startTop = intent.getIntExtra(PhotoViewPagerActivity.PARAM_TOP, targetTop) - marginSize - statusBarHeight;
-            final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(targetView), startWidth, frameSize);
-            final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(targetView), startHeight, frameSize);
+            final int startTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, targetTop) - marginSize - statusBarHeight;
+            final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(targetView), mStartWidth, frameSize);
+            final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(targetView), mStartHeight, frameSize);
             final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(targetView), startLeft, targetLeft);
             final ValueAnimator yAnimator = ValueAnimator.ofObject(new YEvaluator(targetView), startTop, targetTop);
             AnimatorSet animatorSet = new AnimatorSet();
+            animatorSet.setInterpolator(new AccelerateInterpolator());
             animatorSet.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
-            animatorSet.setDuration(500).start();
+            animatorSet.setDuration(400).start();
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvPreview, RevealCircleImageView.RADIUS,
                     0, (frameSize - marginSize * 2) / 2);
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(getView().findViewById(R.id.bg), View.ALPHA, 0, 1);
             AnimatorSet set = new AnimatorSet();
             set.playTogether(animator, animator1);
             set.setInterpolator(new AccelerateInterpolator());
-            set.setDuration(500).start();
+            set.setDuration(400).start();
             set.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animator) {
@@ -229,6 +341,22 @@ public class ViewPagerFragment extends Fragment {
                     startGetImage();
                 }
             });
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
+            mSubscription.unsubscribe();
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof PhotoViewPagerFragment.Callback) {
+            mActivityCallback = ((PhotoViewPagerFragment.Callback) context);
         }
     }
 }

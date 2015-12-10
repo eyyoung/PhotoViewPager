@@ -6,11 +6,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application>
-        <activity
-            android:name=".PhotoViewPagerActivity"
-            android:label="@string/title_activity_photo_view_pager"
-            android:theme="@style/PhotoViewPagerBaseTheme">
-        </activity>
     </application>
 
 </manifest>

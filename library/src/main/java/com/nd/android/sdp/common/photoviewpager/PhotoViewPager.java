@@ -1,6 +1,7 @@
 package com.nd.android.sdp.common.photoviewpager;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -23,6 +24,7 @@ public class PhotoViewPager extends ViewPager {
     private ImagePagerAdapter mImagePagerAdapter;
     private PhotoViewOptions mPhotoViewOptions;
     private ArrayList<String> mPreviewImgs;
+    private Bundle mArguments;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -40,9 +42,10 @@ public class PhotoViewPager extends ViewPager {
 
     public void init(ArrayList<String> images,
                      ArrayList<String> previewImgs,
-                     PhotoViewOptions photoViewOptions) {
+                     Bundle arguments, PhotoViewOptions photoViewOptions) {
         mUrls = images;
         mPreviewImgs = previewImgs;
+        mArguments = arguments;
 
         mImagePagerAdapter = new ImagePagerAdapter(((FragmentActivity) getContext())
                 .getSupportFragmentManager());
@@ -60,7 +63,7 @@ public class PhotoViewPager extends ViewPager {
 
         @Override
         public Fragment getItem(int position) {
-            ViewPagerFragment fragment = ViewPagerFragment.newInstance(mPhotoViewOptions.getImaggerClass());
+            ViewPagerFragment fragment = ViewPagerFragment.newInstance(mPhotoViewOptions.getImaggerClass(), mArguments);
             fragment.setUrl(mUrls.get(position));
             fragment.setPreviewUrl(mPreviewImgs.get(position));
             if (position == mPhotoViewOptions.getDefaultPosition()) {

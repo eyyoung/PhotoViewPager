@@ -2606,7 +2606,7 @@ public class SubsamplingScaleImageView extends View {
 
         /**
          * Set the easing style. See static fields. {@link #EASE_IN_OUT_QUAD} is recommended, and the default.
-         *
+         *EASE_IN_OUT_QUAD
          * @param easing easing style.
          * @return this builder for method chaining.
          */

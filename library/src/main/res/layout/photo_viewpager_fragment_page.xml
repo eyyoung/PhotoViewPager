@@ -1,18 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <View
         android:id="@+id/bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background_material_dark"/>
+        android:background="@color/background_material_dark" />
 
     <com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <FrameLayout
         android:id="@+id/flPreview"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/photo_viewpager_preview_margin"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
         <com.github.rahatarmanahmed.cpv.CircularProgressView
             android:id="@+id/pb"
@@ -32,7 +32,7 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             app:cpv_animAutostart="true"
-            app:cpv_indeterminate="true"/>
+            app:cpv_indeterminate="true" />
     </FrameLayout>
 
     <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView
@@ -40,6 +40,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:scaleType="fitCenter"/>
+        android:scaleType="fitCenter" />
+
+    <ImageView
+        android:id="@+id/ivExitPreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </RelativeLayout>
