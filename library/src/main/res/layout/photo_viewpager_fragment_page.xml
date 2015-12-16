@@ -21,15 +21,16 @@
 
         <com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView
             android:id="@+id/ivPreview"
+            android:layout_margin="3dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/photo_viewpager_preview_margin"
             android:scaleType="centerCrop" />
 
         <com.github.rahatarmanahmed.cpv.CircularProgressView
             android:id="@+id/pb"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:alpha="0.6"
             android:visibility="gone"
             app:cpv_animAutostart="true"
             app:cpv_indeterminate="true" />

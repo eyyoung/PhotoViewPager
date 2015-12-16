@@ -8,12 +8,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
-import com.nd.android.sdp.common.photoviewpager.getter.ImageGetter;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
-import com.nd.android.sdp.common.photoviewpager.options.Builder;
-import com.nd.android.sdp.common.photoviewpager.options.PhotoViewOptions;
+import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -21,24 +20,24 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
-import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PhotoViewPagerFragment.Callback {
 
     String[] urls = new String[]{
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
     };
 
     String[] preview_urls = new String[]{
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
     };
     private ImageView mIv;
+    private ImageView mIv2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements PhotoViewPagerFra
         setSupportActionBar(toolbar);
         ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(this)
                 .memoryCacheSize(20 * 1024 * 1024)
+                .writeDebugLogs()
                 .build();
         ImageLoader.getInstance().init(imageLoaderConfiguration);
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
@@ -55,7 +55,9 @@ public class MainActivity extends AppCompatActivity implements PhotoViewPagerFra
                 .cacheOnDisk(true)
                 .build();
         mIv = ((ImageView) findViewById(R.id.iv));
-        ImageLoader.getInstance().displayImage(preview_urls[1], mIv, displayImageOptions);
+        mIv2 = ((ImageView) findViewById(R.id.iv2));
+        ImageLoader.getInstance().displayImage(preview_urls[0], mIv, displayImageOptions);
+        ImageLoader.getInstance().displayImage(preview_urls[1], mIv2, displayImageOptions);
     }
 
     @Override
@@ -81,68 +83,69 @@ public class MainActivity extends AppCompatActivity implements PhotoViewPagerFra
     }
 
     public void toView(View view) {
-        PhotoViewOptions photoViewOptions = new Builder()
-                .setDefaultPosition(1)
-                .setImaggerClass(DemoImageGetter.class)
-                .build();
         PhotoViewPagerFragment.start(this,
                 (ImageView) view,
                 new ArrayList<>(Arrays.asList(urls)),
                 new ArrayList<>(Arrays.asList(preview_urls)),
-                photoViewOptions);
+                mIv == view ? 0 : 1);
     }
 
     @Override
     public ImageView getPreviewView(String url) {
-        return mIv;
+        if (url.equals(preview_urls[0])) {
+            return null;
+        } else {
+            return mIv2;
+        }
     }
 
-    public static class DemoImageGetter implements ImageGetter {
+    @Override
+    public void startGetImage(String url, final ImageGetterCallback imageGetterCallback) {
+        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .build();
+        ImageLoader.getInstance().loadImage(url,
+                new ImageSize(1440, 2560),
+                displayImageOptions, new ImageLoadingListener() {
+                    @Override
+                    public void onLoadingStarted(String imageUri, View view) {
 
-        @Override
-        public void startGetImage(String url, final ImageGetterCallback imageGetterCallback) {
-            DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
-                    .cacheInMemory(true)
-                    .cacheOnDisk(true)
-                    .build();
-            ImageLoader.getInstance().loadImage(url,
-                    new ImageSize(1080, 1980),
-                    displayImageOptions, new ImageLoadingListener() {
-                        @Override
-                        public void onLoadingStarted(String imageUri, View view) {
+                    }
 
-                        }
+                    @Override
+                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
 
-                        @Override
-                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                    }
 
-                        }
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                        imageGetterCallback.setImageToView(loadedImage);
+                    }
 
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            imageGetterCallback.setImageToView(loadedImage);
-                        }
+                    @Override
+                    public void onLoadingCancelled(String imageUri, View view) {
 
-                        @Override
-                        public void onLoadingCancelled(String imageUri, View view) {
+                    }
+                }, new ImageLoadingProgressListener() {
+                    @Override
+                    public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                        imageGetterCallback.setProgress(current, total);
+                    }
+                });
+    }
 
-                        }
-                    }, new ImageLoadingProgressListener() {
-                        @Override
-                        public void onProgressUpdate(String imageUri, View view, int current, int total) {
+    @Override
+    public File getFullsizePicDiskCache(String url) {
+        final DiskCache diskCache = ImageLoader.getInstance().getDiskCache();
+        final File file = diskCache.get(url);
+        return file;
+    }
 
-                        }
-                    });
-        }
-
-        @Override
-        public Bitmap getPreviewImage(String previewUrl) {
-            final List<Bitmap> cachedBitmapsForImageUri = MemoryCacheUtils.findCachedBitmapsForImageUri(previewUrl,
-                    ImageLoader.getInstance().getMemoryCache());
-            if (cachedBitmapsForImageUri.size() > 0) {
-                return cachedBitmapsForImageUri.get(0);
-            }
-            return null;
-        }
+    @Override
+    public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
+        Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
+        return true;
     }
 }
+
