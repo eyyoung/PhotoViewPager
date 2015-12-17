@@ -26,6 +26,7 @@ public class PhotoViewPager extends ViewPager {
     private Bundle mArguments;
     private int mDefaultPosition;
     private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
+    private PhotoViewPagerFragment.Callback mCallback;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -56,6 +57,10 @@ public class PhotoViewPager extends ViewPager {
         setCurrentItem(defaultPosition);
     }
 
+    public void setCallback(PhotoViewPagerFragment.Callback callback) {
+        mCallback = callback;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -68,9 +73,11 @@ public class PhotoViewPager extends ViewPager {
             ViewPagerFragment fragment = ViewPagerFragment.newInstance(mArguments);
             mFragmentMap.put(position, fragment);
             fragment.setUrl(mUrls.get(position));
+            fragment.setCallback(mCallback);
             fragment.setPreviewUrl(mPreviewImgs.get(position));
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
+                mDefaultPosition = -1;
             }
             return fragment;
         }

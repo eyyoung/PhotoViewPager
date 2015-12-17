@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nostra13.universalimageloader.cache.disc.DiskCache;
+import com.nostra13.universalimageloader.cache.memory.MemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -20,10 +21,12 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
+import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements PhotoViewPagerFragment.Callback {
 
@@ -87,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements PhotoViewPagerFra
                 (ImageView) view,
                 new ArrayList<>(Arrays.asList(urls)),
                 new ArrayList<>(Arrays.asList(preview_urls)),
-                mIv == view ? 0 : 1);
+                mIv == view ? 0 : 1,
+                this);
     }
 
     @Override
@@ -146,6 +150,17 @@ public class MainActivity extends AppCompatActivity implements PhotoViewPagerFra
     public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
         Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
         return true;
+    }
+
+    @Override
+    public Bitmap getPreviewBitmap(String url) {
+        final MemoryCache memoryCache = ImageLoader.getInstance().getMemoryCache();
+        final List<Bitmap> bitmaps = MemoryCacheUtils.findCachedBitmapsForImageUri(url, memoryCache);
+        if (bitmaps != null && !bitmaps.isEmpty()) {
+            return bitmaps.get(0);
+        } else {
+            return null;
+        }
     }
 }
 

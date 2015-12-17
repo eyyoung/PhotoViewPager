@@ -1,20 +1,22 @@
 package com.nd.android.sdp.common.photoviewpager.utils;
 
-import android.content.Context;
+import android.graphics.Rect;
 import android.view.View;
+import android.view.Window;
 
 /**
  * Created by Administrator on 2015/9/22.
  */
 public class Utils {
 
-    public static int getStatusBarHeight(Context context) {
-        int result = 0;
-        int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            result = context.getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
+    public static int getStatusBarHeightFix(Window window) {
+        Rect rectangle = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
+        int statusBarHeight = rectangle.top;
+        int contentViewTop =
+                window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+        int titleBarHeight = contentViewTop - statusBarHeight;
+        return titleBarHeight;
     }
 
     public static float sin(double degree) {

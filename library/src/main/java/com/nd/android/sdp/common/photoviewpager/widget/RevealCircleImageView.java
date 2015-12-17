@@ -345,4 +345,8 @@ public class RevealCircleImageView extends ImageView {
         mBitmapShader.setLocalMatrix(mShaderMatrix);
     }
 
+
+    public void setDrawableRadius(float drawableRadius) {
+        this.mDrawableRadius = drawableRadius;
+    }
 }

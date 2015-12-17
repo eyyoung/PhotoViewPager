@@ -14,9 +14,11 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nd.android.sdp.common.photoviewpager.menu.IBottomMenu;
+import com.nd.android.sdp.common.photoviewpager.menu.OnMenuClick;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,11 +44,16 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
     private LinearLayout mLlBottom;
+    private ArrayList<String> mImages;
+    private IBottomMenu[] mMenus;
+    private Callback mCallback;
 
     public static PhotoViewPagerFragment newInstance(ImageView imageView,
                                                      ArrayList<String> urls,
                                                      ArrayList<String> previewUrls,
-                                                     int defaultPosition) {
+                                                     int defaultPosition,
+                                                     Callback callback,
+                                                     IBottomMenu... menus) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
         args.putStringArrayList(PARAM_URLS, urls);
@@ -58,8 +65,35 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         args.putInt(PARAM_WIDTH, imageView.getWidth());
         args.putInt(PARAM_HEIGHT, imageView.getHeight());
         args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
+        fragment.setMenus(menus);
+        fragment.setCallbacks(callback);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void setCallbacks(Callback callback) {
+        mCallback = callback;
+    }
+
+    private void setMenus(IBottomMenu... menus) {
+        mMenus = menus;
+    }
+
+    private void inflateMenu(final IBottomMenu menu) {
+        final int resIcon = menu.getResIcon();
+        final TextView menuView = ((TextView) getActivity().getLayoutInflater().inflate(R.layout.photo_viewpager_item_bottom_menu, mLlBottom, false));
+        menuView.setText(menu.getDescRes());
+        menuView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final OnMenuClick onClickListener = menu.getOnClickListener();
+                if (onClickListener != null) {
+                    final int currentItem = mVpPhoto.getCurrentItem();
+                    onClickListener.onClick(v, mImages.get(currentItem));
+                }
+            }
+        });
+        mLlBottom.addView(menuView);
     }
 
     @Nullable
@@ -73,10 +107,18 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         super.onViewCreated(view, savedInstanceState);
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         mToolBar.setNavigationIcon(null);
-        mToolBar.inflateMenu(R.menu.menu_photo_view_pager);
-        mToolBar.setOnMenuItemClickListener(this);
-
         init();
+
+        initMenus();
+    }
+
+    private void initMenus() {
+        if (mMenus != null) {
+            for (final IBottomMenu menu : mMenus) {
+                inflateMenu(menu);
+            }
+        }
+        inflateMenu(new FullImageSize());
     }
 
     private View findViewById(int id) {
@@ -89,13 +131,14 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mLlBottom = ((LinearLayout) findViewById(R.id.llBottomMenu));
 
         final Bundle arguments = getArguments();
-        ArrayList<String> images = arguments.getStringArrayList(PARAM_URLS);
+        mImages = arguments.getStringArrayList(PARAM_URLS);
         ArrayList<String> previewImgs = arguments.getStringArrayList(PARAM_PREVIEW_URLS);
         final int defaultPosition = arguments.getInt(PARAM_DEFAULT_POSITION, 0);
-        mVpPhoto.init(images,
+        mVpPhoto.init(mImages,
                 previewImgs,
                 arguments,
                 defaultPosition);
+        mVpPhoto.setCallback(mCallback);
 
         mVpPhoto.post(new Runnable() {
             @Override
@@ -103,8 +146,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 onPageSelected(defaultPosition);
             }
         });
-
-        inflateMenu();
     }
 
     /**
@@ -112,17 +153,25 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
      *
      * @param activity the context
      */
-    public static void start(FragmentActivity activity,
-                             ImageView imageView,
-                             ArrayList<String> urls,
-                             ArrayList<String> previewUrls,
-                             int defaultPosition,
-                             IBottomMenu... menus) {
+    public static PhotoViewPagerFragment start(FragmentActivity activity,
+                                               ImageView imageView,
+                                               ArrayList<String> urls,
+                                               ArrayList<String> previewUrls,
+                                               int defaultPosition,
+                                               Callback callback,
+                                               IBottomMenu... menus) {
+        final PhotoViewPagerFragment fragment = newInstance(imageView,
+                urls,
+                previewUrls,
+                defaultPosition,
+                callback,
+                menus);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .addToBackStack(TAG_PHOTO)
-                .add(Window.ID_ANDROID_CONTENT, newInstance(imageView, urls, previewUrls, defaultPosition), TAG_PHOTO)
+                .add(Window.ID_ANDROID_CONTENT, fragment, TAG_PHOTO)
                 .commit();
+        return fragment;
     }
 
     @Override
@@ -162,9 +211,42 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         File getFullsizePicDiskCache(String url);
 
         boolean onLongClick(View v, String mUrl, Bitmap bitmap);
+
+        Bitmap getPreviewBitmap(String url);
     }
 
+    private class FullImageSize implements IBottomMenu {
 
-    private void inflateMenu() {
+        @Override
+        public int getResIcon() {
+            return 0;
+        }
+
+        @Override
+        public int getDescRes() {
+            return R.string.photo_viewpager_download_full_size;
+        }
+
+        @Override
+        public OnMenuClick getOnClickListener() {
+            return new OnMenuClick() {
+                @Override
+                public void onClick(View v, String url) {
+                    final int currentItem = mVpPhoto.getCurrentItem();
+                    final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+                    fragmentByPosition.downloadFullSize();
+                }
+            };
+        }
     }
+
+    /**
+     * 下载并加载全尺寸图片
+     */
+    public void downloadFullSize() {
+        final int currentItem = mVpPhoto.getCurrentItem();
+        final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+        fragmentByPosition.downloadFullSize();
+    }
+
 }

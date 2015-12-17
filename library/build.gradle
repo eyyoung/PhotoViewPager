@@ -24,8 +24,24 @@ dependencies {
     compile 'com.android.support:palette-v7:23.1.1'
     compile 'com.github.rahatarmanahmed:circularprogressview:2.3.2'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.9'
-    compile 'com.kogitune:pre-lollipop-activity-transition:1.0.0'
     compile 'io.reactivex:rxandroid:1.0.1'
     compile 'io.reactivex:rxjava:1.0.14'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
+}
+
+apply plugin: 'maven'
+uploadArchives {
+    try {
+        repositories {
+            mavenDeployer {
+                repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
+                    authentication(userName: mavenUser, password: mavenPassword)
+                }
+                pom.version = "0.1.3"
+                pom.artifactId = "photoview"
+                pom.groupId = "com.nd.android.sdp.common"
+            }
+        }
+    } catch (java.lang.Exception e) {
+    }
 }
