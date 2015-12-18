@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
@@ -84,6 +85,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private String mPreviewUrl;
     private int mFrameSize;
     private GifImageView mIvGif;
+    private IPhotoViewPagerConfiguration mConfiguration;
 
     public ViewPagerFragment() {
     }
@@ -95,6 +97,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         viewPagerFragment.setArguments(arguments);
         return viewPagerFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
     }
 
     public void setUrl(String pUrl) {
@@ -124,7 +132,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mStatusBarHeight = Utils.getStatusBarHeightFix(getActivity().getWindow());
         final ImageView imageView = mActivityCallback.getPreviewView(mPreviewUrl);
         if (imageView != null) {
-            final Bitmap previewBitmap = mActivityCallback.getPreviewBitmap(mPreviewUrl);
+            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
             if (previewBitmap != null) {
                 Palette palette = Palette.from(previewBitmap).generate();
                 final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
@@ -200,7 +208,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvTemp.setVisibility(View.GONE);
             mIvPreview.setVisibility(View.VISIBLE);
             mIvPreview.setDrawableRadius(mFrameSize / 2);
-            final Bitmap previewBitmap = mActivityCallback.getPreviewBitmap(mUrl);
+            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mUrl);
             mIvPreview.setImageBitmap(previewBitmap);
             startGetImage();
         }
@@ -234,7 +242,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
-                mActivityCallback.startGetImage(mUrl, new ImageGetterCallback() {
+                mConfiguration.startGetImage(mUrl, new ImageGetterCallback() {
                     @Override
                     public void setImageToView(Bitmap bitmap) {
                         subscriber.onNext(bitmap);
@@ -260,7 +268,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvTemp.setVisibility(View.VISIBLE);
                         mIvTemp.setImageBitmap(bitmap);
                         mIvPreview.setVisibility(View.GONE);
-                        final File diskCache = mActivityCallback.getPicDiskCache(mUrl);
+                        final File diskCache = mConfiguration.getPicDiskCache(mUrl);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (diskCache != null && diskCache.exists()) {
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
@@ -364,7 +372,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void downloadFullSize() {
-        final File diskCache = mActivityCallback.getPicDiskCache(mUrl);
+        final File diskCache = mConfiguration.getPicDiskCache(mUrl);
         if (diskCache.exists()) {
             loadPicFromFile(diskCache);
             return;

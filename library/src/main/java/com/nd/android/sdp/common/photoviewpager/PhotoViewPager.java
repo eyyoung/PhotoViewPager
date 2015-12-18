@@ -19,7 +19,7 @@ import java.util.ArrayList;
  *
  * @author Young
  */
-public class PhotoViewPager extends ViewPager {
+class PhotoViewPager extends ViewPager {
 
     private ArrayList<String> mUrls;
     private ImagePagerAdapter mImagePagerAdapter;
