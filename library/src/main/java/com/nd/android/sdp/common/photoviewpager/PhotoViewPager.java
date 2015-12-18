@@ -26,7 +26,7 @@ public class PhotoViewPager extends ViewPager {
     private Bundle mArguments;
     private int mDefaultPosition;
     private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
-    private PhotoViewPagerFragment.Callback mCallback;
+    private Callback mCallback;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -57,7 +57,7 @@ public class PhotoViewPager extends ViewPager {
         setCurrentItem(defaultPosition);
     }
 
-    public void setCallback(PhotoViewPagerFragment.Callback callback) {
+    public void setCallback(Callback callback) {
         mCallback = callback;
     }
 

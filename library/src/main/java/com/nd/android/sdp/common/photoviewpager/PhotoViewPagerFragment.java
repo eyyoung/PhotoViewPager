@@ -118,7 +118,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 inflateMenu(menu);
             }
         }
-        inflateMenu(new FullImageSize());
+//        inflateMenu(new FullImageSize());
     }
 
     private View findViewById(int id) {
@@ -168,7 +168,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 menus);
         activity.getSupportFragmentManager()
                 .beginTransaction()
-                .addToBackStack(TAG_PHOTO)
                 .add(Window.ID_ANDROID_CONTENT, fragment, TAG_PHOTO)
                 .commit();
         return fragment;
@@ -201,18 +200,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     @Override
     public void onPageScrollStateChanged(int state) {
 
-    }
-
-    public interface Callback {
-        ImageView getPreviewView(String url);
-
-        void startGetImage(String url, ImageGetterCallback imageGetterCallback);
-
-        File getFullsizePicDiskCache(String url);
-
-        boolean onLongClick(View v, String mUrl, Bitmap bitmap);
-
-        Bitmap getPreviewBitmap(String url);
     }
 
     private class FullImageSize implements IBottomMenu {

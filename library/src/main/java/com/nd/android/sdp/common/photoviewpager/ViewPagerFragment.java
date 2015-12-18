@@ -67,7 +67,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private boolean mNeedTransition;
     private Subscription mSubscription;
     private SubsamplingScaleImageView mIvReal;
-    private PhotoViewPagerFragment.Callback mActivityCallback;
+    private Callback mActivityCallback;
     private float mOrigScale;
     private long mScaleDuration;
     private int mSceenWidth;
@@ -486,7 +486,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         return mActivityCallback.onLongClick(v, mUrl, bitmap);
     }
 
-    public void setCallback(PhotoViewPagerFragment.Callback callback) {
+    public void setCallback(Callback callback) {
         mActivityCallback = callback;
     }
 
@@ -637,4 +637,5 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         return true;
     }
+
 }
