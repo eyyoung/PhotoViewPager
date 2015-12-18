@@ -33,12 +33,16 @@ public class MainActivity extends AppCompatActivity implements Callback {
 
     String[] urls = new String[]{
             "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/005UtZ0Igw1ez3lvhnpezj30hs0np3ze.jpg"
     };
 
     String[] preview_urls = new String[]{
             "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg"
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/005UtZ0Igw1ez3lvhnpezj30hs0np3ze.jpg"
     };
     private ImageView mIv;
     private ImageView mIv2;
@@ -142,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements Callback {
     }
 
     @Override
-    public File getFullsizePicDiskCache(String url) {
+    public File getPicDiskCache(String url) {
         final DiskCache diskCache = ImageLoader.getInstance().getDiskCache();
         final File file = diskCache.get(url);
         return file;

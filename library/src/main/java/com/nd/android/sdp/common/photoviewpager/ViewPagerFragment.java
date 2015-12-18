@@ -8,17 +8,18 @@ import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -44,6 +45,7 @@ import java.io.IOException;
 
 import okio.BufferedSink;
 import okio.Okio;
+import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -78,6 +80,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private String mUrl;
     private String mPreviewUrl;
     private int mFrameSize;
+    private GifImageView mIvGif;
 
     public ViewPagerFragment() {
     }
@@ -114,6 +117,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
         mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
         mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
+        mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
         mFlPreview = mView.findViewById(R.id.flPreview);
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;
@@ -214,9 +218,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     }
 
                     @Override
-                    public void setProgress(int current, int total) {
-                        mPb.setIndeterminate(false);
-                        mPb.setProgress(((float) current) / ((float) total));
+                    public void setProgress(final int current, final int total) {
+                        mPb.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPb.setIndeterminate(false);
+                                mPb.setProgress(((float) current) / ((float) total));
+                            }
+                        });
                     }
                 });
             }
@@ -229,48 +238,66 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvTemp.setVisibility(View.VISIBLE);
                         mIvTemp.setImageBitmap(bitmap);
                         mIvPreview.setVisibility(View.GONE);
+                        final File diskCache = mActivityCallback.getPicDiskCache(mUrl);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
-                        mIvReal.setVisibility(View.VISIBLE);
-                        final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
-                                mFrameSize / 2, 0);
-                        final ObjectAnimator animator2 = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.ALPHA,
-                                0, 1);
-                        AnimatorSet set = new AnimatorSet();
-                        set.playTogether(animator, animator2);
-                        set.setDuration(300).start();
-                        set.addListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animator) {
-                                if (!isAdded()) {
-                                    return;
-                                }
-                                mView.removeView(mIvPreview);
+                        if (diskCache != null && diskCache.exists()) {
+                            if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
+                                mIvReal.setVisibility(View.VISIBLE);
+                                mIvGif.setVisibility(View.GONE);
+                                final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
+                                        mFrameSize / 2, 0);
+                                final ObjectAnimator animator2 = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.ALPHA,
+                                        0, 1);
+                                AnimatorSet set = new AnimatorSet();
+                                set.playTogether(animator, animator2);
+                                set.setDuration(300).start();
+                                set.addListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animator) {
+                                        if (!isAdded()) {
+                                            return;
+                                        }
+                                        mView.removeView(mIvPreview);
 //                                ((ViewGroup) getView()).removeView(mIvTemp);
+                                        mIvTemp.setVisibility(View.GONE);
+                                        final int bmHeight = bitmap.getHeight();
+                                        final int bmWidth = bitmap.getWidth();
+                                        float maxScale;
+                                        if (isPortrait(bmWidth, bmHeight)) {
+                                            // 竖照片，放大宽
+                                            maxScale = ((float) bmWidth) / ((float) mSceenWidth);
+                                        } else {
+                                            maxScale = ((float) bmHeight) / ((float) mSceenHeight);
+                                        }
+                                        if (maxScale < 1f) {
+                                            maxScale = 1f / maxScale;
+                                        }
+                                        mIvReal.setMaxScale(maxScale);
+                                        mIvReal.setDoubleTapZoomScale(maxScale);
+                                        mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                                        mOrigScale = mIvReal.getScale();
+                                        mIvReal.setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                finish();
+                                            }
+                                        });
+                                    }
+                                });
+                            } else {
+                                mIvReal.setVisibility(View.GONE);
+                                mIvGif.setVisibility(View.VISIBLE);
+                                mIvGif.setImageURI(Uri.fromFile(diskCache));
+                                mView.removeView(mIvPreview);
                                 mIvTemp.setVisibility(View.GONE);
-                                final int bmHeight = bitmap.getHeight();
-                                final int bmWidth = bitmap.getWidth();
-                                float maxScale;
-                                if (isPortrait(bmWidth, bmHeight)) {
-                                    // 竖照片，放大宽
-                                    maxScale = ((float) bmWidth) / ((float) mSceenWidth);
-                                } else {
-                                    maxScale = ((float) bmHeight) / ((float) mSceenHeight);
-                                }
-                                if (maxScale < 1f) {
-                                    maxScale = 1f / maxScale;
-                                }
-                                mIvReal.setMaxScale(maxScale);
-                                mIvReal.setDoubleTapZoomScale(maxScale);
-                                mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
-                                mOrigScale = mIvReal.getScale();
-                                mIvReal.setOnClickListener(new View.OnClickListener() {
+                                mIvGif.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         finish();
                                     }
                                 });
                             }
-                        });
+                        }
                         mSubscription.unsubscribe();
                     }
                 }, new Action1<Throwable>() {
@@ -325,7 +352,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void downloadFullSize() {
-        final File diskCache = mActivityCallback.getFullsizePicDiskCache(mUrl);
+        final File diskCache = mActivityCallback.getPicDiskCache(mUrl);
         if (diskCache.exists()) {
             loadPicFromFile(diskCache);
             return;
@@ -506,7 +533,13 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             animator1.setDuration(mScaleDuration + EXIT_DURATION);
             animator1.start();
         } else {
-            mIvReal.animate()
+            ViewPropertyAnimator animate;
+            if (mIvGif.getVisibility() == View.GONE) {
+                animate = mIvReal.animate();
+            } else {
+                animate = mIvGif.animate();
+            }
+            animate
                     .alpha(0f)
                     .setInterpolator(new AccelerateInterpolator())
                     .setDuration(300)
@@ -539,6 +572,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         final ImageView previewView = mActivityCallback.getPreviewView(mUrl);
         if (previewView == null) {
+            return false;
+        }
+        if (mIvGif.getVisibility() == View.VISIBLE) {
             return false;
         }
         mScaleDuration = ((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));
@@ -593,7 +629,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 final ViewGroup.LayoutParams layoutParams = animateView.getLayoutParams();
                 layoutParams.height = animatedValue;
                 animateView.requestLayout();
-                Log.d("ViewPagerFragment", "height:" + animatedValue);
             }
         });
         valueAnimator2.setStartDelay(mScaleDuration);
@@ -617,7 +652,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             public void onAnimationUpdate(ValueAnimator animation) {
                 final Float animatedValue = (Float) animation.getAnimatedValue();
                 animateView.setY(animatedValue);
-                Log.d("ViewPagerFragment", "setY:" + animatedValue);
             }
         });
         valueAnimator4.setStartDelay(mScaleDuration);

@@ -1,6 +1,5 @@
 package com.nd.android.sdp.common.photoviewpager;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,11 +15,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nd.android.sdp.common.photoviewpager.menu.IBottomMenu;
 import com.nd.android.sdp.common.photoviewpager.menu.OnMenuClick;
 
-import java.io.File;
 import java.util.ArrayList;
 
 public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuItemClickListener, ViewPager.OnPageChangeListener {
@@ -169,7 +166,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .add(Window.ID_ANDROID_CONTENT, fragment, TAG_PHOTO)
-                .commit();
+                .commitAllowingStateLoss();
         return fragment;
     }
 

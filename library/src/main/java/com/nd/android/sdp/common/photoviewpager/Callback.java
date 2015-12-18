@@ -13,7 +13,7 @@ public interface Callback {
 
     void startGetImage(String url, ImageGetterCallback imageGetterCallback);
 
-    File getFullsizePicDiskCache(String url);
+    File getPicDiskCache(String url);
 
     boolean onLongClick(View v, String mUrl, Bitmap bitmap);
 
