@@ -14,8 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.nd.android.sdp.common.photoviewpager.menu.IBottomMenu;
 import com.nd.android.sdp.common.photoviewpager.menu.OnMenuClick;
@@ -42,7 +40,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
-    private LinearLayout mLlBottom;
     private ArrayList<String> mImages;
     private Callback mCallback;
 
@@ -69,23 +66,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     private void setCallbacks(Callback callback) {
         mCallback = callback;
-    }
-
-    private void inflateMenu(final IBottomMenu menu) {
-        final int resIcon = menu.getResIcon();
-        final TextView menuView = ((TextView) getActivity().getLayoutInflater().inflate(R.layout.photo_viewpager_item_bottom_menu, mLlBottom, false));
-        menuView.setText(menu.getDescRes());
-        menuView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final OnMenuClick onClickListener = menu.getOnClickListener();
-                if (onClickListener != null) {
-                    final int currentItem = mVpPhoto.getCurrentItem();
-                    onClickListener.onClick(v, mImages.get(currentItem));
-                }
-            }
-        });
-        mLlBottom.addView(menuView);
     }
 
     @Nullable
@@ -123,7 +103,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private void init() {
         mVpPhoto = (PhotoViewPager) findViewById(R.id.vpPhoto);
         mVpPhoto.addOnPageChangeListener(this);
-        mLlBottom = ((LinearLayout) findViewById(R.id.llBottomMenu));
 
         final Bundle arguments = getArguments();
         mImages = arguments.getStringArrayList(PARAM_URLS);
@@ -223,10 +202,19 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     /**
      * 下载并加载全尺寸图片
      */
-    public void downloadFullSize() {
-        final int currentItem = mVpPhoto.getCurrentItem();
-        final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
-        fragmentByPosition.downloadFullSize();
+//    public void downloadFullSize() {
+//        final int currentItem = mVpPhoto.getCurrentItem();
+//        final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+//        fragmentByPosition.downloadFullSize();
+//    }
+
+    /**
+     * 跳到指定页面
+     *
+     * @param position 序号
+     */
+    public void goPage(int position) {
+        mVpPhoto.setCurrentItem(position);
     }
 
 }

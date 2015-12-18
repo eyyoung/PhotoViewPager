@@ -16,14 +16,5 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat" />
 
-    <LinearLayout
-        android:id="@+id/llBottomMenu"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
-
-    </LinearLayout>
-
 
 </RelativeLayout>

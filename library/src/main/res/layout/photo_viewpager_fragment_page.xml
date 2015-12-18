@@ -38,7 +38,8 @@
             android:alpha="0.6"
             android:visibility="gone"
             app:cpv_animAutostart="true"
-            app:cpv_indeterminate="true" />
+            app:cpv_indeterminate="true"
+            app:cpv_thickness="4dp" />
     </FrameLayout>
 
     <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView

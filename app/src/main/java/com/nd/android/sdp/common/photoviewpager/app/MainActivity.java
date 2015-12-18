@@ -168,5 +168,10 @@ public class MainActivity extends AppCompatActivity implements Callback {
             return null;
         }
     }
+
+    @Override
+    public void onViewCreated(View view) {
+
+    }
 }
 

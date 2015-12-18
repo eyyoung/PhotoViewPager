@@ -43,6 +43,7 @@ import com.squareup.okhttp.ResponseBody;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okio.BufferedSink;
 import okio.Okio;
@@ -56,6 +57,7 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 
 public class ViewPagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
 
@@ -126,7 +128,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             final Bitmap previewBitmap = mActivityCallback.getPreviewBitmap(mPreviewUrl);
             if (previewBitmap != null) {
                 Palette palette = Palette.from(previewBitmap).generate();
-                final Palette.Swatch lightVibrantSwatch = palette.getDarkMutedSwatch();
+                final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
                 if (lightVibrantSwatch != null) {
                     mPb.setColor(lightVibrantSwatch.getRgb());
                 }
@@ -205,7 +207,31 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
+    private PublishSubject<Integer> mBitmapProgressSubject;
+
+    private void initProgressPublishSubject() {
+        mBitmapProgressSubject = PublishSubject.create();
+        mBitmapProgressSubject
+                .throttleLast(1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer integer) {
+                        if (integer > 0 && mPb.isIndeterminate()) {
+                            mPb.setIndeterminate(false);
+                        }
+                        mPb.setProgress(integer);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+
+                    }
+                });
+    }
+
     private void startGetImage() {
+        initProgressPublishSubject();
         mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -217,17 +243,16 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
                     @Override
                     public void setProgress(final int current, final int total) {
-                        mPb.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mPb.setIndeterminate(false);
-                                mPb.setProgress(((float) current) / ((float) total));
-                            }
-                        });
+                        final float currentProgress = ((float) current) / ((float) total) * 100;
+                        mBitmapProgressSubject.onNext((int) currentProgress);
+                        if (currentProgress == 100) {
+                            mBitmapProgressSubject.onCompleted();
+                        }
                     }
                 });
             }
         })
+                .throttleLast(1000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Bitmap>() {
                     @Override
@@ -318,16 +343,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         return bmHeight / bmWidth
                 > ((float) mSceenHeight) / (float) mSceenWidth;
     }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        View rootView = getView();
-        if (rootView != null) {
-            outState.putString(BUNDLE_URL, mUrl);
-        }
-    }
-
 
     public void startDefaultTransition() {
         mNeedTransition = true;
