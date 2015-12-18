@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -105,13 +106,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = (ViewGroup) inflater.inflate(R.layout.photo_viewpager_fragment_page, container, false);
-
-        if (savedInstanceState != null) {
-            if (mUrl == null && savedInstanceState.containsKey(BUNDLE_URL)) {
-                mUrl = savedInstanceState.getString(BUNDLE_URL);
-            }
+        if (mActivityCallback == null) {
+            Log.d("PhotoViewPagerFragment", "not support save instance");
+            return mView;
         }
-
         mBg = mView.findViewById(R.id.bg);
         mPb = (CircularProgressView) mView.findViewById(R.id.pb);
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));

@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -102,6 +104,18 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (savedInstanceState != null) {
+            Log.d("PhotoViewPagerFragment", "not support save instance");
+            final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
+            final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
+            if (fragment != null) {
+                supportFragmentManager
+                        .beginTransaction()
+                        .remove(fragment)
+                        .commit();
+            }
+            return;
+        }
         mToolBar = (Toolbar) findViewById(R.id.toolbar);
         mToolBar.setNavigationIcon(null);
         init();
