@@ -112,7 +112,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             Log.d("PhotoViewPagerFragment", "not support save instance");
             return mView;
         }
-        mBg = mView.findViewById(R.id.bg);
         mPb = (CircularProgressView) mView.findViewById(R.id.pb);
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
         mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
@@ -528,6 +527,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void setCallback(Callback callback) {
         mActivityCallback = callback;
+    }
+
+    public void setBg(View bg){
+        mBg = bg;
     }
 
     public void finish() {

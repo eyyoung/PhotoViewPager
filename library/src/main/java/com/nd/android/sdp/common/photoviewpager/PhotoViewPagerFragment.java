@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 
+import com.eftimoff.viewpagertransformers.DrawFromBackTransformer;
 import com.nd.android.sdp.common.photoviewpager.menu.IBottomMenu;
 import com.nd.android.sdp.common.photoviewpager.menu.OnMenuClick;
 
@@ -108,12 +109,14 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mImages = arguments.getStringArrayList(PARAM_URLS);
         ArrayList<String> previewImgs = arguments.getStringArrayList(PARAM_PREVIEW_URLS);
         final int defaultPosition = arguments.getInt(PARAM_DEFAULT_POSITION, 0);
+        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
+        mVpPhoto.setPageMargin(20);
+        mVpPhoto.setBg(findViewById(R.id.bg));
         mVpPhoto.init(mImages,
                 previewImgs,
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
-
         mVpPhoto.post(new Runnable() {
             @Override
             public void run() {
@@ -197,6 +200,15 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 }
             };
         }
+    }
+
+    public void exit() {
+        final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
+        final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
+        supportFragmentManager
+                .beginTransaction()
+                .remove(fragment)
+                .commit();
     }
 
     /**

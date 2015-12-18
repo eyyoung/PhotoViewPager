@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ public class PhotoViewPager extends ViewPager {
     private int mDefaultPosition;
     private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
     private Callback mCallback;
+    private View mBg;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -62,6 +63,10 @@ public class PhotoViewPager extends ViewPager {
         mCallback = callback;
     }
 
+    public void setBg(View bg) {
+        mBg = bg;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -73,6 +78,7 @@ public class PhotoViewPager extends ViewPager {
         public Fragment getItem(int position) {
             ViewPagerFragment fragment = ViewPagerFragment.newInstance(mArguments);
             mFragmentMap.put(position, fragment);
+            fragment.setBg(mBg);
             fragment.setUrl(mUrls.get(position));
             fragment.setCallback(mCallback);
             fragment.setPreviewUrl(mPreviewImgs.get(position));

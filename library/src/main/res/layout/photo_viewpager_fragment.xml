@@ -4,6 +4,12 @@
     android:layout_height="match_parent"
     tools:context=".PhotoViewPagerFragment">
 
+    <View
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/background_material_dark" />
+
 
     <com.nd.android.sdp.common.photoviewpager.PhotoViewPager
         android:id="@+id/vpPhoto"
