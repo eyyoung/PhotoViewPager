@@ -11,23 +11,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
-import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
-import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
-import com.nostra13.universalimageloader.cache.disc.DiskCache;
-import com.nostra13.universalimageloader.cache.memory.MemoryCache;
+import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
+import com.nd.android.sdp.common.photoviewpager.iml.ImageLoaderIniter;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
-import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Callback {
 
@@ -49,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements Callback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        ImageLoaderIniter.INSTANCE.init();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -92,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements Callback {
     }
 
     public void toView(View view) {
-        PhotoViewPagerFragment.start(this,
+        PhotoViewPagerManager.start(this,
                 (ImageView) view,
                 new ArrayList<>(Arrays.asList(urls)),
                 new ArrayList<>(Arrays.asList(preview_urls)),
@@ -110,63 +102,9 @@ public class MainActivity extends AppCompatActivity implements Callback {
     }
 
     @Override
-    public void startGetImage(String url, final ImageGetterCallback imageGetterCallback) {
-        DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .build();
-        ImageLoader.getInstance().loadImage(url,
-                new ImageSize(1440, 2560),
-                displayImageOptions, new ImageLoadingListener() {
-                    @Override
-                    public void onLoadingStarted(String imageUri, View view) {
-
-                    }
-
-                    @Override
-                    public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-
-                    }
-
-                    @Override
-                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                        imageGetterCallback.setImageToView(loadedImage);
-                    }
-
-                    @Override
-                    public void onLoadingCancelled(String imageUri, View view) {
-
-                    }
-                }, new ImageLoadingProgressListener() {
-                    @Override
-                    public void onProgressUpdate(String imageUri, View view, int current, int total) {
-                        imageGetterCallback.setProgress(current, total);
-                    }
-                });
-    }
-
-    @Override
-    public File getPicDiskCache(String url) {
-        final DiskCache diskCache = ImageLoader.getInstance().getDiskCache();
-        final File file = diskCache.get(url);
-        return file;
-    }
-
-    @Override
     public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
         Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
         return true;
-    }
-
-    @Override
-    public Bitmap getPreviewBitmap(String url) {
-        final MemoryCache memoryCache = ImageLoader.getInstance().getMemoryCache();
-        final List<Bitmap> bitmaps = MemoryCacheUtils.findCachedBitmapsForImageUri(url, memoryCache);
-        if (bitmaps != null && !bitmaps.isEmpty()) {
-            return bitmaps.get(0);
-        } else {
-            return null;
-        }
     }
 
     @Override
