@@ -17,3 +17,8 @@ allprojects {
         jcenter()
     }
 }
+
+ext {
+    revision = 'git rev-list --count HEAD'.execute().text.trim()
+    module_version = "0.1." + revision
+}

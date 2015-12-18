@@ -30,20 +30,24 @@ dependencies {
 }
 
 apply plugin: 'maven'
-uploadArchives {
+
+task uploadPhotoView(type: Upload) {
+    configuration = configurations.archives
+    uploadDescriptor = true
     try {
         repositories {
             mavenDeployer {
                 repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
                     authentication(userName: mavenUser, password: mavenPassword)
                 }
-                revision = 'git rev-list --count HEAD'.execute().text.trim()
-                pom.version = "0.1." + revision
-                println(pom.version)
+                pom.version = rootProject.ext.module_version
                 pom.artifactId = "photoview"
                 pom.groupId = "com.nd.android.sdp.common"
             }
         }
     } catch (java.lang.Exception e) {
+    }
+    doLast {
+        println(rootProject.ext.module_version)
     }
 }
