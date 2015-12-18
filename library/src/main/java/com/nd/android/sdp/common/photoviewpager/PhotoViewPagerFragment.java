@@ -44,7 +44,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private PhotoViewPager mVpPhoto;
     private LinearLayout mLlBottom;
     private ArrayList<String> mImages;
-    private IBottomMenu[] mMenus;
     private Callback mCallback;
 
     public static PhotoViewPagerFragment newInstance(ImageView imageView,
@@ -64,7 +63,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         args.putInt(PARAM_WIDTH, imageView.getWidth());
         args.putInt(PARAM_HEIGHT, imageView.getHeight());
         args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
-        fragment.setMenus(menus);
         fragment.setCallbacks(callback);
         fragment.setArguments(args);
         return fragment;
@@ -72,10 +70,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     private void setCallbacks(Callback callback) {
         mCallback = callback;
-    }
-
-    private void setMenus(IBottomMenu... menus) {
-        mMenus = menus;
     }
 
     private void inflateMenu(final IBottomMenu menu) {
@@ -120,16 +114,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mToolBar.setNavigationIcon(null);
         init();
 
-        initMenus();
-    }
-
-    private void initMenus() {
-        if (mMenus != null) {
-            for (final IBottomMenu menu : mMenus) {
-                inflateMenu(menu);
-            }
-        }
-//        inflateMenu(new FullImageSize());
+        mCallback.onViewCreated(view);
     }
 
     private View findViewById(int id) {
