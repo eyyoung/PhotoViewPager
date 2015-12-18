@@ -50,8 +50,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                                                      ArrayList<String> urls,
                                                      ArrayList<String> previewUrls,
                                                      int defaultPosition,
-                                                     Callback callback,
-                                                     IBottomMenu... menus) {
+                                                     Callback callback) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
         args.putStringArrayList(PARAM_URLS, urls);
@@ -154,14 +153,12 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                                                ArrayList<String> urls,
                                                ArrayList<String> previewUrls,
                                                int defaultPosition,
-                                               Callback callback,
-                                               IBottomMenu... menus) {
+                                               Callback callback) {
         final PhotoViewPagerFragment fragment = newInstance(imageView,
                 urls,
                 previewUrls,
                 defaultPosition,
-                callback,
-                menus);
+                callback);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .add(Window.ID_ANDROID_CONTENT, fragment, TAG_PHOTO)
