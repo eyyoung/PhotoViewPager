@@ -271,6 +271,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mPb.setVisibility(View.GONE);
                         mTvError.setVisibility(View.VISIBLE);
                         mTvError.setOnLongClickListener(ViewPagerFragment.this);
+                        mTvError.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                finish();
+                            }
+                        });
                     }
                 });
             }
