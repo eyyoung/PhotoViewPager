@@ -16,14 +16,27 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-//    compile 'com.nd.android.sdp.common:photoview:0.1.18'
+//    compile 'com.nd.android.sdp.common:photoview:0.1.20'
     compile project(":library")
-    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3_r9.1@aar'
+    compile('com.nostra13.universalimageloader:universal-image-loader:1.9.3_r9.1@aar') {
+        transitive = true
+        exclude group: 'android.support'
+    }
 }
 
 

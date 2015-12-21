@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="photo_viewpager_download_full_size">查看原图</string>
+    <string name="photo_viewpager_download_failed">网络异常，获取失败</string>
 </resources>

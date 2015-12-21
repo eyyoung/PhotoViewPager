@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="photo_viewpager_error_textcolor">#ffffff</color>
+    <color name="photo_viewpager_bg">@color/background_material_dark</color>
+</resources>

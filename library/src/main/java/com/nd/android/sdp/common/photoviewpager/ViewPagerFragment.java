@@ -25,6 +25,7 @@ import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
@@ -86,6 +87,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private int mFrameSize;
     private GifImageView mIvGif;
     private IPhotoViewPagerConfiguration mConfiguration;
+    private TextView mTvError;
 
     public ViewPagerFragment() {
     }
@@ -125,6 +127,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
         mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
         mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
+        mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
         mFlPreview = mView.findViewById(R.id.flPreview);
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;
@@ -207,6 +210,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvReal.setVisibility(View.GONE);
             mIvTemp.setVisibility(View.GONE);
             mIvPreview.setVisibility(View.VISIBLE);
+            mTvError.setVisibility(View.GONE);
             mIvPreview.setDrawableRadius(mFrameSize / 2);
             final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
             mIvPreview.setImageBitmap(previewBitmap);
@@ -260,6 +264,13 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         if (currentProgress == 100) {
                             mBitmapProgressSubject.onCompleted();
                         }
+                    }
+
+                    @Override
+                    public void error(String imageUri, View view, Throwable cause) {
+                        mPb.setVisibility(View.GONE);
+                        mTvError.setVisibility(View.VISIBLE);
+                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
                     }
                 });
             }

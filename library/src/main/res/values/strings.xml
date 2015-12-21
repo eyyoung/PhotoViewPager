@@ -2,5 +2,6 @@
     <string name="title_activity_photo_view_pager"></string>
     <string name="download_picture">Full Size</string>
     <string name="photo_viewpager_download_full_size">ORIGINAL SIZE</string>
+    <string name="photo_viewpager_download_failed">Download Image Failed</string>
 
 </resources>

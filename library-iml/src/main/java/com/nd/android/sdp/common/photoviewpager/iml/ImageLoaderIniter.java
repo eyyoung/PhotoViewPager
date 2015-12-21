@@ -45,7 +45,7 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
 
                     @Override
                     public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-
+                        imageGetterCallback.error(imageUri, view, failReason.getCause());
                     }
 
                     @Override
