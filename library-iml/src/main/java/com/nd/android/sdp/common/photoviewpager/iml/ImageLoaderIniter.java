@@ -13,7 +13,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingProgressListener;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
 import java.io.File;
@@ -27,7 +26,7 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
     INSTANCE;
 
     public void init() {
-        PhotoViewPagerManager.init(this);
+        PhotoViewPagerManager.INSTANCE.init(this);
     }
 
     @Override
@@ -58,9 +57,9 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
                     public void onLoadingCancelled(String imageUri, View view) {
 
                     }
-                }, new ImageLoadingProgressListener() {
+
                     @Override
-                    public void onProgressUpdate(String imageUri, View view, int current, int total) {
+                    public void onLoadingProgress(long current, long total) {
                         imageGetterCallback.setProgress(current, total);
                     }
                 });

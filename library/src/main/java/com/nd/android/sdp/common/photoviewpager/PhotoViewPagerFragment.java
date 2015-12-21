@@ -13,8 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.eftimoff.viewpagertransformers.DrawFromBackTransformer;
-
 import java.util.ArrayList;
 
 public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuItemClickListener, ViewPager.OnPageChangeListener {
@@ -101,7 +99,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mImages = arguments.getStringArrayList(PARAM_URLS);
         ArrayList<String> previewImgs = arguments.getStringArrayList(PARAM_PREVIEW_URLS);
         final int defaultPosition = arguments.getInt(PARAM_DEFAULT_POSITION, 0);
-        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
+//        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
         mVpPhoto.setPageMargin(20);
         mVpPhoto.setBg(findViewById(R.id.bg));
         mVpPhoto.init(mImages,

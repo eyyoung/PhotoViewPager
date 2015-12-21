@@ -13,13 +13,13 @@ public enum PhotoViewPagerManager {
 
     INSTANCE;
 
-    private static IPhotoViewPagerConfiguration mConfiguration;
+    private IPhotoViewPagerConfiguration mConfiguration;
 
-    public static void init(IPhotoViewPagerConfiguration configuration) {
+    public void init(IPhotoViewPagerConfiguration configuration) {
         mConfiguration = configuration;
     }
 
-    public static IPhotoViewPagerConfiguration getConfiguration() {
+    public IPhotoViewPagerConfiguration getConfiguration() {
         return mConfiguration;
     }
 

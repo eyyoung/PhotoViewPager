@@ -9,5 +9,5 @@ public interface ImageGetterCallback {
 
     void setImageToView(Bitmap bitmap);
 
-    void setProgress(int current, int total);
+    void setProgress(long current, long total);
 }

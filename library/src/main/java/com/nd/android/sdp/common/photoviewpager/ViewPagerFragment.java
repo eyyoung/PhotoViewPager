@@ -208,7 +208,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvTemp.setVisibility(View.GONE);
             mIvPreview.setVisibility(View.VISIBLE);
             mIvPreview.setDrawableRadius(mFrameSize / 2);
-            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mUrl);
+            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
             mIvPreview.setImageBitmap(previewBitmap);
             startGetImage();
         }
@@ -239,6 +239,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void startGetImage() {
         initProgressPublishSubject();
+        long debouceTime = 1000;
+        final File fileCache = mConfiguration.getPicDiskCache(mUrl);
+        if (fileCache != null && fileCache.exists()) {
+            debouceTime = 1;
+        }
         mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -249,7 +254,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     }
 
                     @Override
-                    public void setProgress(final int current, final int total) {
+                    public void setProgress(final long current, final long total) {
                         final float currentProgress = ((float) current) / ((float) total) * 100;
                         mBitmapProgressSubject.onNext((int) currentProgress);
                         if (currentProgress == 100) {
@@ -259,7 +264,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 });
             }
         })
-                .throttleLast(1000, TimeUnit.MILLISECONDS)
+                .throttleLast(debouceTime, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Bitmap>() {
                     @Override
@@ -537,12 +542,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mActivityCallback = callback;
     }
 
-    public void setBg(View bg){
+    public void setBg(View bg) {
         mBg = bg;
     }
 
     public void finish() {
-        if (getActivity().getCurrentFocus() != mView) {
+        int[] location = new int[2];
+        mView.getLocationOnScreen(location);
+        if (location[0] < 0) {
             return;
         }
         final boolean animateFinish = animateFinish();
@@ -594,7 +601,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mActivityCallback == null) {
             return false;
         }
-        final ImageView previewView = mActivityCallback.getPreviewView(mUrl);
+        final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
         if (previewView == null) {
             return false;
         }
