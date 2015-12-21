@@ -52,6 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:visibility="gone"
         android:text="@string/photo_viewpager_download_failed"
         android:textColor="@color/photo_viewpager_error_textcolor"/>
 
