@@ -766,6 +766,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private void exit() {
         final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
         final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
+        if (fragment == null) {
+            return;
+        }
         supportFragmentManager
                 .beginTransaction()
                 .remove(fragment)
