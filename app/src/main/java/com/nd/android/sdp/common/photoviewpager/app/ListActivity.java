@@ -38,22 +38,17 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d6agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/f85e128b-7323-42a3-a833-4aeaeb29ecca.jpg"
+            "http://172.24.133.153/v0.1/download?dentryId=362c396d-611a-4f27-abfa-964e22539762&size=960"
     };
 
     String[] preview_urls = new String[]{
             "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
-//            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-//            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-//            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-//            "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
-//            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/f85e128b-7323-42a3-a833-4aeaeb29ecca.jpg"
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://172.24.133.153/v0.1/download?dentryId=362c396d-611a-4f27-abfa-964e22539762&size=120"
     };
 
     private ListView mLv;

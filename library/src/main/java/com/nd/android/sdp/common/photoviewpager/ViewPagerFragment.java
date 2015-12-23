@@ -137,6 +137,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mSceenWidth = displayMetrics.widthPixels;
         mSceenHeight = displayMetrics.heightPixels;
         mStatusBarHeight = Utils.getStatusBarHeightFix(getActivity().getWindow());
+        mIvReal.setOnLongClickListener(ViewPagerFragment.this);
+        mIvGif.setOnLongClickListener(ViewPagerFragment.this);
+        mIvReal.setOnImageEventListener(this);
         return mView;
     }
 
@@ -186,7 +189,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             loadFileCache(fileCache, true);
             return;
         }
-        // 下载完成
         final Bundle arguments = getArguments();
         int startWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mSceenWidth);
         int startHeight = arguments.getInt(PhotoViewPagerFragment.PARAM_HEIGHT, mSceenHeight);
@@ -259,7 +261,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             }
             final ImageSource uri = ImageSource.uri(fileCache.getAbsolutePath());
             mIvReal.setImage(uri);
-            mIvReal.setOnImageEventListener(ViewPagerFragment.this);
             mIvPreview.setVisibility(View.GONE);
             mIvReal.setVisibility(View.VISIBLE);
             mIvGif.setVisibility(View.GONE);
@@ -448,7 +449,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                             return;
                                         }
                                         mView.removeView(mIvPreview);
-                                        mIvTemp.setVisibility(View.GONE);
+                                        mIvTemp.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (!isAdded()) {
+                                                    return;
+                                                }
+                                                mIvTemp.setVisibility(View.GONE);
+                                            }
+                                        }, 450);
                                         mIvReal.setVisibility(View.VISIBLE);
                                         final int bmHeight = bitmap.getHeight();
                                         final int bmWidth = bitmap.getWidth();
@@ -577,7 +586,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mPb.setVisibility(View.GONE);
         final ImageSource uri = ImageSource.uri(diskCache.getAbsolutePath());
         mIvReal.setImage(uri);
-        mIvReal.setOnImageEventListener(ViewPagerFragment.this);
     }
 
 
@@ -638,7 +646,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     public void onImageLoaded() {
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
-        mIvReal.resetScaleAndCenter();
         float maxScale;
         if (isPortrait(sWidth, sHeight)) {
             // 竖照片，放大宽
@@ -651,6 +658,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         mIvReal.setMaxScale(maxScale);
         mIvReal.setDoubleTapZoomScale(maxScale);
+        final float minScale = mIvReal.getMinScale();
+        if (mIvReal.getScale() < minScale) {
+            mIvReal.animateScale(minScale)
+                    .withDuration(1)
+                    .start();
+        }
     }
 
     @Override
