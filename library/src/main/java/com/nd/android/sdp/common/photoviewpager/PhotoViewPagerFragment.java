@@ -35,7 +35,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     public static final String PARAM_HEIGHT = "height";
     public static final String TAG_PHOTO = "tag_photo";
     private static final String PARAM_DEFAULT_POSITION = "default_position";
-    private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
     private ArrayList<String> mImages;
     private Callback mCallback;
@@ -89,8 +88,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
             }
             return;
         }
-        mToolBar = (Toolbar) findViewById(R.id.toolbar);
-        mToolBar.setNavigationIcon(null);
         init();
 
         mOnViewCreatedListener.onViewCreated(view);
@@ -114,7 +111,9 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 //        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
         mVpPhoto.setPageMargin(20);
         mVpPhoto.setBg(findViewById(R.id.bg));
-        mVpPhoto.init(mImages,
+        // Use child fragment manager,prevent memory leak
+        mVpPhoto.init(getChildFragmentManager(),
+                mImages,
                 previewImgs,
                 arguments,
                 defaultPosition);
@@ -195,11 +194,19 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mOnPageListeners.add(onPageChangeListener);
     }
 
-    public void setOnViewCreatedListener(OnViewCreatedListener onViewCreatedListener){
+    public void setOnViewCreatedListener(OnViewCreatedListener onViewCreatedListener) {
         mOnViewCreatedListener = onViewCreatedListener;
     }
 
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        setCallbacks(null);
+        setOnViewCreatedListener(null);
+        setOnPictureLongClickListener(null);
     }
 }

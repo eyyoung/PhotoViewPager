@@ -32,7 +32,7 @@ import java.util.Arrays;
 public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnPictureLongClickListener, OnViewCreatedListener {
 
     String[] urls = new String[]{
-            "http://172.24.133.153/v0.1/download?dentryId=afc868a7-efdd-4996-b831-15f16cbb0f7a&size=960",
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
             "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
@@ -41,12 +41,11 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/031907cc-525f-416e-9ffe-1c5d6e840e86.jpg",
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/27e77ba5-d569-4dd2-b3d1-4161bf899006.jpg",
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/31ff63ec-7882-40b5-b5a4-2c50347f1980.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg",
-            "http://172.24.133.153/v0.1/download?dentryId=362c396d-611a-4f27-abfa-964e22539762&size=960"
+            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg"
     };
 
     String[] preview_urls = new String[]{
-            "http://172.24.133.153/v0.1/download?dentryId=afc868a7-efdd-4996-b831-15f16cbb0f7a&size=160",
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=1680x0&quality=96&stripmeta=0&type=jpg",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
             "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
@@ -55,8 +54,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/031907cc-525f-416e-9ffe-1c5d6e840e86.jpg",
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/27e77ba5-d569-4dd2-b3d1-4161bf899006.jpg",
             "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/31ff63ec-7882-40b5-b5a4-2c50347f1980.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg",
-            "http://172.24.133.153/v0.1/download?dentryId=362c396d-611a-4f27-abfa-964e22539762&size=120"
+            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg"
     };
 
     private ListView mLv;
@@ -122,7 +120,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onClick(View v) {
-        mPhotoViewPagerFragment.exit();
+//        mPhotoViewPagerFragment.exit();
     }
 
     private class DemoAdapter extends BaseAdapter {

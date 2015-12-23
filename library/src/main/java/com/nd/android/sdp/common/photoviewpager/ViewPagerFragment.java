@@ -91,6 +91,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private TextView mTvError;
     private ImageView mIvExit;
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private Subscription mBitmapProgressSubscription;
 
     public ViewPagerFragment() {
     }
@@ -370,7 +371,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void initProgressPublishSubject() {
         mBitmapProgressSubject = PublishSubject.create();
-        mBitmapProgressSubject
+        mBitmapProgressSubscription = mBitmapProgressSubject
                 .throttleLast(1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
@@ -391,7 +392,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void startGetImage() {
         initProgressPublishSubject();
-        final File fileCache = mConfiguration.getPicDiskCache(mUrl);
         mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -405,9 +405,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     public void setProgress(final long current, final long total) {
                         final float currentProgress = ((float) current) / ((float) total) * 100;
                         mBitmapProgressSubject.onNext((int) currentProgress);
-                        if (currentProgress == 100) {
-                            mBitmapProgressSubject.onCompleted();
-                        }
                     }
 
                     @Override
@@ -439,7 +436,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
                                 mIvReal.setVisibility(View.GONE);
                                 mIvGif.setVisibility(View.GONE);
-                                mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
+                                mIvReal.setImage(ImageSource.uri(Uri.fromFile(diskCache)));
                                 final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
                                         mFrameSize / 2, 0);
                                 final ObjectAnimator animator2 = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.ALPHA,
@@ -454,30 +451,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                             return;
                                         }
                                         mView.removeView(mIvPreview);
-                                        mIvTemp.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                if (!isAdded()) {
-                                                    return;
-                                                }
-                                                mIvTemp.setVisibility(View.GONE);
-                                            }
-                                        }, 450);
                                         mIvReal.setVisibility(View.VISIBLE);
-                                        final int bmHeight = bitmap.getHeight();
-                                        final int bmWidth = bitmap.getWidth();
-                                        float maxScale;
-                                        if (isPortrait(bmWidth, bmHeight)) {
-                                            // 竖照片，放大宽
-                                            maxScale = ((float) bmWidth) / ((float) mSceenWidth);
-                                        } else {
-                                            maxScale = ((float) bmHeight) / ((float) mSceenHeight);
-                                        }
-                                        if (maxScale < 1f) {
-                                            maxScale = 1f / maxScale;
-                                        }
-                                        mIvReal.setMaxScale(maxScale);
-                                        mIvReal.setDoubleTapZoomScale(maxScale);
                                         mOrigScale = mIvReal.getScale();
                                         mIvReal.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -508,6 +482,13 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     public void call(Throwable throwable) {
                         throwable.printStackTrace();
                     }
+                }, new Action0() {
+                    @Override
+                    public void call() {
+                        if (mBitmapProgressSubscription != null) {
+                            mBitmapProgressSubscription.unsubscribe();
+                        }
+                    }
                 });
 
     }
@@ -534,6 +515,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mSubscription != null && !mSubscription.isUnsubscribed()) {
             mSubscription.unsubscribe();
         }
+        if (mBitmapProgressSubscription != null) {
+            mBitmapProgressSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -542,7 +526,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
         }
-        mIvReal.recycle();
+        setCallback(null);
+        setOnPictureLongClickListener(null);
+        setBg(null);
     }
 
     public void downloadFullSize() {
@@ -669,6 +655,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     .withDuration(1)
                     .start();
         }
+        mIvTemp.setVisibility(View.GONE);
     }
 
     @Override

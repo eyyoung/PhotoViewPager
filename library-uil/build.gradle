@@ -1,0 +1,64 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+//    compile 'com.nd.android.sdp.common:photoview:0.1.26'
+    compile project(":library")
+    compile('com.nostra13.universalimageloader:universal-image-loader:1.9.4') {
+        transitive = true
+        exclude group: 'android.support'
+    }
+}
+
+
+apply plugin: 'maven'
+task uploadPhotoViewIML(type: Upload) {
+    configuration = configurations.archives
+    uploadDescriptor = true
+    try {
+        repositories {
+            mavenDeployer {
+                repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
+                    authentication(userName: mavenUser, password: mavenPassword)
+                }
+                pom.version = rootProject.ext.module_version
+                pom.artifactId = "photoview-iml"
+                pom.groupId = "com.nd.android.sdp.common"
+            }
+        }
+    } catch (java.lang.Exception e) {
+        e.printStackTrace()
+    }
+    doLast {
+        println(rootProject.ext.module_version)
+    }
+}

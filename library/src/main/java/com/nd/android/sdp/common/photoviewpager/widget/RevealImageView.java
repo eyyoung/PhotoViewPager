@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.widget.ImageView;
 
@@ -151,7 +152,7 @@ public class RevealImageView extends ImageView {
         mBitmapWidth = mBitmap.getWidth();
 
         float scale = 1f;
-        if (getWidth() / mBitmapWidth < getHeight() / mBitmapHeight) {
+        if (((float) getWidth()) / ((float) mBitmapWidth) < ((float) getHeight()) / ((float) mBitmapHeight)) {
             scale = (float) getWidth() / (float) mBitmapWidth;
         } else {
             scale = (float) getHeight() / (float) mBitmapHeight;
@@ -177,6 +178,15 @@ public class RevealImageView extends ImageView {
         mShaderMatrix.setScale(scale, scale);
 
         mBitmapShader.setLocalMatrix(mShaderMatrix);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.d(getClass().getName(), "onDetachedFromWindow: ");
+        mBitmapPaint.setShader(null);
+        mBitmapShader = null;
+        mBitmap = null;
     }
 
 }

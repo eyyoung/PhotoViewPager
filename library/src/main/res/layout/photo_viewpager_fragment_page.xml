@@ -3,6 +3,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+
+    <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView
+        android:id="@+id/ivTemp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
@@ -35,12 +41,6 @@
             app:cpv_indeterminate="true"
             app:cpv_thickness="4dp"/>
     </FrameLayout>
-
-    <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView
-        android:id="@+id/ivTemp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="fitCenter"/>
 
     <ImageView
         android:id="@+id/ivExitPreview"

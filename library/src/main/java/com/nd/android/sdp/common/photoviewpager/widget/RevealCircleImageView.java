@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Property;
 import android.widget.ImageView;
 
@@ -345,6 +346,14 @@ public class RevealCircleImageView extends ImageView {
         mBitmapShader.setLocalMatrix(mShaderMatrix);
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        Log.d(getClass().getName(), "onDetachedFromWindow: ");
+        mBitmapPaint.setShader(null);
+        mBitmap = null;
+        mBitmapShader = null;
+    }
 
     public void setDrawableRadius(float drawableRadius) {
         this.mDrawableRadius = drawableRadius;

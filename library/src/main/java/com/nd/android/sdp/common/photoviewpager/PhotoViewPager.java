@@ -47,7 +47,7 @@ class PhotoViewPager extends ViewPager {
         }
     }
 
-    public void init(ArrayList<String> images,
+    public void init(FragmentManager fragmentManager, ArrayList<String> images,
                      ArrayList<String> previewImgs,
                      Bundle arguments, int defaultPosition) {
         mUrls = images;
@@ -55,8 +55,7 @@ class PhotoViewPager extends ViewPager {
         mArguments = arguments;
         mDefaultPosition = defaultPosition;
 
-        mImagePagerAdapter = new ImagePagerAdapter(((FragmentActivity) getContext())
-                .getSupportFragmentManager());
+        mImagePagerAdapter = new ImagePagerAdapter(fragmentManager);
         setAdapter(mImagePagerAdapter);
 
         setCurrentItem(defaultPosition);
@@ -113,4 +112,11 @@ class PhotoViewPager extends ViewPager {
         return mFragmentMap.get(position);
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        setOnPictureLongClickListener(null);
+        setBg(null);
+        setCallback(null);
+    }
 }
