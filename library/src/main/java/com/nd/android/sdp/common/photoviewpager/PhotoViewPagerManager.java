@@ -1,5 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.widget.ImageView;
@@ -28,12 +29,16 @@ public enum PhotoViewPagerManager {
      *
      * @param activity the context
      */
+    @NonNull
     public static PhotoViewPagerFragment start(FragmentActivity activity,
                                                ImageView imageView,
                                                ArrayList<String> urls,
                                                ArrayList<String> previewUrls,
                                                int defaultPosition,
                                                Callback callback) {
+        if (urls.size() != previewUrls.size()) {
+            throw new IllegalArgumentException("Url and Preview size not same!");
+        }
         final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(imageView,
                 urls,
                 previewUrls,

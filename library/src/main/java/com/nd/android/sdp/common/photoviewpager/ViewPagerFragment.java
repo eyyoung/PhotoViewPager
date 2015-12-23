@@ -431,7 +431,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (diskCache != null && diskCache.exists()) {
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
-                                mIvReal.setVisibility(View.VISIBLE);
+                                mIvReal.setVisibility(View.GONE);
                                 mIvGif.setVisibility(View.GONE);
                                 mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
                                 final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
@@ -449,6 +449,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         }
                                         mView.removeView(mIvPreview);
                                         mIvTemp.setVisibility(View.GONE);
+                                        mIvReal.setVisibility(View.VISIBLE);
                                         final int bmHeight = bitmap.getHeight();
                                         final int bmWidth = bitmap.getWidth();
                                         float maxScale;
