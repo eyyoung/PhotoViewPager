@@ -192,11 +192,25 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final int startLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, 0);
         // 起始y位置
         final int startTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, 0) + mStatusBarHeight;
-        int targetHeight = (int) (((float) previewBitmap.getHeight()) / ((float) previewBitmap.getWidth()) * mSceenWidth);
-        final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mIvExit), startWidth, mSceenWidth);
+        int targetHeight;
+        int targetWidth;
+        int targetTop;
+        int targetLeft;
+        if (isPortrait(previewBitmap.getWidth(), previewBitmap.getHeight())) {
+            targetTop = 0;
+            targetHeight = mSceenHeight + mStatusBarHeight;
+            targetWidth = (int) (((float) previewBitmap.getWidth()) / ((float) previewBitmap.getHeight()) * targetHeight);
+            targetLeft = (mSceenWidth - targetWidth) / 2;
+        } else {
+            targetHeight = (int) (((float) previewBitmap.getHeight()) / ((float) previewBitmap.getWidth()) * mSceenWidth);
+            targetTop = (mSceenHeight + mStatusBarHeight - targetHeight) / 2;
+            targetLeft = 0;
+            targetWidth = mSceenWidth;
+        }
+        final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mIvExit), startWidth, targetWidth);
         final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(mIvExit), startHeight, targetHeight);
-        final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mIvExit), startLeft, 0);
-        final ValueAnimator yAnimator = ValueAnimator.ofObject(new YEvaluator(mIvExit), startTop, (mSceenHeight + mStatusBarHeight - targetHeight) / 2);
+        final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mIvExit), startLeft, targetLeft);
+        final ValueAnimator yAnimator = ValueAnimator.ofObject(new YEvaluator(mIvExit), startTop, targetTop);
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.setInterpolator(new AccelerateInterpolator());
         animatorSet.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
@@ -207,6 +221,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 loadFileCache(fileCache, false);
             }
         });
+        mIvReal.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isAdded()) {
+                    return;
+                }
+                mIvExit.setVisibility(View.GONE);
+            }
+        }, 550);
         animatorSet.setDuration(400).start();
         mIvExit.setVisibility(View.VISIBLE);
         final ImageView imageView = mActivityCallback.getPreviewView(mPreviewUrl);
@@ -258,7 +281,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvGif.setImageURI(Uri.fromFile(fileCache));
             mView.removeView(mIvPreview);
             mIvTemp.setVisibility(View.GONE);
-            mIvExit.setVisibility(View.GONE);
             mIvGif.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -266,6 +288,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }
             });
         }
+        // 最后设置成不可见
+//        mIvExit.setVisibility(View.GONE);
     }
 
     /**
@@ -685,6 +709,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvReal.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if (!isAdded()) {
+                        return;
+                    }
                     exit();
                 }
             }, mScaleDuration + EXIT_DURATION);
@@ -823,6 +850,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvReal.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    if (!isAdded()) {
+                        return;
+                    }
                     mIvReal.setVisibility(View.GONE);
                     mIvExit.setVisibility(View.VISIBLE);
                 }

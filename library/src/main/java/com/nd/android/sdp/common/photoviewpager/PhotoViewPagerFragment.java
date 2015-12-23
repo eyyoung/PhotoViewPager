@@ -21,6 +21,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
      * URL列表，支持本地路径与URL路径
      */
     public static final String PARAM_URLS = "urls";
+
     private static final String PARAM_PREVIEW_URLS = "preview_urls";
     public static final String PARAM_TOP = "top";
     public static final String PARAM_LEFT = "left";
@@ -28,7 +29,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     public static final String PARAM_HEIGHT = "height";
     public static final String TAG_PHOTO = "tag_photo";
     private static final String PARAM_DEFAULT_POSITION = "default_position";
-
     private Toolbar mToolBar;
     private PhotoViewPager mVpPhoto;
     private ArrayList<String> mImages;
@@ -128,7 +128,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
@@ -141,7 +140,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
     }
 
     public void exit() {
@@ -178,5 +176,9 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     public void deletePosition(int position) {
         mImages.remove(position);
         mVpPhoto.getAdapter().notifyDataSetChanged();
+    }
+
+    public void addOnPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener) {
+        mVpPhoto.addOnPageChangeListener(onPageChangeListener);
     }
 }

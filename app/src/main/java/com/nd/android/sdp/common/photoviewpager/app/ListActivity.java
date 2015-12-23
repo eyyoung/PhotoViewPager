@@ -36,7 +36,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d6agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://imglf1.nosdn.127.net/img/Y0Y0Rmp6OUVJRUNERXoyUlE1RmFDa3ZDQmJ4L2hESWVYNGVmRGsvM1VuL2s5NkdTMk1nU0h3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg"
+            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/f85e128b-7323-42a3-a833-4aeaeb29ecca.jpg"
     };
 
     String[] preview_urls = new String[]{
@@ -46,7 +46,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://imglf1.nosdn.127.net/img/0Y0Rmp6OUVJRUNERXoyUlE1RmFDa3ZDQmJ4L2hESWVYNGVmRGsvM1VuL2s5NkdTMk1nU0h3PT0.jpg?imageView&thumbnail=2000y1334&type=jpg&quality=96&stripmeta=0&type=jpg"
+            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/f85e128b-7323-42a3-a833-4aeaeb29ecca.jpg"
     };
 
     private ListView mLv;
