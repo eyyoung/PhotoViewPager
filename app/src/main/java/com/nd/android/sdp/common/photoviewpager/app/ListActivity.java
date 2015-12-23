@@ -3,6 +3,7 @@ package com.nd.android.sdp.common.photoviewpager.app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,9 +14,12 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
+import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -23,7 +27,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback {
+public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener {
 
     String[] urls = new String[]{
             "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
@@ -31,7 +35,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d6agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif"
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://imglf1.nosdn.127.net/img/Y0Y0Rmp6OUVJRUNERXoyUlE1RmFDa3ZDQmJ4L2hESWVYNGVmRGsvM1VuL2s5NkdTMk1nU0h3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg"
     };
 
     String[] preview_urls = new String[]{
@@ -40,10 +45,12 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg"
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://imglf1.nosdn.127.net/img/0Y0Rmp6OUVJRUNERXoyUlE1RmFDa3ZDQmJ4L2hESWVYNGVmRGsvM1VuL2s5NkdTMk1nU0h3PT0.jpg?imageView&thumbnail=2000y1334&type=jpg&quality=96&stripmeta=0&type=jpg"
     };
 
     private ListView mLv;
+    private PhotoViewPagerFragment mPhotoViewPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +70,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        PhotoViewPagerManager.start(this,
+        mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
                 (ImageView) view,
                 new ArrayList<>(Arrays.asList(urls)),
                 new ArrayList<>(Arrays.asList(preview_urls)),
@@ -92,7 +99,18 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onViewCreated(View view) {
+        final RelativeLayout relativeLayout = (RelativeLayout) view;
+        final TextView textView = new TextView(this);
+        textView.setText("EXIT");
+        textView.setTextColor(Color.WHITE);
+        textView.setPadding(20, 20, 0, 0);
+        textView.setOnClickListener(this);
+        relativeLayout.addView(textView);
+    }
 
+    @Override
+    public void onClick(View v) {
+        mPhotoViewPagerFragment.exit();
     }
 
     private class DemoAdapter extends BaseAdapter {

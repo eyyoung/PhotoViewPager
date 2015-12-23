@@ -59,7 +59,7 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
                     }
 
                     @Override
-                    public void onLoadingProgress(long current, long total) {
+                    public void onLoadingProgress(long total, long current) {
                         imageGetterCallback.setProgress(current, total);
                     }
                 });

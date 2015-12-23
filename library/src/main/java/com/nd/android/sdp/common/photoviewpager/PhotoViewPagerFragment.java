@@ -145,12 +145,9 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     }
 
     public void exit() {
-        final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
-        final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
-        supportFragmentManager
-                .beginTransaction()
-                .remove(fragment)
-                .commit();
+        final int currentItem = mVpPhoto.getCurrentItem();
+        final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+        fragmentByPosition.finish();
     }
 
     /**
@@ -171,4 +168,15 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mVpPhoto.setCurrentItem(position);
     }
 
+    public int getCurrentPosition() {
+        return mVpPhoto.getCurrentItem();
+    }
+
+    /**
+     * Delete position.
+     */
+    public void deletePosition(int position) {
+        mImages.remove(position);
+        mVpPhoto.getAdapter().notifyDataSetChanged();
+    }
 }
