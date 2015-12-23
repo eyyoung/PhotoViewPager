@@ -32,7 +32,7 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
     @Override
     public void startGetImage(String url, final ImageGetterCallback imageGetterCallback) {
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
-                .cacheInMemory(true)
+                .cacheInMemory(false)
                 .cacheOnDisk(true)
                 .build();
         ImageLoader.getInstance().loadImage(url,

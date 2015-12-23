@@ -184,10 +184,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 .setDuration(400)
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
-        final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+        Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+        final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
         if (previewBitmap == null) {
-            loadFileCache(fileCache, true);
-            return;
+            final Drawable drawable = previewView.getDrawable();
+            if (drawable == null || !(drawable instanceof BitmapDrawable)) {
+                loadFileCache(fileCache, true);
+                return;
+            }
+            previewBitmap = ((BitmapDrawable) drawable).getBitmap();
         }
         final Bundle arguments = getArguments();
         int startWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mSceenWidth);
@@ -236,7 +241,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }, 550);
         animatorSet.setDuration(400).start();
         mIvExit.setVisibility(View.VISIBLE);
-        final ImageView imageView = mActivityCallback.getPreviewView(mPreviewUrl);
+        final ImageView imageView = previewView;
         if (imageView != null) {
             mIvExit.setScaleType(imageView.getScaleType());
         } else {
@@ -516,7 +521,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
      */
     private boolean isPortrait(float bmWidth, float bmHeight) {
         return bmHeight / bmWidth
-                > ((float) mSceenHeight) / (float) mSceenWidth;
+                > ((float) mSceenHeight + mStatusBarHeight) / (float) mSceenWidth;
     }
 
     public void startDefaultTransition() {
