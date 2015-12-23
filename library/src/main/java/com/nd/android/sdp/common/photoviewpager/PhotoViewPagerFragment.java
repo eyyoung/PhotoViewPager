@@ -13,9 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuItemClickListener, ViewPager.OnPageChangeListener {
+
+    private List<ViewPager.OnPageChangeListener> mOnPageListeners = new ArrayList<>();
 
     /**
      * URL列表，支持本地路径与URL路径
@@ -33,6 +39,9 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private PhotoViewPager mVpPhoto;
     private ArrayList<String> mImages;
     private Callback mCallback;
+    private OnViewCreatedListener mOnViewCreatedListener;
+
+    private OnPictureLongClickListener mOnPictureLongClickListener;
 
     public static PhotoViewPagerFragment newInstance(ImageView imageView,
                                                      ArrayList<String> urls,
@@ -84,7 +93,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mToolBar.setNavigationIcon(null);
         init();
 
-        mCallback.onViewCreated(view);
+        mOnViewCreatedListener.onViewCreated(view);
     }
 
     private View findViewById(int id) {
@@ -94,6 +103,9 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private void init() {
         mVpPhoto = (PhotoViewPager) findViewById(R.id.vpPhoto);
         mVpPhoto.addOnPageChangeListener(this);
+        for (ViewPager.OnPageChangeListener onPageChange : mOnPageListeners) {
+            mVpPhoto.addOnPageChangeListener(onPageChange);
+        }
 
         final Bundle arguments = getArguments();
         mImages = arguments.getStringArrayList(PARAM_URLS);
@@ -107,6 +119,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
+        mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.post(new Runnable() {
             @Override
             public void run() {
@@ -179,6 +192,14 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     }
 
     public void addOnPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener) {
-        mVpPhoto.addOnPageChangeListener(onPageChangeListener);
+        mOnPageListeners.add(onPageChangeListener);
+    }
+
+    public void setOnViewCreatedListener(OnViewCreatedListener onViewCreatedListener){
+        mOnViewCreatedListener = onViewCreatedListener;
+    }
+
+    public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
+        mOnPictureLongClickListener = onPictureLongClickListener;
     }
 }

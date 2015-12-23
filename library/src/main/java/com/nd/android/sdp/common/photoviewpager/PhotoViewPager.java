@@ -12,6 +12,8 @@ import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+
 import java.util.ArrayList;
 
 /**
@@ -29,6 +31,7 @@ class PhotoViewPager extends ViewPager {
     private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
     private Callback mCallback;
     private View mBg;
+    private OnPictureLongClickListener mOnPictureLongClickListener;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -67,6 +70,10 @@ class PhotoViewPager extends ViewPager {
         mBg = bg;
     }
 
+    public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
+        mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -82,6 +89,7 @@ class PhotoViewPager extends ViewPager {
             fragment.setUrl(mUrls.get(position));
             fragment.setCallback(mCallback);
             fragment.setPreviewUrl(mPreviewImgs.get(position));
+            fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
                 mDefaultPosition = -1;

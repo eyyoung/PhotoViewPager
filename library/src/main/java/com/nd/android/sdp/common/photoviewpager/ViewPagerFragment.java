@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -89,6 +90,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private IPhotoViewPagerConfiguration mConfiguration;
     private TextView mTvError;
     private ImageView mIvExit;
+    private OnPictureLongClickListener mOnPictureLongClickListener;
 
     public ViewPagerFragment() {
     }
@@ -682,12 +684,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     @Override
     public boolean onLongClick(View v) {
+        if (mOnPictureLongClickListener == null) {
+            return false;
+        }
         Bitmap bitmap = null;
         final Drawable drawable = mIvTemp.getDrawable();
         if (drawable != null && drawable instanceof BitmapDrawable) {
             bitmap = ((BitmapDrawable) drawable).getBitmap();
         }
-        return mActivityCallback.onLongClick(v, mUrl, bitmap);
+        return mOnPictureLongClickListener.onLongClick(v, mUrl, bitmap);
     }
 
     public void setCallback(Callback callback) {
@@ -861,4 +866,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         return true;
     }
 
+    public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
+        mOnPictureLongClickListener = onPictureLongClickListener;
+    }
 }

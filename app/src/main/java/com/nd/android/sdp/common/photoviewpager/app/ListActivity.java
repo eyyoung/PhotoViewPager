@@ -21,13 +21,15 @@ import android.widget.Toast;
 import com.nd.android.sdp.common.photoviewpager.Callback;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener {
+public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnPictureLongClickListener, OnViewCreatedListener {
 
     String[] urls = new String[]{
             "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
@@ -76,6 +78,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
                 new ArrayList<>(Arrays.asList(preview_urls)),
                 position,
                 this);
+        mPhotoViewPagerFragment.setOnViewCreatedListener(this);
+        mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
     }
 
     @Override
