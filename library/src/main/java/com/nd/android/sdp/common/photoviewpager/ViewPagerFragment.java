@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
@@ -756,7 +757,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void exit() {
-        final FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
         final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
         if (fragment == null) {
             return;

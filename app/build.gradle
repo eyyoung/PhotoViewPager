@@ -33,6 +33,6 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':library')
-//    compile project(':library-iml')
-    compile project(':library-uil')
+    compile project(':library-iml')
+//    compile project(':library-uil')
 }
