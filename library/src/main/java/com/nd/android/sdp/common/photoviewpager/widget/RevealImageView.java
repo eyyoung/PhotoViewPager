@@ -151,7 +151,7 @@ public class RevealImageView extends ImageView {
         mBitmapHeight = mBitmap.getHeight();
         mBitmapWidth = mBitmap.getWidth();
 
-        float scale = 1f;
+        float scale;
         if (((float) getWidth()) / ((float) mBitmapWidth) < ((float) getHeight()) / ((float) mBitmapHeight)) {
             scale = (float) getWidth() / (float) mBitmapWidth;
         } else {

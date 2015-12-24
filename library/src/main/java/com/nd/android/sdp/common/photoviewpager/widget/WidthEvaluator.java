@@ -6,7 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Created by Administrator on 2015/9/22.
+ * The type Width evaluator.
  */
 public class WidthEvaluator extends IntEvaluator {
 

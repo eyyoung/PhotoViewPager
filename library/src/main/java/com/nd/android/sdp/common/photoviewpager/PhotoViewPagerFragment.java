@@ -93,12 +93,20 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         mOnViewCreatedListener.onViewCreated(view);
     }
 
+    @Nullable
     private View findViewById(int id) {
-        return getView().findViewById(id);
+        final View view = getView();
+        if (view == null) {
+            return null;
+        }
+        return view.findViewById(id);
     }
 
     private void init() {
         mVpPhoto = (PhotoViewPager) findViewById(R.id.vpPhoto);
+        if (mVpPhoto == null) {
+            return;
+        }
         mVpPhoto.addOnPageChangeListener(this);
         for (ViewPager.OnPageChangeListener onPageChange : mOnPageListeners) {
             mVpPhoto.addOnPageChangeListener(onPageChange);

@@ -65,7 +65,6 @@ import rx.subjects.PublishSubject;
 
 public class ViewPagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
 
-    private static final String BUNDLE_URL = "url";
     private static final int EXIT_DURATION = 500;
     private static final int MAX_EXIT_SCALEDURATION = 300;
     private View mBg;
@@ -189,6 +188,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
         final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
         if (previewBitmap == null) {
+            if (previewView == null) {
+                loadFileCache(fileCache, true);
+                return;
+            }
             final Drawable drawable = previewView.getDrawable();
             if (drawable == null || !(drawable instanceof BitmapDrawable)) {
                 loadFileCache(fileCache, true);
@@ -243,9 +246,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }, 550);
         animatorSet.setDuration(400).start();
         mIvExit.setVisibility(View.VISIBLE);
-        final ImageView imageView = previewView;
-        if (imageView != null) {
-            mIvExit.setScaleType(imageView.getScaleType());
+        if (previewView != null) {
+            mIvExit.setScaleType(previewView.getScaleType());
         } else {
             mIvExit.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
@@ -279,7 +281,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             });
         } else {
             if (needAnimate) {
-                mIvGif.setAlpha(0);
+                mIvGif.setAlpha(0f);
                 mIvGif.animate()
                         .alpha(1.0f)
                         .setDuration(400)

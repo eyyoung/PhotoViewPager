@@ -24,7 +24,6 @@ import java.util.ArrayList;
 class PhotoViewPager extends ViewPager {
 
     private ArrayList<String> mUrls;
-    private ImagePagerAdapter mImagePagerAdapter;
     private ArrayList<String> mPreviewImgs;
     private Bundle mArguments;
     private int mDefaultPosition;
@@ -55,8 +54,8 @@ class PhotoViewPager extends ViewPager {
         mArguments = arguments;
         mDefaultPosition = defaultPosition;
 
-        mImagePagerAdapter = new ImagePagerAdapter(fragmentManager);
-        setAdapter(mImagePagerAdapter);
+        ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(fragmentManager);
+        setAdapter(imagePagerAdapter);
 
         setCurrentItem(defaultPosition);
     }
