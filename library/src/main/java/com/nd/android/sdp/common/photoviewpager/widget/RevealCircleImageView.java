@@ -349,7 +349,6 @@ public class RevealCircleImageView extends ImageView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Log.d(getClass().getName(), "onDetachedFromWindow: ");
         mBitmapPaint.setShader(null);
         mBitmap = null;
         mBitmapShader = null;

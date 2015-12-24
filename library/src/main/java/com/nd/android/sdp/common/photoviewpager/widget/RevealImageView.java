@@ -183,7 +183,6 @@ public class RevealImageView extends ImageView {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        Log.d(getClass().getName(), "onDetachedFromWindow: ");
         mBitmapPaint.setShader(null);
         mBitmapShader = null;
         mBitmap = null;
