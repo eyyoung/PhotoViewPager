@@ -527,9 +527,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
         }
-        setCallback(null);
-        setOnPictureLongClickListener(null);
-        setBg(null);
     }
 
     public void downloadFullSize() {

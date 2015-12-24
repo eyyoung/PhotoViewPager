@@ -205,8 +205,5 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     @Override
     public void onDestroy() {
         super.onDestroy();
-        setCallbacks(null);
-        setOnViewCreatedListener(null);
-        setOnPictureLongClickListener(null);
     }
 }

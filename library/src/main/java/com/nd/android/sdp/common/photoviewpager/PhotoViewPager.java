@@ -115,8 +115,5 @@ class PhotoViewPager extends ViewPager {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        setOnPictureLongClickListener(null);
-        setBg(null);
-        setCallback(null);
     }
 }
