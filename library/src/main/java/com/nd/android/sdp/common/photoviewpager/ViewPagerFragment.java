@@ -786,10 +786,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mScaleDuration > MAX_EXIT_SCALEDURATION) {
             mScaleDuration = MAX_EXIT_SCALEDURATION;
         }
-        mIvReal.animateScale(mOrigScale)
-                .withDuration(mScaleDuration)
-                .withInterruptible(false)
-                .start();
+        final SubsamplingScaleImageView.AnimationBuilder animationBuilder = mIvReal.animateScale(mOrigScale);
+        if (animationBuilder != null) {
+            animationBuilder
+                    .withDuration(mScaleDuration)
+                    .withInterruptible(false)
+                    .start();
+        } else {
+            return false;
+        }
         mIvExit.setVisibility(View.GONE);
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
