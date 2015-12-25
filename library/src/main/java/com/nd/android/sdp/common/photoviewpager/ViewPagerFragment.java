@@ -261,7 +261,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .start();
             }
             final ImageSource uri = ImageSource.uri(fileCache.getAbsolutePath());
-            mIvReal.setImage(uri);
+            Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+            mIvReal.setImage(uri, ImageSource.cachedBitmap(previewBitmap));
             mIvPreview.setVisibility(View.GONE);
             mIvReal.setVisibility(View.VISIBLE);
             mIvGif.setVisibility(View.GONE);
@@ -271,6 +272,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     finish();
                 }
             });
+            mIvExit.setVisibility(View.GONE);
         } else {
             if (needAnimate) {
                 mIvGif.setAlpha(0f);
