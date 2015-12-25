@@ -657,6 +657,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     .start();
         }
         mIvTemp.setVisibility(View.GONE);
+        mIvExit.setVisibility(View.GONE);
+        mIvPreview.setVisibility(View.GONE);
     }
 
     @Override
