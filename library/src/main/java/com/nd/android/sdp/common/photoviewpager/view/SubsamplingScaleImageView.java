@@ -61,13 +61,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+
 /**
  * Displays an image subsampled as necessary to avoid loading too much image data into memory. After a pinch to zoom in,
  * a set of image tiles subsampled at higher resolution are loaded and displayed over the base layer. During pinch and
  * zoom, tiles off screen or higher/lower resolution than required are discarded from memory.
- * <p/>
+ * <p>
  * Tiles are no larger than the max supported bitmap size, so with large images tiling may be used even when zoomed out.
- * <p/>
+ * <p>
  * v prefixes - coordinates, translations and distances measured in screen (view) pixels
  * s prefixes - coordinates, translations and distances measured in source image pixels (scaled)
  */
@@ -278,6 +285,7 @@ public class SubsamplingScaleImageView extends View {
     private RectF sRect;
     private float[] srcArray = new float[8];
     private float[] dstArray = new float[8];
+    private Subscription mTilesSubscription;
 
     public SubsamplingScaleImageView(Context context, AttributeSet attr) {
         super(context, attr);
@@ -370,7 +378,7 @@ public class SubsamplingScaleImageView extends View {
     /**
      * Set the image source from a bitmap, resource, asset, file or other URI, providing a preview image to be
      * displayed until the full size image is loaded.
-     * <p/>
+     * <p>
      * You must declare the dimensions of the full size image by calling {@link ImageSource#dimensions(int, int)}
      * on the imageSource object. The preview source will be ignored if you don't provide dimensions,
      * and if you provide a bitmap for the full size image.
@@ -387,7 +395,7 @@ public class SubsamplingScaleImageView extends View {
      * displayed until the full size image is loaded, starting with a given orientation setting, scale and center.
      * This is the best method to use when you want scale and center to be restored after screen orientation change;
      * it avoids any redundant loading of tiles in the wrong orientation.
-     * <p/>
+     * <p>
      * You must declare the dimensions of the full size image by calling {@link ImageSource#dimensions(int, int)}
      * on the imageSource object. The preview source will be ignored if you don't provide dimensions,
      * and if you provide a bitmap for the full size image.
@@ -442,8 +450,9 @@ public class SubsamplingScaleImageView extends View {
             }
             if (imageSource.getTile() || this.sRegion != null) {
                 // Load the bitmap using tile decoding.
-                TilesInitTask task = new TilesInitTask(this, getContext(), regionDecoderFactory, uri);
-                task.execute();
+                startTilesInit(this, getContext(), regionDecoderFactory, uri);
+//                TilesInitTask task = new TilesInitTask(this, getContext(), regionDecoderFactory, uri);
+//                task.execute();
             } else {
                 // Load the bitmap as a single image.
                 BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false);
@@ -1417,6 +1426,62 @@ public class SubsamplingScaleImageView extends View {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mTilesSubscription != null) {
+            mTilesSubscription.unsubscribe();
+        }
+    }
+
+    private void startTilesInit(final SubsamplingScaleImageView view,
+                                final Context context,
+                                final DecoderFactory<? extends ImageRegionDecoder> decoderFactory,
+                                final Uri source) {
+        mTilesSubscription = Observable.create(new Observable.OnSubscribe<int[]>() {
+            @Override
+            public void call(Subscriber<? super int[]> subscriber) {
+                try {
+                    String sourceUri = source.toString();
+                    if (context != null && decoderFactory != null && view != null) {
+                        decoder = decoderFactory.make();
+                        Point dimensions = decoder.init(context, source);
+                        int sWidth = dimensions.x;
+                        int sHeight = dimensions.y;
+                        int exifOrientation = view.getExifOrientation(sourceUri);
+                        if (view.sRegion != null) {
+                            sWidth = view.sRegion.width();
+                            sHeight = view.sRegion.height();
+                        }
+                        subscriber.onNext(new int[]{sWidth, sHeight, exifOrientation});
+                    }
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+                subscriber.onCompleted();
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<int[]>() {
+                    @Override
+                    public void call(int[] xyo) {
+                        if (view != null) {
+                            if (decoder != null && xyo != null && xyo.length == 3) {
+                                view.onTilesInited(decoder, xyo[0], xyo[1], xyo[2]);
+                            }
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e(TAG, "Failed to initialise bitmap decoder", throwable);
+                        if (view.onImageEventListener != null) {
+                            view.onImageEventListener.onImageLoadError(((Exception) throwable));
+                        }
+                    }
+                });
+    }
+
     /**
      * Async task used to get image details without blocking the UI thread.
      */
@@ -1863,6 +1928,9 @@ public class SubsamplingScaleImageView extends View {
         bitmapPaint = null;
         debugPaint = null;
         tileBgPaint = null;
+        if (mTilesSubscription != null) {
+            mTilesSubscription.unsubscribe();
+        }
     }
 
     /**
@@ -2606,7 +2674,8 @@ public class SubsamplingScaleImageView extends View {
 
         /**
          * Set the easing style. See static fields. {@link #EASE_IN_OUT_QUAD} is recommended, and the default.
-         *EASE_IN_OUT_QUAD
+         * EASE_IN_OUT_QUAD
+         *
          * @param easing easing style.
          * @return this builder for method chaining.
          */
