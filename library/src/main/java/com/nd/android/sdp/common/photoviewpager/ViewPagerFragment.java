@@ -235,15 +235,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 loadFileCache(fileCache, false);
             }
         });
-        mIvReal.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isAdded()) {
-                    return;
-                }
-                mIvExit.setVisibility(View.GONE);
-            }
-        }, 550);
         animatorSet.setDuration(400).start();
         mIvExit.setVisibility(View.VISIBLE);
         if (previewView != null) {
@@ -300,6 +291,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }
             });
         }
+        mIvReal.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isAdded()) {
+                    return;
+                }
+                mIvExit.setVisibility(View.GONE);
+            }
+        }, 250);
         // 最后设置成不可见
 //        mIvExit.setVisibility(View.GONE);
     }

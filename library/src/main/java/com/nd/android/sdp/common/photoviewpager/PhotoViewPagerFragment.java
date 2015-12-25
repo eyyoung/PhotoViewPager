@@ -52,12 +52,14 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         args.putStringArrayList(PARAM_URLS, urls);
         args.putStringArrayList(PARAM_PREVIEW_URLS, previewUrls);
         int[] locations = new int[2];
-        imageView.getLocationOnScreen(locations);
-        args.putInt(PARAM_LEFT, locations[0]);
-        args.putInt(PARAM_TOP, locations[1]);
-        args.putInt(PARAM_WIDTH, imageView.getWidth());
-        args.putInt(PARAM_HEIGHT, imageView.getHeight());
-        args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
+        if (imageView != null) {
+            imageView.getLocationOnScreen(locations);
+            args.putInt(PARAM_LEFT, locations[0]);
+            args.putInt(PARAM_TOP, locations[1]);
+            args.putInt(PARAM_WIDTH, imageView.getWidth());
+            args.putInt(PARAM_HEIGHT, imageView.getHeight());
+            args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
+        }
         fragment.setCallbacks(callback);
         fragment.setArguments(args);
         return fragment;

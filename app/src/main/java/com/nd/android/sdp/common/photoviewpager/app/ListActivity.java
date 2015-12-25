@@ -38,10 +38,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d6agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/031907cc-525f-416e-9ffe-1c5d6e840e86.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/27e77ba5-d569-4dd2-b3d1-4161bf899006.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/31ff63ec-7882-40b5-b5a4-2c50347f1980.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg"
+            "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=960"
     };
 
     String[] preview_urls = new String[]{
@@ -51,10 +48,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/031907cc-525f-416e-9ffe-1c5d6e840e86.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/27e77ba5-d569-4dd2-b3d1-4161bf899006.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/31ff63ec-7882-40b5-b5a4-2c50347f1980.jpg",
-            "file:///storage/emulated/0/Android/data/com.nd.smartcan.appfactory.imapp/cache/image/949177/ce1cc456-f75f-4f14-b042-9577ffab7567.jpg"
+            "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=160"
     };
 
     private ListView mLv;
