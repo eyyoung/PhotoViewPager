@@ -92,6 +92,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private ImageView mIvExit;
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private Subscription mBitmapProgressSubscription;
+    private boolean mIsAnimateFinishing = false;
 
     public ViewPagerFragment() {
     }
@@ -291,15 +292,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }
             });
         }
-        mIvReal.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!isAdded()) {
-                    return;
-                }
-                mIvExit.setVisibility(View.GONE);
-            }
-        }, 250);
+//        mIvReal.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (!isAdded()) {
+//                    return;
+//                }
+//                mIvExit.setVisibility(View.GONE);
+//            }
+//        }, 250);
         // 最后设置成不可见
 //        mIvExit.setVisibility(View.GONE);
     }
@@ -710,6 +711,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void finish() {
+        if (mIsAnimateFinishing) {
+            return;
+        }
+        mIsAnimateFinishing = true;
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
