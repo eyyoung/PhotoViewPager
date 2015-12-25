@@ -65,8 +65,10 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Displays an image subsampled as necessary to avoid loading too much image data into memory. After a pinch to zoom in,
@@ -285,10 +287,11 @@ public class SubsamplingScaleImageView extends View {
     private RectF sRect;
     private float[] srcArray = new float[8];
     private float[] dstArray = new float[8];
-    private Subscription mTilesSubscription;
+    private CompositeSubscription mCompositeSubscription;
 
     public SubsamplingScaleImageView(Context context, AttributeSet attr) {
         super(context, attr);
+        mCompositeSubscription = new CompositeSubscription();
         setMinimumDpi(160);
         setDoubleTapZoomDpi(160);
         setGestureDetector(context);
@@ -1112,6 +1115,7 @@ public class SubsamplingScaleImageView extends View {
                 onImageEventListener.onReady();
             }
         }
+        Log.d(TAG, "ready:" + ready);
         return ready;
     }
 
@@ -1170,8 +1174,9 @@ public class SubsamplingScaleImageView extends View {
 
         List<Tile> baseGrid = tileMap.get(fullImageSampleSize);
         for (Tile baseTile : baseGrid) {
-            TileLoadTask task = new TileLoadTask(this, decoder, baseTile);
-            task.execute();
+            startTileLoad(this, decoder, baseTile);
+//            TileLoadTask task = new TileLoadTask(this, decoder, baseTile);
+//            task.execute();
         }
         refreshRequiredTiles(true);
 
@@ -1205,8 +1210,9 @@ public class SubsamplingScaleImageView extends View {
                     if (tileVisible(tile)) {
                         tile.visible = true;
                         if (!tile.loading && tile.bitmap == null && load) {
-                            TileLoadTask task = new TileLoadTask(this, decoder, tile);
-                            task.execute();
+                            startTileLoad(this, decoder, tile);
+//                            TileLoadTask task = new TileLoadTask(this, decoder, tile);
+//                            task.execute();
                         }
                     } else if (tile.sampleSize != fullImageSampleSize) {
                         tile.visible = false;
@@ -1429,8 +1435,8 @@ public class SubsamplingScaleImageView extends View {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (mTilesSubscription != null) {
-            mTilesSubscription.unsubscribe();
+        if (mCompositeSubscription != null) {
+            mCompositeSubscription.unsubscribe();
         }
     }
 
@@ -1438,7 +1444,7 @@ public class SubsamplingScaleImageView extends View {
                                 final Context context,
                                 final DecoderFactory<? extends ImageRegionDecoder> decoderFactory,
                                 final Uri source) {
-        mTilesSubscription = Observable.create(new Observable.OnSubscribe<int[]>() {
+        final Subscription subscription = Observable.create(new Observable.OnSubscribe<int[]>() {
             @Override
             public void call(Subscriber<? super int[]> subscriber) {
                 try {
@@ -1479,7 +1485,12 @@ public class SubsamplingScaleImageView extends View {
                             view.onImageEventListener.onImageLoadError(((Exception) throwable));
                         }
                     }
+                }, new Action0() {
+                    @Override
+                    public void call() {
+                    }
                 });
+        mCompositeSubscription.add(subscription);
     }
 
     /**
@@ -1565,6 +1576,50 @@ public class SubsamplingScaleImageView extends View {
         requestLayout();
     }
 
+    private void startTileLoad(final SubsamplingScaleImageView view, final ImageRegionDecoder decoder, final Tile tile){
+        final Subscription subscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
+            @Override
+            public void call(Subscriber<? super Bitmap> subscriber) {
+                try {
+                    if (decoder != null && tile != null && view != null && decoder.isReady()) {
+                        synchronized (view.decoderLock) {
+                            // Update tile's file sRect according to rotation
+                            view.fileSRect(tile.sRect, tile.fileSRect);
+                            if (view.sRegion != null) {
+                                tile.fileSRect.offset(view.sRegion.left, view.sRegion.top);
+                            }
+                            subscriber.onNext(decoder.decodeRegion(tile.fileSRect, tile.sampleSize));
+                        }
+                    } else if (tile != null) {
+                        tile.loading = false;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to decode tile", e);
+                    subscriber.onError(e);
+                }
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<Bitmap>() {
+                    @Override
+                    public void call(Bitmap bitmap) {
+                        if (view != null && tile != null) {
+                            if (bitmap != null) {
+                                tile.bitmap = bitmap;
+                                tile.loading = false;
+                                view.onTileLoaded();
+                            }
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        view.onImageEventListener.onTileLoadError(((Exception) throwable));
+                    }
+                });
+        mCompositeSubscription.add(subscription);
+    }
+
     /**
      * Async task used to load images without blocking the UI thread.
      */
@@ -1637,6 +1692,52 @@ public class SubsamplingScaleImageView extends View {
             bitmapIsCached = false;
         }
         invalidate();
+    }
+
+    private void startBitmapLoad(final SubsamplingScaleImageView view,
+                                 final Context context,
+                                 final DecoderFactory<? extends ImageDecoder> decoderFactory,
+                                 final Uri source,
+                                 final boolean preview){
+        final Subscription subscription = Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                try {
+                    String sourceUri = source.toString();
+                    if (context != null && decoderFactory != null && view != null) {
+                        bitmap = decoderFactory.make().decode(context, source);
+                        subscriber.onNext(view.getExifOrientation(sourceUri));
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to load bitmap", e);
+                    subscriber.onError(e);
+                }
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer orientation) {
+                        if (view != null) {
+                            if (bitmap != null && orientation != null) {
+                                if (preview) {
+                                    view.onPreviewLoaded(bitmap);
+                                } else {
+                                    view.onImageLoaded(bitmap, orientation);
+                                }
+                            }
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        if (preview) {
+                            view.onImageEventListener.onPreviewLoadError(((Exception) throwable));
+                        } else {
+                            view.onImageEventListener.onImageLoadError((Exception) throwable);
+                        }
+                    }
+                });
     }
 
     /**
@@ -1928,8 +2029,8 @@ public class SubsamplingScaleImageView extends View {
         bitmapPaint = null;
         debugPaint = null;
         tileBgPaint = null;
-        if (mTilesSubscription != null) {
-            mTilesSubscription.unsubscribe();
+        if (mCompositeSubscription != null) {
+            mCompositeSubscription.unsubscribe();
         }
     }
 

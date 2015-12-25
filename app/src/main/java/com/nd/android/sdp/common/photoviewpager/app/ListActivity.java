@@ -38,6 +38,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d6agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=960",
             "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=960"
     };
 
@@ -48,6 +49,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69bd63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=160",
             "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=160"
     };
 
