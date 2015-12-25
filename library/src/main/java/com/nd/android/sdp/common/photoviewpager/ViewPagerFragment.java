@@ -283,6 +283,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvReal.setVisibility(View.GONE);
             mIvGif.setVisibility(View.VISIBLE);
             mIvGif.setImageURI(Uri.fromFile(fileCache));
+            mIvExit.setVisibility(View.GONE);
             mView.removeView(mIvPreview);
             mIvTemp.setVisibility(View.GONE);
             mIvGif.setOnClickListener(new View.OnClickListener() {
@@ -471,6 +472,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                 mIvGif.setImageURI(Uri.fromFile(diskCache));
                                 mView.removeView(mIvPreview);
                                 mIvTemp.setVisibility(View.GONE);
+                                mIvExit.setVisibility(View.GONE);
                                 mIvGif.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
@@ -714,6 +716,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void finish() {
         if (mIsAnimateFinishing) {
+            return;
+        }
+        // 还没加载完
+        if (mIvGif.getVisibility() == View.GONE && !mIvReal.isReady()) {
             return;
         }
         mIsAnimateFinishing = true;
