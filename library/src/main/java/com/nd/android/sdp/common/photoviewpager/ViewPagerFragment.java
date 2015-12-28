@@ -534,6 +534,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
         }
+        mIvReal.recycle();
     }
 
     public void downloadFullSize() {
