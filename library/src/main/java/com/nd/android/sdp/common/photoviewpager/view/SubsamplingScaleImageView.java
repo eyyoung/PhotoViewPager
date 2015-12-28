@@ -1115,7 +1115,6 @@ public class SubsamplingScaleImageView extends View {
                 onImageEventListener.onReady();
             }
         }
-        Log.d(TAG, "ready:" + ready);
         return ready;
     }
 

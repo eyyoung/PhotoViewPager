@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -109,6 +110,17 @@ class PhotoViewPager extends ViewPager {
 
     public ViewPagerFragment getFragmentByPosition(int position) {
         return mFragmentMap.get(position);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        try {
+            return super.onInterceptTouchEvent(ev);
+        } catch (IllegalArgumentException e) {
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+        }
+        return false;
     }
 
     @Override
