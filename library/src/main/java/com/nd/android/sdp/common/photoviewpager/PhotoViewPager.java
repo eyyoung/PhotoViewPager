@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ class PhotoViewPager extends ViewPager {
     private Callback mCallback;
     private View mBg;
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private OnFinishListener mOnFinishListener;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -73,6 +75,10 @@ class PhotoViewPager extends ViewPager {
         mOnPictureLongClickListener = onPictureLongClickListener;
     }
 
+    public void setOnFinishListener(OnFinishListener onFinishListener) {
+        mOnFinishListener = onFinishListener;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -86,6 +92,7 @@ class PhotoViewPager extends ViewPager {
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
             fragment.setUrl(mUrls.get(position));
+            fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
             fragment.setPreviewUrl(mPreviewImgs.get(position));
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);

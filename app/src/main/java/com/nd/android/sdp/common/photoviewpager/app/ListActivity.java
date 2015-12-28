@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.nd.android.sdp.common.photoviewpager.Callback;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
+import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -29,7 +30,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnPictureLongClickListener, OnViewCreatedListener {
+public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnPictureLongClickListener, OnViewCreatedListener, OnFinishListener {
 
     String[] urls = new String[]{
             "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
@@ -81,6 +82,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
                 position,
                 this);
         mPhotoViewPagerFragment.setOnViewCreatedListener(this);
+        mPhotoViewPagerFragment.setOnFinishListener(this);
         mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
     }
 
@@ -117,6 +119,11 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onClick(View v) {
 //        mPhotoViewPagerFragment.exit();
+    }
+
+    @Override
+    public void onFinish() {
+        mPhotoViewPagerFragment = null;
     }
 
     private class DemoAdapter extends BaseAdapter {

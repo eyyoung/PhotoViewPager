@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 
@@ -39,6 +40,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     private ArrayList<String> mImages;
     private Callback mCallback;
     private OnViewCreatedListener mOnViewCreatedListener;
+    private OnFinishListener mOnFinishListener;
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
 
@@ -129,6 +131,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
+        mVpPhoto.setOnFinishListener(mOnFinishListener);
         mVpPhoto.post(new Runnable() {
             @Override
             public void run() {
@@ -210,6 +213,11 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
 
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
+
+    public void setOnFinishListener(OnFinishListener onFinishListener) {
+        mOnFinishListener = onFinishListener;
     }
 
     @Override

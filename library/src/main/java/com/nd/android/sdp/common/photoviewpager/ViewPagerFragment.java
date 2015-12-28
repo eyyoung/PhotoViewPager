@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
+import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
@@ -93,6 +94,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
+    private OnFinishListener mOnFinishListener;
 
     public ViewPagerFragment() {
     }
@@ -722,12 +724,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mIvGif.getVisibility() == View.GONE && !mIvReal.isReady()) {
             return;
         }
-        mIsAnimateFinishing = true;
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
             return;
         }
+        mIsAnimateFinishing = true;
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
             mIvReal.postDelayed(new Runnable() {
@@ -765,6 +767,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(500);
             animator1.start();
+        }
+        if (mOnFinishListener != null) {
+            mOnFinishListener.onFinish();
         }
     }
 
@@ -899,5 +904,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
+    public void setOnFinishListener(OnFinishListener onFinishListener) {
+        mOnFinishListener = onFinishListener;
     }
 }
