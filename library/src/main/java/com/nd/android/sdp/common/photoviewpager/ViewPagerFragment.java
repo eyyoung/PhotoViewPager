@@ -557,9 +557,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
         }
-        mIvTemp.setImageBitmap(null);
-        mIvExit.setImageBitmap(null);
-        mIvPreview.setImageBitmap(null);
+        // onsaveinstance
+        if (mIvTemp != null) {
+            mIvTemp.setImageBitmap(null);
+            mIvExit.setImageBitmap(null);
+            mIvPreview.setImageBitmap(null);
+        }
     }
 
     public void downloadFullSize() {
@@ -819,6 +822,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (activity == null) {
             return;
         }
+        if (!isAdded()) {
+            return;
+        }
         final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
         final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
         if (fragment == null) {
@@ -827,7 +833,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         supportFragmentManager
                 .beginTransaction()
                 .remove(fragment)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     private boolean animateFinish() {
