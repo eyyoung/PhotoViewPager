@@ -71,6 +71,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private static final int FADE_ANIMATE_DURATION = 300;
     private static final int REVEAL_IN_ANIMATE_DURATION = 300;
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
+
     private View mBg;
     private ViewGroup mView;
     private CircularProgressView mPb;
@@ -147,6 +148,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
         mIvGif.setOnLongClickListener(ViewPagerFragment.this);
         mIvReal.setOnImageEventListener(this);
+        mIvTemp.setOnClickListener(mFinishClickListener);
         return mView;
     }
 
@@ -269,12 +271,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             mIvPreview.setVisibility(View.GONE);
                             mIvReal.setVisibility(View.VISIBLE);
                             mIvGif.setVisibility(View.GONE);
-                            mIvReal.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    finish();
-                                }
-                            });
+                            mIvReal.setOnClickListener(mFinishClickListener);
                         }
 
                         @Override
@@ -303,12 +300,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvExit.setVisibility(View.GONE);
             mView.removeView(mIvPreview);
             mIvTemp.setVisibility(View.GONE);
-            mIvGif.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
+            mIvGif.setOnClickListener(mFinishClickListener);
         }
 //        mIvReal.postDelayed(new Runnable() {
 //            @Override
@@ -345,9 +337,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
         if (previewBitmap == null) {
             final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
-            final Drawable drawable = previewView.getDrawable();
-            if (drawable != null && drawable instanceof BitmapDrawable) {
-                previewBitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (previewView != null) {
+                final Drawable drawable = previewView.getDrawable();
+                if (drawable != null && drawable instanceof BitmapDrawable) {
+                    previewBitmap = ((BitmapDrawable) drawable).getBitmap();
+                }
             }
         }
         return previewBitmap;
@@ -447,12 +441,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mPb.setVisibility(View.GONE);
                         mTvError.setVisibility(View.VISIBLE);
                         mTvError.setOnLongClickListener(ViewPagerFragment.this);
-                        mTvError.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                finish();
-                            }
-                        });
+                        mTvError.setOnClickListener(mFinishClickListener);
                     }
                 });
             }
@@ -488,12 +477,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         mView.removeView(mIvPreview);
                                         mIvReal.setVisibility(View.VISIBLE);
                                         mOrigScale = mIvReal.getScale();
-                                        mIvReal.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                finish();
-                                            }
-                                        });
+                                        mIvReal.setOnClickListener(mFinishClickListener);
                                     }
                                 });
                             } else {
@@ -503,12 +487,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                 mView.removeView(mIvPreview);
                                 mIvTemp.setVisibility(View.GONE);
                                 mIvExit.setVisibility(View.GONE);
-                                mIvGif.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        finish();
-                                    }
-                                });
+                                mIvGif.setOnClickListener(mFinishClickListener);
                             }
                         }
                         mSubscription.unsubscribe();
@@ -770,7 +749,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             return;
         }
         // 还没加载完
-        if (mIvGif.getVisibility() == View.GONE && !mIvReal.isReady()) {
+        if (mIvGif.getVisibility() == View.GONE
+                && !mIvReal.isReady()) {
             return;
         }
         int[] location = new int[2];
@@ -962,4 +942,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mOnFinishListener = onFinishListener;
     }
 
+    private final View.OnClickListener mFinishClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            finish();
+        }
+    };
 }

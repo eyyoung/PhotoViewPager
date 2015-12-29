@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -61,6 +63,14 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Test");
+        final File[] files = file.listFiles();
+        urls = new String[files.length];
+        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
+            File f = files[i];
+            urls[i] = "file://"+f.getAbsolutePath();
+        }
+        preview_urls = urls;
         mLv = ((ListView) findViewById(R.id.lv));
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         mLv.setAdapter(new DemoAdapter());
