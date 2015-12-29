@@ -201,6 +201,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 return;
             }
             previewBitmap = ((BitmapDrawable) drawable).getBitmap();
+            if (previewBitmap == null) {
+                loadFileCache(fileCache, true);
+                return;
+            }
         }
         final Bundle arguments = getArguments();
         int startWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mSceenWidth);
@@ -534,6 +538,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
         }
+        mIvTemp.setImageBitmap(null);
+        mIvExit.setImageBitmap(null);
+        mIvPreview.setImageBitmap(null);
     }
 
     public void downloadFullSize() {

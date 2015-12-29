@@ -458,8 +458,7 @@ public class SubsamplingScaleImageView extends View {
 //                task.execute();
             } else {
                 // Load the bitmap as a single image.
-                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, false);
-                task.execute();
+                startBitmapLoad(this,getContext(),bitmapDecoderFactory, uri, false);
             }
         }
     }
@@ -1438,6 +1437,7 @@ public class SubsamplingScaleImageView extends View {
             mCompositeSubscription.unsubscribe();
         }
         recycle();
+        System.gc();
     }
 
     private void startTilesInit(final SubsamplingScaleImageView view,
