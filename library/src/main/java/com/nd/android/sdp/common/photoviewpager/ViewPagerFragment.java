@@ -66,8 +66,11 @@ import rx.subjects.PublishSubject;
 
 public class ViewPagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
 
-    private static final int EXIT_DURATION = 500;
+    private static final int EXIT_DURATION = 300;
     private static final int MAX_EXIT_SCALEDURATION = 300;
+    private static final int FADE_ANIMATE_DURATION = 300;
+    private static final int REVEAL_IN_ANIMATE_DURATION = 300;
+    private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
     private View mBg;
     private ViewGroup mView;
     private CircularProgressView mPb;
@@ -185,7 +188,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mBg.setAlpha(0);
         mBg.animate()
                 .alpha(1.0f)
-                .setDuration(400)
+                .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
         Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
@@ -242,7 +245,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 loadFileCache(fileCache, false);
             }
         });
-        animatorSet.setDuration(400).start();
+        animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         mIvExit.setVisibility(View.VISIBLE);
         if (previewView != null) {
             mIvExit.setScaleType(previewView.getScaleType());
@@ -262,27 +265,43 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 mIvReal.setAlpha(0);
                 mIvReal.animate()
                         .alpha(1.0f)
-                        .setDuration(400)
+                        .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }
-            final ImageSource uri = ImageSource.uri(fileCache.getAbsolutePath());
-            mIvReal.setImage(uri);
-            mIvPreview.setVisibility(View.GONE);
-            mIvReal.setVisibility(View.VISIBLE);
-            mIvGif.setVisibility(View.GONE);
-            mIvReal.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    finish();
-                }
-            });
+            mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
+                    new ImageGetterCallback() {
+                        @Override
+                        public void setImageToView(Bitmap bitmap) {
+                            mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                            mIvPreview.setVisibility(View.GONE);
+                            mIvReal.setVisibility(View.VISIBLE);
+                            mIvGif.setVisibility(View.GONE);
+                            mIvReal.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    finish();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void setProgress(long current, long total) {
+
+                        }
+
+                        @Override
+                        public void error(String imageUri, View view, Throwable cause) {
+
+                        }
+                    });
+
         } else {
             if (needAnimate) {
                 mIvGif.setAlpha(0f);
                 mIvGif.animate()
                         .alpha(1.0f)
-                        .setDuration(400)
+                        .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }
@@ -356,14 +375,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.setInterpolator(new AccelerateInterpolator());
         animatorSet.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
-        animatorSet.setDuration(400).start();
+        animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvPreview, RevealCircleImageView.RADIUS,
                 0, (mFrameSize - marginSize * 2) / 2);
         final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 0, 1);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(animator, animator1);
         set.setInterpolator(new AccelerateInterpolator());
-        set.setDuration(400).start();
+        set.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         set.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animator) {
@@ -447,20 +466,20 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
                                 mIvReal.setVisibility(View.GONE);
                                 mIvGif.setVisibility(View.GONE);
-                                mIvReal.setImage(ImageSource.uri(Uri.fromFile(diskCache)));
                                 final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
                                         mFrameSize / 2, 0);
                                 final ObjectAnimator animator2 = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.ALPHA,
                                         0, 1);
                                 AnimatorSet set = new AnimatorSet();
                                 set.playTogether(animator, animator2);
-                                set.setDuration(300).start();
+                                set.setDuration(REVEAL_IN_ANIMATE_DURATION).start();
                                 set.addListener(new AnimatorListenerAdapter() {
                                     @Override
                                     public void onAnimationEnd(Animator animator) {
                                         if (!isAdded()) {
                                             return;
                                         }
+                                        mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
                                         mView.removeView(mIvPreview);
                                         mIvReal.setVisibility(View.VISIBLE);
                                         mOrigScale = mIvReal.getScale();
@@ -551,7 +570,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         mIvReal.animate()
                 .alpha(0)
-                .setDuration(500)
+                .setDuration(FADE_ANIMATE_DURATION)
                 .start();
         mPb.setVisibility(View.VISIBLE);
         // 下载完成
@@ -583,12 +602,27 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private void loadPicFromFile(File diskCache) {
         mIvReal.animate()
                 .alpha(1.0f)
-                .setDuration(500)
+                .setDuration(FADE_ANIMATE_DURATION)
                 .start();
         // 下载完成
         mPb.setVisibility(View.GONE);
-        final ImageSource uri = ImageSource.uri(diskCache.getAbsolutePath());
-        mIvReal.setImage(uri);
+        mConfiguration.startGetImage("file://" + diskCache.getAbsolutePath(),
+                new ImageGetterCallback() {
+                    @Override
+                    public void setImageToView(Bitmap bitmap) {
+                        mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                    }
+
+                    @Override
+                    public void setProgress(long current, long total) {
+
+                    }
+
+                    @Override
+                    public void error(String imageUri, View view, Throwable cause) {
+
+                    }
+                });
     }
 
 
@@ -762,7 +796,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             animate
                     .alpha(0f)
                     .setInterpolator(new AccelerateInterpolator())
-                    .setDuration(300)
+                    .setDuration(FADE_ANIMATE_DURATION)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -772,7 +806,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     })
                     .start();
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
-            animator1.setDuration(500);
+            animator1.setDuration(FADE_ANIMATE_DURATION);
             animator1.start();
         }
         if (mOnFinishListener != null) {
@@ -916,4 +950,5 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;
     }
+
 }

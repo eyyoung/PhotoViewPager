@@ -36,7 +36,7 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
                 .cacheOnDisk(true)
                 .build();
         ImageLoader.getInstance().loadImage(url,
-                new ImageSize(1440, 2560),
+                new ImageSize(0, 0),
                 displayImageOptions, new ImageLoadingListener() {
                     @Override
                     public void onLoadingStarted(String imageUri, View view) {
