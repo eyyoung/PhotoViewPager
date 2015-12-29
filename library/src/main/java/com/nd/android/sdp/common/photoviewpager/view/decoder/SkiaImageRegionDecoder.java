@@ -87,6 +87,8 @@ public class SkiaImageRegionDecoder implements ImageRegionDecoder {
 
     @Override
     public void recycle() {
-        decoder.recycle();
+        if(decoder!=null) {
+            decoder.recycle();
+        }
     }
 }
