@@ -191,23 +191,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
-        Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
         final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
+        if (previewView == null) {
+            loadFileCache(fileCache, true);
+            return;
+        }
+        Bitmap previewBitmap = getPreviewBitmap();
         if (previewBitmap == null) {
-            if (previewView == null) {
-                loadFileCache(fileCache, true);
-                return;
-            }
-            final Drawable drawable = previewView.getDrawable();
-            if (drawable == null || !(drawable instanceof BitmapDrawable)) {
-                loadFileCache(fileCache, true);
-                return;
-            }
-            previewBitmap = ((BitmapDrawable) drawable).getBitmap();
-            if (previewBitmap == null) {
-                loadFileCache(fileCache, true);
-                return;
-            }
+            loadFileCache(fileCache, true);
+            return;
         }
         final Bundle arguments = getArguments();
         int startWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mSceenWidth);
@@ -343,9 +335,22 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvPreview.setVisibility(View.VISIBLE);
         mTvError.setVisibility(View.GONE);
         mIvPreview.setDrawableRadius(mFrameSize / 2);
-        final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+        Bitmap previewBitmap = getPreviewBitmap();
         mIvPreview.setImageBitmap(previewBitmap);
         startGetImage();
+    }
+
+    @Nullable
+    private Bitmap getPreviewBitmap() {
+        Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+        if (previewBitmap == null) {
+            final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
+            final Drawable drawable = previewView.getDrawable();
+            if (drawable != null && drawable instanceof BitmapDrawable) {
+                previewBitmap = ((BitmapDrawable) drawable).getBitmap();
+            }
+        }
+        return previewBitmap;
     }
 
     /**

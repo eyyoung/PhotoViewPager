@@ -1437,7 +1437,6 @@ public class SubsamplingScaleImageView extends View {
             mCompositeSubscription.unsubscribe();
         }
         recycle();
-        System.gc();
     }
 
     private void startTilesInit(final SubsamplingScaleImageView view,
