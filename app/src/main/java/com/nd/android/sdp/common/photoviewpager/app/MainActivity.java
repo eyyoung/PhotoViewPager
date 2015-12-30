@@ -26,17 +26,13 @@ import java.util.Arrays;
 public class MainActivity extends AppCompatActivity implements Callback, OnPictureLongClickListener, OnViewCreatedListener {
 
     String[] urls = new String[]{
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
+            "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=960",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/005UtZ0Igw1ez3lvhnpezj30hs0np3ze.jpg"
     };
 
     String[] preview_urls = new String[]{
-            "http://ww4.sinaimg.cn/bmiddle/6106a4f0gw1ez18sesw2aj20r80r8juz.jpg",
+            "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=160",
             "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/005UtZ0Igw1ez3lvhnpezj30hs0np3ze.jpg"
     };
     private ImageView mIv;
     private ImageView mIv2;
@@ -100,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
     @Override
     public ImageView getPreviewView(String url) {
         if (url.equals(preview_urls[0])) {
-            return null;
+            return mIv;
         } else {
             return mIv2;
         }

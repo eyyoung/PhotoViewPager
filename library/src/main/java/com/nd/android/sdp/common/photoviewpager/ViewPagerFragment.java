@@ -663,7 +663,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     @Override
     public void onReady() {
-
+        onImageLoaded();
     }
 
     @Override
