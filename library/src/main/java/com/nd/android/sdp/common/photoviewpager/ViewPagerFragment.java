@@ -16,6 +16,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
+import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,6 +34,7 @@ import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 import com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView;
@@ -88,8 +91,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private Subscription mFullSizeSubscription;
     private int mStatusBarHeight;
     private View mFlPreview;
-    private String mUrl;
-    private String mPreviewUrl;
     private int mFrameSize;
     private GifImageView mIvGif;
     private IPhotoViewPagerConfiguration mConfiguration;
@@ -99,6 +100,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
     private OnFinishListener mOnFinishListener;
+    private TextView mTvOrig;
+    private PicInfo mPicInfo;
 
     public ViewPagerFragment() {
     }
@@ -118,14 +121,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
     }
 
-    public void setUrl(String pUrl) {
-        mUrl = pUrl;
-    }
-
-    public void setPreviewUrl(String previewUrl) {
-        mPreviewUrl = previewUrl;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = (ViewGroup) inflater.inflate(R.layout.photo_viewpager_fragment_page, container, false);
@@ -140,6 +135,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
         mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
         mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
+        mTvOrig = ((TextView) mView.findViewById(R.id.tvOrig));
         mFlPreview = mView.findViewById(R.id.flPreview);
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;
@@ -149,27 +145,29 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvGif.setOnLongClickListener(ViewPagerFragment.this);
         mIvReal.setOnImageEventListener(this);
         mIvTemp.setOnClickListener(mFinishClickListener);
+        mTvOrig.setOnClickListener(mViewOrig);
         return mView;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (mUrl == null) {
+        if (mPicInfo == null) {
             return;
         }
         // 边框大小
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
+        final boolean origAvailable = isOrigAvailable();
         if (mNeedTransition) {
             mNeedTransition = false;
-            final File fileCache = mConfiguration.getPicDiskCache(mUrl);
+            final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
             if (fileCache != null && fileCache.exists()) {
                 // 直接放大
-                animateToBigImage(fileCache);
+                animateToBigImage(fileCache, origAvailable);
             } else {
-                final ImageView imageView = mActivityCallback.getPreviewView(mPreviewUrl);
+                final ImageView imageView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
                 if (imageView != null) {
-                    final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+                    final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPicInfo.previewUrl);
                     if (previewBitmap != null) {
                         Palette palette = Palette.from(previewBitmap).generate();
                         final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
@@ -186,21 +184,42 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private void animateToBigImage(final File fileCache) {
+    private boolean isOrigAvailable() {
+        if (TextUtils.isEmpty(mPicInfo.origUrl)) {
+            mTvOrig.setVisibility(View.GONE);
+            return false;
+        } else {
+            final File origCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
+            if (origCache != null && origCache.exists()) {
+                mTvOrig.setVisibility(View.GONE);
+                return true;
+            } else {
+                mTvOrig.setVisibility(View.VISIBLE);
+                if (mPicInfo.size > 0) {
+                    mTvOrig.setText(getString(R.string.photo_viewpager_view_origin_with_size, Formatter.formatFileSize(getContext(), mPicInfo.size)));
+                } else {
+                    mTvOrig.setText(R.string.photo_viewpager_view_origin);
+                }
+                return false;
+            }
+        }
+    }
+
+    private void animateToBigImage(final File fileCache, final boolean origAvailable) {
         mBg.setAlpha(0);
         mBg.animate()
                 .alpha(1.0f)
                 .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
-        final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
+        final ImageView previewView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
         if (previewView == null) {
-            loadFileCache(fileCache, true);
+            loadFileCache(fileCache, true, origAvailable);
             return;
         }
         Bitmap previewBitmap = getPreviewBitmap();
         if (previewBitmap == null) {
-            loadFileCache(fileCache, true);
+            loadFileCache(fileCache, true, origAvailable);
             return;
         }
         final Bundle arguments = getArguments();
@@ -236,16 +255,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                loadFileCache(fileCache, false);
+                loadFileCache(fileCache, false, origAvailable);
             }
         });
         animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         mIvExit.setVisibility(View.VISIBLE);
-        if (previewView != null) {
-            mIvExit.setScaleType(previewView.getScaleType());
-        } else {
-            mIvExit.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        }
+        mIvExit.setScaleType(previewView.getScaleType());
         mIvExit.setImageBitmap(previewBitmap);
         mIvPreview.setVisibility(View.GONE);
         mIvGif.setVisibility(View.GONE);
@@ -253,7 +268,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mPb.setVisibility(View.GONE);
     }
 
-    private void loadFileCache(File fileCache, boolean needAnimate) {
+    private void loadFileCache(File fileCache, boolean needAnimate, boolean needBigOrig) {
         if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
             if (needAnimate) {
                 mIvReal.setAlpha(0);
@@ -263,28 +278,35 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }
-            mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
-                    new ImageGetterCallback() {
-                        @Override
-                        public void setImageToView(Bitmap bitmap) {
-                            mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
-                            mIvPreview.setVisibility(View.GONE);
-                            mIvReal.setVisibility(View.VISIBLE);
-                            mIvGif.setVisibility(View.GONE);
-                            mIvReal.setOnClickListener(mFinishClickListener);
-                        }
+            if (needBigOrig) {
+                mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
+                mIvPreview.setVisibility(View.GONE);
+                mIvReal.setVisibility(View.VISIBLE);
+                mIvGif.setVisibility(View.GONE);
+                mIvReal.setOnClickListener(mFinishClickListener);
+            } else {
+                mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
+                        new ImageGetterCallback() {
+                            @Override
+                            public void setImageToView(Bitmap bitmap) {
+                                mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                                mIvPreview.setVisibility(View.GONE);
+                                mIvReal.setVisibility(View.VISIBLE);
+                                mIvGif.setVisibility(View.GONE);
+                                mIvReal.setOnClickListener(mFinishClickListener);
+                            }
 
-                        @Override
-                        public void setProgress(long current, long total) {
+                            @Override
+                            public void setProgress(long current, long total) {
 
-                        }
+                            }
 
-                        @Override
-                        public void error(String imageUri, View view, Throwable cause) {
+                            @Override
+                            public void error(String imageUri, View view, Throwable cause) {
 
-                        }
-                    });
-
+                            }
+                        });
+            }
         } else {
             if (needAnimate) {
                 mIvGif.setAlpha(0f);
@@ -302,17 +324,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvTemp.setVisibility(View.GONE);
             mIvGif.setOnClickListener(mFinishClickListener);
         }
-//        mIvReal.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (!isAdded()) {
-//                    return;
-//                }
-//                mIvExit.setVisibility(View.GONE);
-//            }
-//        }, 250);
-        // 最后设置成不可见
-//        mIvExit.setVisibility(View.GONE);
     }
 
     /**
@@ -334,9 +345,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     @Nullable
     private Bitmap getPreviewBitmap() {
-        Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPreviewUrl);
+        Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPicInfo.previewUrl);
         if (previewBitmap == null) {
-            final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
+            final ImageView previewView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
             if (previewView != null) {
                 final Drawable drawable = previewView.getDrawable();
                 if (drawable != null && drawable instanceof BitmapDrawable) {
@@ -424,7 +435,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
-                mConfiguration.startGetImage(mUrl, new ImageGetterCallback() {
+                mConfiguration.startGetImage(mPicInfo.url, new ImageGetterCallback() {
                     @Override
                     public void setImageToView(Bitmap bitmap) {
                         subscriber.onNext(bitmap);
@@ -454,7 +465,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvTemp.setVisibility(View.VISIBLE);
                         mIvPreview.setVisibility(View.GONE);
                         mIvTemp.setImageBitmap(bitmap);
-                        final File diskCache = mConfiguration.getPicDiskCache(mUrl);
+                        final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (diskCache != null && diskCache.exists()) {
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
@@ -550,18 +561,13 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void downloadFullSize() {
-        final File diskCache = mConfiguration.getPicDiskCache(mUrl);
+        final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
         if (diskCache.exists()) {
             loadPicFromFile(diskCache);
             return;
         }
-        mIvReal.animate()
-                .alpha(0)
-                .setDuration(FADE_ANIMATE_DURATION)
-                .start();
-        mPb.setVisibility(View.VISIBLE);
         // 下载完成
-        mFullSizeSubscription = download(mUrl, diskCache)
+        mFullSizeSubscription = download(mPicInfo.origUrl, diskCache)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<Pair<Integer, File>>() {
@@ -569,7 +575,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     public void call(Pair<Integer, File> filePair) {
                         final int progress = filePair.first;
                         if (progress > 0) {
-                            mPb.setProgress(progress);
+                            if (progress != 100) {
+                                mTvOrig.setText(String.format("%d%%", progress));
+                            } else {
+                                mTvOrig.setVisibility(View.GONE);
+                            }
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -733,7 +743,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (drawable != null && drawable instanceof BitmapDrawable) {
             bitmap = ((BitmapDrawable) drawable).getBitmap();
         }
-        return mOnPictureLongClickListener.onLongClick(v, mUrl, bitmap);
+        return mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
     }
 
     public void setCallback(Callback callback) {
@@ -825,7 +835,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mActivityCallback == null) {
             return false;
         }
-        final ImageView previewView = mActivityCallback.getPreviewView(mPreviewUrl);
+        final ImageView previewView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
         if (previewView == null) {
             return false;
         }
@@ -942,10 +952,21 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mOnFinishListener = onFinishListener;
     }
 
+    private View.OnClickListener mViewOrig = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            downloadFullSize();
+        }
+    };
+
     private final View.OnClickListener mFinishClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             finish();
         }
     };
+
+    public void setPicInfo(PicInfo picInfo) {
+        mPicInfo = picInfo;
+    }
 }

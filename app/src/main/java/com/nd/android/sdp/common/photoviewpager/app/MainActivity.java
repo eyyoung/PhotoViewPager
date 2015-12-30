@@ -16,12 +16,12 @@ import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.iml.ImageLoaderIniter;
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements Callback, OnPictureLongClickListener, OnViewCreatedListener {
 
@@ -83,10 +83,18 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
     }
 
     public void toView(View view) {
+        ArrayList<PicInfo> picInfos = new ArrayList<>();
+        for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
+            PicInfo picInfo = new PicInfo(urls[i],
+                    preview_urls[i],
+                    null,
+                    110
+            );
+            picInfos.add(picInfo);
+        }
         final PhotoViewPagerFragment photoViewPagerFragment = PhotoViewPagerManager.start(this,
                 (ImageView) view,
-                new ArrayList<>(Arrays.asList(urls)),
-                new ArrayList<>(Arrays.asList(preview_urls)),
+                picInfos,
                 mIv == view ? 0 : 1,
                 this);
         photoViewPagerFragment.setOnPictureLongClickListener(this);

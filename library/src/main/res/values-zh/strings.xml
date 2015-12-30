@@ -2,4 +2,6 @@
 <resources>
     <string name="photo_viewpager_download_full_size">查看原图</string>
     <string name="photo_viewpager_download_failed">网络异常，获取失败</string>
+    <string name="photo_viewpager_view_origin">查看原图</string>
+    <string name="photo_viewpager_view_origin_with_size">查看原图(%s)</string>
 </resources>

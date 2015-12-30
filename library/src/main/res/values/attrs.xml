@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="SubsamplingScaleImageView">
-        <attr name="src" format="reference"/>
-        <attr name="assetName" format="string"/>
-        <attr name="panEnabled" format="boolean"/>
-        <attr name="zoomEnabled" format="boolean"/>
-        <attr name="quickScaleEnabled" format="boolean"/>
-        <attr name="tileBackgroundColor" format="color"/>
+    <declare-styleable name="photo_viewpager_SubsamplingScaleImageView">
+        <attr name="photo_viewpager_src" format="reference"/>
+        <attr name="photo_viewpager_assetName" format="string"/>
+        <attr name="photo_viewpager_panEnabled" format="boolean"/>
+        <attr name="photo_viewpager_zoomEnabled" format="boolean"/>
+        <attr name="photo_viewpager_quickScaleEnabled" format="boolean"/>
+        <attr name="photo_viewpager_tileBackgroundColor" format="color"/>
     </declare-styleable>
 
 </resources>

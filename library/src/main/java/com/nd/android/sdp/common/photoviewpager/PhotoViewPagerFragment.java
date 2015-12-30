@@ -5,10 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,20 +14,19 @@ import android.widget.ImageView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuItemClickListener, ViewPager.OnPageChangeListener {
+public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPageChangeListener {
 
     private List<ViewPager.OnPageChangeListener> mOnPageListeners = new ArrayList<>();
 
     /**
      * URL列表，支持本地路径与URL路径
      */
-    public static final String PARAM_URLS = "urls";
-
-    private static final String PARAM_PREVIEW_URLS = "preview_urls";
+    public static final String PARAM_PICINFOS = "picinfos";
     public static final String PARAM_TOP = "top";
     public static final String PARAM_LEFT = "left";
     public static final String PARAM_WIDTH = "width";
@@ -37,22 +34,20 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
     public static final String TAG_PHOTO = "tag_photo";
     private static final String PARAM_DEFAULT_POSITION = "default_position";
     private PhotoViewPager mVpPhoto;
-    private ArrayList<String> mImages;
+    private ArrayList<PicInfo> mImages;
     private Callback mCallback;
     private OnViewCreatedListener mOnViewCreatedListener;
     private OnFinishListener mOnFinishListener;
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
 
-    public static PhotoViewPagerFragment newInstance(ImageView imageView,
-                                                     ArrayList<String> urls,
-                                                     ArrayList<String> previewUrls,
-                                                     int defaultPosition,
-                                                     Callback callback) {
+    static PhotoViewPagerFragment newInstance(ImageView imageView,
+                                              ArrayList<PicInfo> picInfos,
+                                              int defaultPosition,
+                                              Callback callback) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
-        args.putStringArrayList(PARAM_URLS, urls);
-        args.putStringArrayList(PARAM_PREVIEW_URLS, previewUrls);
+        args.putParcelableArrayList(PARAM_PICINFOS, picInfos);
         int[] locations = new int[2];
         if (imageView != null) {
             imageView.getLocationOnScreen(locations);
@@ -117,8 +112,7 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         }
 
         final Bundle arguments = getArguments();
-        mImages = arguments.getStringArrayList(PARAM_URLS);
-        ArrayList<String> previewImgs = arguments.getStringArrayList(PARAM_PREVIEW_URLS);
+        mImages = arguments.getParcelableArrayList(PARAM_PICINFOS);
         final int defaultPosition = arguments.getInt(PARAM_DEFAULT_POSITION, 0);
 //        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
         mVpPhoto.setPageMargin(20);
@@ -126,7 +120,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
         // Use child fragment manager,prevent memory leak
         mVpPhoto.init(getChildFragmentManager(),
                 mImages,
-                previewImgs,
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
@@ -138,17 +131,6 @@ public class PhotoViewPagerFragment extends Fragment implements Toolbar.OnMenuIt
                 onPageSelected(defaultPosition);
             }
         });
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        int i = item.getItemId();
-        if (i == R.id.menu_download) {
-            final int currentItem = mVpPhoto.getCurrentItem();
-            final ViewPagerFragment fragment = mVpPhoto.getFragmentByPosition(currentItem);
-            fragment.downloadFullSize();
-        }
-        return false;
     }
 
     @Override

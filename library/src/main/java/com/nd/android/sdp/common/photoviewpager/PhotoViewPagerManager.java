@@ -5,6 +5,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.widget.ImageView;
 
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+
 import java.util.ArrayList;
 
 /**
@@ -27,21 +29,21 @@ public enum PhotoViewPagerManager {
     /**
      * Start
      *
-     * @param activity the context
+     * @param activity        the context
+     * @param imageView       the image view
+     * @param picInfos        the pic infos
+     * @param defaultPosition the default position
+     * @param callback        the callback
+     * @return the photo view pager fragment
      */
     @NonNull
     public static PhotoViewPagerFragment start(FragmentActivity activity,
                                                ImageView imageView,
-                                               ArrayList<String> urls,
-                                               ArrayList<String> previewUrls,
+                                               ArrayList<PicInfo> picInfos,
                                                int defaultPosition,
                                                Callback callback) {
-        if (urls.size() != previewUrls.size()) {
-            throw new IllegalArgumentException("Url and Preview size not same!");
-        }
         final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(imageView,
-                urls,
-                previewUrls,
+                picInfos,
                 defaultPosition,
                 callback);
         activity.getSupportFragmentManager()

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
 
@@ -25,8 +26,7 @@ import java.util.ArrayList;
  */
 class PhotoViewPager extends ViewPager {
 
-    private ArrayList<String> mUrls;
-    private ArrayList<String> mPreviewImgs;
+    private ArrayList<PicInfo> mPicInfos;
     private Bundle mArguments;
     private int mDefaultPosition;
     private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
@@ -49,17 +49,13 @@ class PhotoViewPager extends ViewPager {
         }
     }
 
-    public void init(FragmentManager fragmentManager, ArrayList<String> images,
-                     ArrayList<String> previewImgs,
-                     Bundle arguments, int defaultPosition) {
-        mUrls = images;
-        mPreviewImgs = previewImgs;
+    public void init(FragmentManager fragmentManager, ArrayList<PicInfo> images,
+            Bundle arguments, int defaultPosition) {
+        mPicInfos = images;
         mArguments = arguments;
         mDefaultPosition = defaultPosition;
-
         ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(fragmentManager);
         setAdapter(imagePagerAdapter);
-
         setCurrentItem(defaultPosition);
     }
 
@@ -91,10 +87,9 @@ class PhotoViewPager extends ViewPager {
             ViewPagerFragment fragment = ViewPagerFragment.newInstance(mArguments);
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
-            fragment.setUrl(mUrls.get(position));
+            fragment.setPicInfo(mPicInfos.get(position));
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
-            fragment.setPreviewUrl(mPreviewImgs.get(position));
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
@@ -111,7 +106,7 @@ class PhotoViewPager extends ViewPager {
 
         @Override
         public int getCount() {
-            return mUrls.size();
+            return mPicInfos.size();
         }
     }
 
