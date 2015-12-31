@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -29,7 +28,6 @@ import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -42,7 +40,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=960",
-            "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=960"
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960"
     };
 
     String[] preview_urls = new String[]{
@@ -52,7 +50,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=160",
-            "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=160"
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160"
     };
 
     String[] orig_urls = new String[]{
@@ -61,8 +59,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=160",
-            "http://betacs.101.com/v0.1/download?dentryId=7af9c790-09a0-464a-be45-5322bece6a04&size=160"
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0"
     };
 
     private ListView mLv;
@@ -72,14 +70,14 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Test");
-        final File[] files = file.listFiles();
-        urls = new String[files.length];
-        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
-            File f = files[i];
-            urls[i] = "file://" + f.getAbsolutePath();
-        }
-        preview_urls = urls;
+//        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Test");
+//        final File[] files = file.listFiles();
+//        urls = new String[files.length];
+//        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
+//            File f = files[i];
+//            urls[i] = "file://" + f.getAbsolutePath();
+//        }
+//        preview_urls = urls;
         mLv = ((ListView) findViewById(R.id.lv));
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         mLv.setAdapter(new DemoAdapter());
@@ -98,7 +96,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
             PicInfo picInfo = new PicInfo(urls[i],
                     preview_urls[i],
-                    null,
+                    orig_urls[i],
                     new Random().nextInt(10 * 1024 * 1024)
             );
             picInfos.add(picInfo);
@@ -114,13 +112,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public ImageView getPreviewView(String url) {
-//        final int childCount = mLv.getChildCount();
-//        for (int i = 0; i < childCount; i++) {
-//            final View iv = mLv.getChildAt(i);
-//            if (iv.getTag().equals(url)) {
-//                return (ImageView) iv;
-//            }
-//        }
+        final int childCount = mLv.getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View iv = mLv.getChildAt(i);
+            if (iv.getTag().equals(url)) {
+                return (ImageView) iv;
+            }
+        }
         return null;
     }
 

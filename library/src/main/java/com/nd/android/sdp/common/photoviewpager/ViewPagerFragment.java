@@ -29,6 +29,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
@@ -44,17 +45,18 @@ import com.nd.android.sdp.common.photoviewpager.widget.RevealImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.WidthEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
+import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 
-import okio.BufferedSink;
-import okio.Okio;
 import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.Subscriber;
@@ -158,9 +160,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         // 边框大小
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
         final boolean origAvailable = isOrigAvailable();
+        final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
         if (mNeedTransition) {
             mNeedTransition = false;
-            final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
             if (fileCache != null && fileCache.exists()) {
                 // 直接放大
                 animateToBigImage(fileCache, origAvailable);
@@ -563,7 +565,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     public void downloadFullSize() {
         final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
         if (diskCache.exists()) {
-            loadPicFromFile(diskCache);
+            loadFileCache(diskCache, false, true);
             return;
         }
         // 下载完成
@@ -573,7 +575,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 .subscribe(new Action1<Pair<Integer, File>>() {
                     @Override
                     public void call(Pair<Integer, File> filePair) {
-                        final int progress = filePair.first;
+                        final long progress = filePair.first;
                         if (progress > 0) {
                             if (progress != 100) {
                                 mTvOrig.setText(String.format("%d%%", progress));
@@ -585,13 +587,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        mPb.setVisibility(View.GONE);
+                        mTvOrig.setText(R.string.photo_viewpager_view_origin);
+                        Toast.makeText(getContext(), R.string.photo_viewpager_download_failed, Toast.LENGTH_SHORT).show();
                         throwable.printStackTrace();
                     }
                 }, new Action0() {
                     @Override
                     public void call() {
-                        loadPicFromFile(diskCache);
+                        mTvOrig.setVisibility(View.GONE);
+                        loadFileCache(diskCache, false, true);
                     }
                 });
     }
@@ -633,42 +637,57 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             public void call(final Subscriber<? super Pair<Integer, File>> subscriber) {
                                 Request request = new Request.Builder().url(url).build();
                                 final OkHttpClient okHttpClient = new OkHttpClient();
-                                okHttpClient.newCall(request).enqueue(new com.squareup.okhttp.Callback() {
-                                    @Override
-                                    public void onFailure(Request request, IOException e) {
-                                        subscriber.onError(e);
-                                    }
-
-                                    @Override
-                                    public void onResponse(Response response) throws IOException {
+                                Call call = okHttpClient.newCall(request);
+                                try {
+                                    Response response = call.execute();
+                                    if (response.code() == 200) {
+                                        InputStream inputStream = null;
+                                        OutputStream outputStream = null;
                                         try {
-                                            BufferedSink sink = Okio.buffer(Okio.sink(file));
-                                            final ResponseBody body = response.body();
-                                            final long size = sink.writeAll(body.source());
-                                            final String strLen = response.header("Content-Length");
-                                            long length;
-                                            try {
-                                                length = Long.parseLong(strLen);
-                                            } catch (NumberFormatException e) {
-                                                e.printStackTrace();
-                                                length = -1;
-                                            }
-                                            sink.close();
-                                            final int progress = (int) (size * 100 / length);
-                                            final Pair<Integer, File> filePair = new Pair<>(progress, file);
+                                            inputStream = response.body().byteStream();
+                                            outputStream = new FileOutputStream(file);
+                                            byte[] buff = new byte[1024 * 4];
+                                            long downloaded = 0;
+                                            long target = response.body().contentLength();
+                                            final Pair<Integer, File> filePair = new Pair<>(0, file);
                                             subscriber.onNext(filePair);
-                                            if (progress == 100) {
+                                            while (true) {
+                                                int readed = inputStream.read(buff);
+                                                if (readed == -1) {
+                                                    break;
+                                                }
+                                                downloaded += readed;
+                                                outputStream.write(buff, 0, readed);
+                                                final Pair<Integer, File> filePairProgress = new Pair<>(((int) (downloaded * 100 / target)), file);
+                                                subscriber.onNext(filePairProgress);
+                                            }
+                                            if (downloaded == target) {
+                                                outputStream.flush();
                                                 subscriber.onCompleted();
+                                            } else {
+                                                throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new Throwable("Http Error"), url));
                                             }
                                         } catch (IOException io) {
                                             throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(io, url));
+                                        } finally {
+                                            if (inputStream != null) {
+                                                inputStream.close();
+                                            }
+                                            if (outputStream != null) {
+                                                outputStream.close();
+                                            }
                                         }
+                                    } else {
+                                        throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new Throwable("Http Error"), url));
                                     }
-                                });
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(e, url));
+                                }
                             }
                         });
                     }
-                });
+                }).throttleLast(500, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -842,7 +861,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mIvGif.getVisibility() == View.VISIBLE) {
             return false;
         }
-        mScaleDuration = ((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));
+        mScaleDuration = Math.abs((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));
         if (mScaleDuration > MAX_EXIT_SCALEDURATION) {
             mScaleDuration = MAX_EXIT_SCALEDURATION;
         }
