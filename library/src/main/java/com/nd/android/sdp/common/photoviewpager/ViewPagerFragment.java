@@ -500,7 +500,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         mIvReal.setImage(source);
                                         mView.removeView(mIvPreview);
                                         mIvReal.setVisibility(View.VISIBLE);
-                                        mOrigScale = mIvReal.getScale();
                                         mIvReal.setOnClickListener(mFinishClickListener);
                                     }
                                 });
@@ -749,6 +748,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvExit.setVisibility(View.GONE);
         mIvPreview.setVisibility(View.GONE);
         mPbBigPic.setVisibility(View.GONE);
+        mOrigScale = mIvReal.getScale();
     }
 
     @Override
