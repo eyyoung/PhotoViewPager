@@ -102,6 +102,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
+    private boolean mIsAnimateBeginningEnd = false; // Determine begin animation is finished if not finished cannot close
     private OnFinishListener mOnFinishListener;
     private TextView mTvOrig;
     private PicInfo mPicInfo;
@@ -185,6 +186,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 animateToProgress();
             }
             mIsLoaded = true;
+        } else {
+            noAnimateInit();
         }
     }
 
@@ -284,6 +287,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .start();
             }
             if (needBigOrig) {
+                mIsAnimateBeginningEnd = true;
                 mPbBigPic.setVisibility(View.VISIBLE);
                 mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
                 mIvTemp.setVisibility(View.VISIBLE);
@@ -292,6 +296,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 mIvGif.setVisibility(View.GONE);
                 mIvReal.setOnClickListener(mFinishClickListener);
             } else {
+                mIsAnimateBeginningEnd = true;
                 mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
                         new ImageGetterCallback() {
                             @Override
@@ -347,7 +352,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvPreview.setDrawableRadius(mFrameSize / 2);
         Bitmap previewBitmap = getPreviewBitmap();
         mIvPreview.setImageBitmap(previewBitmap);
-        startGetImage();
     }
 
     @Nullable
@@ -439,6 +443,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void startGetImage() {
         initProgressPublishSubject();
+        mIsAnimateBeginningEnd = true;
         mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -496,6 +501,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         ImageSource source = origAvailable ?
                                                 ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
                                                 ImageSource.cachedBitmap(bitmap);
+                                        mIsAnimateBeginningEnd = true;
                                         mPbBigPic.setVisibility(View.VISIBLE);
                                         mIvReal.setImage(source);
                                         mView.removeView(mIvPreview);
@@ -609,33 +615,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     }
                 });
     }
-
-    private void loadPicFromFile(File diskCache) {
-        mIvReal.animate()
-                .alpha(1.0f)
-                .setDuration(FADE_ANIMATE_DURATION)
-                .start();
-        // 下载完成
-        mPb.setVisibility(View.GONE);
-        mConfiguration.startGetImage("file://" + diskCache.getAbsolutePath(),
-                new ImageGetterCallback() {
-                    @Override
-                    public void setImageToView(Bitmap bitmap) {
-                        mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
-                    }
-
-                    @Override
-                    public void setProgress(long current, long total) {
-
-                    }
-
-                    @Override
-                    public void error(String imageUri, View view, Throwable cause) {
-
-                    }
-                });
-    }
-
 
     public Observable<Pair<Integer, File>> download(final String url, final File file) {
         return Observable.just(url)
@@ -771,7 +750,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mView.requestFocus();
         mView.setOnKeyListener(this);
         if (!mIsLoaded) {
-            noAnimateInit();
+            startGetImage();
             mIsLoaded = true;
         }
     }
@@ -807,7 +786,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void finish() {
-        if (mIsAnimateFinishing) {
+        if (mIsAnimateFinishing
+                || !mIsAnimateBeginningEnd) {
             return;
         }
         // 还没加载完
