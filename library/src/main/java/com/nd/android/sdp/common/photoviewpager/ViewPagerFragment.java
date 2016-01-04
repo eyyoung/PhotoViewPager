@@ -102,7 +102,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
-    private boolean mIsAnimateBeginningEnd = false; // Determine begin animation is finished if not finished cannot close
     private OnFinishListener mOnFinishListener;
     private TextView mTvOrig;
     private PicInfo mPicInfo;
@@ -287,7 +286,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .start();
             }
             if (needBigOrig) {
-                mIsAnimateBeginningEnd = true;
                 mPbBigPic.setVisibility(View.VISIBLE);
                 mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
                 mIvTemp.setVisibility(View.VISIBLE);
@@ -296,7 +294,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 mIvGif.setVisibility(View.GONE);
                 mIvReal.setOnClickListener(mFinishClickListener);
             } else {
-                mIsAnimateBeginningEnd = true;
                 mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
                         new ImageGetterCallback() {
                             @Override
@@ -443,7 +440,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void startGetImage() {
         initProgressPublishSubject();
-        mIsAnimateBeginningEnd = true;
         mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
@@ -501,7 +497,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         ImageSource source = origAvailable ?
                                                 ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
                                                 ImageSource.cachedBitmap(bitmap);
-                                        mIsAnimateBeginningEnd = true;
                                         mPbBigPic.setVisibility(View.VISIBLE);
                                         mIvReal.setImage(source);
                                         mView.removeView(mIvPreview);
@@ -786,15 +781,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     public void finish() {
-        if (mIsAnimateFinishing
-                || !mIsAnimateBeginningEnd) {
+        if (mIsAnimateFinishing) {
             return;
         }
         // 还没加载完
-//        if (mIvGif.getVisibility() == View.GONE
-//                && !mIvReal.isReady()) {
-//            return;
-//        }
+        if (mIvGif.getVisibility() == View.GONE
+                && !mIvReal.isReady()) {
+            return;
+        }
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
