@@ -83,7 +83,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private RevealCircleImageView mIvPreview;
     private RevealImageView mIvTemp;
     private boolean mNeedTransition;
-    private Subscription mSubscription;
+    private Subscription mStartGetImageSubscription;
     private SubsamplingScaleImageView mIvReal;
     private Callback mActivityCallback;
     private float mOrigScale;
@@ -104,6 +104,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private OnFinishListener mOnFinishListener;
     private TextView mTvOrig;
     private PicInfo mPicInfo;
+    private boolean mIsLoaded;
 
     public ViewPagerFragment() {
     }
@@ -181,8 +182,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }
                 animateToProgress();
             }
-        } else {
-            noAnimateInit();
+            mIsLoaded = true;
         }
     }
 
@@ -282,6 +282,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             }
             if (needBigOrig) {
                 mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
+                mIvTemp.setVisibility(View.VISIBLE);
                 mIvPreview.setVisibility(View.GONE);
                 mIvReal.setVisibility(View.VISIBLE);
                 mIvGif.setVisibility(View.GONE);
@@ -434,13 +435,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void startGetImage() {
         initProgressPublishSubject();
-        mSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
+        mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(final Subscriber<? super Bitmap> subscriber) {
                 mConfiguration.startGetImage(mPicInfo.url, new ImageGetterCallback() {
                     @Override
                     public void setImageToView(Bitmap bitmap) {
                         subscriber.onNext(bitmap);
+                        subscriber.onCompleted();
                     }
 
                     @Override
@@ -486,7 +488,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         if (!isAdded()) {
                                             return;
                                         }
-                                        mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
+                                        final boolean origAvailable = isOrigAvailable();
+                                        ImageSource source = origAvailable ?
+                                                ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
+                                                ImageSource.cachedBitmap(bitmap);
+                                        mIvReal.setImage(source);
                                         mView.removeView(mIvPreview);
                                         mIvReal.setVisibility(View.VISIBLE);
                                         mOrigScale = mIvReal.getScale();
@@ -503,7 +509,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                 mIvGif.setOnClickListener(mFinishClickListener);
                             }
                         }
-                        mSubscription.unsubscribe();
+                        if (mBitmapProgressSubscription != null) {
+                            mBitmapProgressSubscription.unsubscribe();
+                        }
+                        mStartGetImageSubscription.unsubscribe();
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -513,9 +522,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }, new Action0() {
                     @Override
                     public void call() {
-                        if (mBitmapProgressSubscription != null) {
-                            mBitmapProgressSubscription.unsubscribe();
-                        }
                     }
                 });
 
@@ -540,8 +546,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-            mSubscription.unsubscribe();
+        if (mStartGetImageSubscription != null && !mStartGetImageSubscription.isUnsubscribed()) {
+            mStartGetImageSubscription.unsubscribe();
         }
         if (mBitmapProgressSubscription != null) {
             mBitmapProgressSubscription.unsubscribe();
@@ -644,12 +650,25 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         InputStream inputStream = null;
                                         OutputStream outputStream = null;
                                         try {
+                                            File tempFile = new File(file.getParent(), file.getName() + "_temp");
+                                            if (tempFile.exists()) {
+                                                final boolean delete = tempFile.delete();
+                                                if (!delete) {
+                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
+                                                }
+                                            }
+                                            if (file.exists()) {
+                                                final boolean delete = file.delete();
+                                                if (!delete) {
+                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
+                                                }
+                                            }
                                             inputStream = response.body().byteStream();
-                                            outputStream = new FileOutputStream(file);
+                                            outputStream = new FileOutputStream(tempFile);
                                             byte[] buff = new byte[1024 * 4];
                                             long downloaded = 0;
                                             long target = response.body().contentLength();
-                                            final Pair<Integer, File> filePair = new Pair<>(0, file);
+                                            final Pair<Integer, File> filePair = new Pair<>(0, tempFile);
                                             subscriber.onNext(filePair);
                                             while (true) {
                                                 int readed = inputStream.read(buff);
@@ -658,11 +677,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                                 }
                                                 downloaded += readed;
                                                 outputStream.write(buff, 0, readed);
-                                                final Pair<Integer, File> filePairProgress = new Pair<>(((int) (downloaded * 100 / target)), file);
+                                                final Pair<Integer, File> filePairProgress = new Pair<>(((int) (downloaded * 100 / target)), tempFile);
                                                 subscriber.onNext(filePairProgress);
                                             }
                                             if (downloaded == target) {
                                                 outputStream.flush();
+                                                final boolean result = tempFile.renameTo(file);
+                                                if (!result) {
+                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
+                                                }
                                                 subscriber.onCompleted();
                                             } else {
                                                 throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new Throwable("Http Error"), url));
@@ -741,6 +764,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mView.setFocusableInTouchMode(true);
         mView.requestFocus();
         mView.setOnKeyListener(this);
+        if (!mIsLoaded) {
+            noAnimateInit();
+            mIsLoaded = true;
+        }
     }
 
     @Override

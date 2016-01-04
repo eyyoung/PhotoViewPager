@@ -435,8 +435,7 @@ public class SubsamplingScaleImageView extends View {
                 if (uri == null && previewSource.getResource() != null) {
                     uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getContext().getPackageName() + "/" + previewSource.getResource());
                 }
-                BitmapLoadTask task = new BitmapLoadTask(this, getContext(), bitmapDecoderFactory, uri, true);
-                task.execute();
+                startBitmapLoad(this, getContext(), bitmapDecoderFactory, uri, true);
             }
         }
 
