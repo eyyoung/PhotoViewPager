@@ -98,6 +98,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private IPhotoViewPagerConfiguration mConfiguration;
     private TextView mTvError;
     private ImageView mIvExit;
+    private CircularProgressView mPbBigPic;
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
@@ -132,6 +133,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             return mView;
         }
         mPb = (CircularProgressView) mView.findViewById(R.id.pb);
+        mPbBigPic = (CircularProgressView) mView.findViewById(R.id.pbBigPic);
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
         mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
         mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
@@ -263,6 +265,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         mIvExit.setVisibility(View.VISIBLE);
         mIvExit.setScaleType(previewView.getScaleType());
+        mIvExit.setOnClickListener(mFinishClickListener);
         mIvExit.setImageBitmap(previewBitmap);
         mIvPreview.setVisibility(View.GONE);
         mIvGif.setVisibility(View.GONE);
@@ -281,6 +284,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .start();
             }
             if (needBigOrig) {
+                mPbBigPic.setVisibility(View.VISIBLE);
                 mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
                 mIvTemp.setVisibility(View.VISIBLE);
                 mIvPreview.setVisibility(View.GONE);
@@ -492,6 +496,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                         ImageSource source = origAvailable ?
                                                 ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
                                                 ImageSource.cachedBitmap(bitmap);
+                                        mPbBigPic.setVisibility(View.VISIBLE);
                                         mIvReal.setImage(source);
                                         mView.removeView(mIvPreview);
                                         mIvReal.setVisibility(View.VISIBLE);
@@ -743,6 +748,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvTemp.setVisibility(View.GONE);
         mIvExit.setVisibility(View.GONE);
         mIvPreview.setVisibility(View.GONE);
+        mPbBigPic.setVisibility(View.GONE);
     }
 
     @Override
@@ -805,10 +811,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             return;
         }
         // 还没加载完
-        if (mIvGif.getVisibility() == View.GONE
-                && !mIvReal.isReady()) {
-            return;
-        }
+//        if (mIvGif.getVisibility() == View.GONE
+//                && !mIvReal.isReady()) {
+//            return;
+//        }
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
