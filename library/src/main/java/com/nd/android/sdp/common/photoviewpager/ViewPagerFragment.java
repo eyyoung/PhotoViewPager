@@ -162,6 +162,18 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         // 边框大小
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
+        final ImageView imageView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
+        if (imageView != null) {
+            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPicInfo.previewUrl);
+            if (previewBitmap != null) {
+                Palette palette = Palette.from(previewBitmap).generate();
+                final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
+                if (lightVibrantSwatch != null) {
+                    mPb.setColor(lightVibrantSwatch.getRgb());
+                }
+                mIvPreview.setImageBitmap(previewBitmap);
+            }
+        }
         final boolean origAvailable = isOrigAvailable();
         final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
         if (mNeedTransition) {
@@ -170,18 +182,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 // 直接放大
                 animateToBigImage(fileCache, origAvailable);
             } else {
-                final ImageView imageView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
-                if (imageView != null) {
-                    final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPicInfo.previewUrl);
-                    if (previewBitmap != null) {
-                        Palette palette = Palette.from(previewBitmap).generate();
-                        final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
-                        if (lightVibrantSwatch != null) {
-                            mPb.setColor(lightVibrantSwatch.getRgb());
-                        }
-                        mIvPreview.setImageBitmap(previewBitmap);
-                    }
-                }
                 animateToProgress();
             }
             mIsLoaded = true;
