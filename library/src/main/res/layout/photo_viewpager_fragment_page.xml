@@ -70,16 +70,4 @@
         android:text="@string/photo_viewpager_view_origin"
         android:textSize="10dp"/>
 
-    <com.github.rahatarmanahmed.cpv.CircularProgressView
-        android:id="@+id/pbBigPic"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="72dp"
-        android:visibility="gone"
-        app:cpv_animAutostart="true"
-        app:cpv_indeterminate="true"
-        app:cpv_thickness="1dp"/>
-
 </RelativeLayout>
