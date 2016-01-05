@@ -34,6 +34,7 @@ class PhotoViewPager extends ViewPager {
     private View mBg;
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private OnFinishListener mOnFinishListener;
+    private OnClickListener mOnPictureClickListener;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -75,6 +76,10 @@ class PhotoViewPager extends ViewPager {
         mOnFinishListener = onFinishListener;
     }
 
+    public void setOnPictureClickListener(OnClickListener onPictureClickListener) {
+        mOnPictureClickListener = onPictureClickListener;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -90,6 +95,7 @@ class PhotoViewPager extends ViewPager {
             fragment.setPicInfo(mPicInfos.get(position));
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
+            fragment.setOnPictureClickListener(mOnPictureClickListener);
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();

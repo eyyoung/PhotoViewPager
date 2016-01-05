@@ -40,6 +40,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private OnFinishListener mOnFinishListener;
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private View.OnClickListener mOnPictureClickListener;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<PicInfo> picInfos,
@@ -125,6 +126,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mVpPhoto.setCallback(mCallback);
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
+        mVpPhoto.setOnPictureClickListener(mOnPictureClickListener);
         mVpPhoto.post(new Runnable() {
             @Override
             public void run() {
@@ -197,6 +199,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mOnPictureLongClickListener = onPictureLongClickListener;
     }
 
+    public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
+        mOnPictureClickListener = onPictureClickListener;
+    }
 
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;

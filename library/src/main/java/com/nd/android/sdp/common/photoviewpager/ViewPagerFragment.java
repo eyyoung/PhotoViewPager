@@ -107,6 +107,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private boolean mIsLoaded;
     private boolean mIsAreadyBigImage = false;
     private boolean mImageLoaded = false;
+    private View.OnClickListener mOnPictureClickListener;
 
     public ViewPagerFragment() {
     }
@@ -164,7 +165,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
         final ImageView imageView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
         if (imageView != null) {
-            final Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mPicInfo.previewUrl);
+            final Bitmap previewBitmap = getPreviewBitmap();
             if (previewBitmap != null) {
                 Palette palette = Palette.from(previewBitmap).generate();
                 final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
@@ -479,12 +480,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
                                 mIvGif.setVisibility(View.GONE);
                                 final boolean origAvailable = isOrigAvailable();
+                                mView.removeView(mIvPreview);
+                                mIvReal.setVisibility(View.VISIBLE);
                                 ImageSource source = origAvailable ?
                                         ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
                                         ImageSource.cachedBitmap(bitmap);
                                 mIvReal.setImage(source);
-                                mView.removeView(mIvPreview);
-                                mIvReal.setVisibility(View.VISIBLE);
                                 mIvReal.setOnClickListener(mFinishClickListener);
                             } else {
                                 mIvReal.setVisibility(View.GONE);
@@ -1010,11 +1011,19 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private final View.OnClickListener mFinishClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if (mOnPictureClickListener != null) {
+                mOnPictureClickListener.onClick(v);
+                return;
+            }
             finish();
         }
     };
 
     public void setPicInfo(PicInfo picInfo) {
         mPicInfo = picInfo;
+    }
+
+    public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
+        mOnPictureClickListener = onPictureClickListener;
     }
 }
