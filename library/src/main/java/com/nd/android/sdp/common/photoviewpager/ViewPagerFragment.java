@@ -428,6 +428,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 }, new Action0() {
                     @Override
                     public void call() {
+                        mPb.setIndeterminate(true);
                         mIvTemp.setVisibility(View.GONE);
 //                        mIvTemp.setImageBitmap(bitmap);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
@@ -571,6 +572,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     @Override
                     public void call() {
                         mTvOrig.setVisibility(View.GONE);
+                        mImageLoaded = false;
                         loadFileCache(diskCache, false);
                     }
                 });
@@ -666,6 +668,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mImageLoaded) {
             return;
         }
+        if (mIsAnimateFinishing) {
+            return;
+        }
         mImageLoaded = true;
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
@@ -711,6 +716,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             @Override
             public void onAnimationEnd(Animator animator) {
                 if (!isAdded()) {
+                    return;
+                }
+                if(mIsAnimateFinishing){
                     return;
                 }
                 mIvTemp.setVisibility(View.GONE);
