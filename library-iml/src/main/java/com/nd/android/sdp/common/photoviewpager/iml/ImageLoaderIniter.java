@@ -11,8 +11,9 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.utils.MemoryCacheUtils;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * ImageLoader 初始化器
@@ -28,11 +29,10 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
             return;
         }
         PhotoViewPagerManager.INSTANCE.init(this);
-        mMemoryCaches.add(ImageLoader.getInstance().getMemoryCache());
         mIsInited = true;
     }
 
-    private List<MemoryCache> mMemoryCaches = new ArrayList<>();
+    private Set<MemoryCache> mMemoryCaches = new HashSet<>();
 
     @Override
     public File getPicDiskCache(String url) {
@@ -42,6 +42,9 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
 
     @Override
     public Bitmap getPreviewBitmap(String url) {
+        if (!mMemoryCaches.contains(ImageLoader.getInstance().getMemoryCache())) {
+            mMemoryCaches.add(ImageLoader.getInstance().getMemoryCache());
+        }
         for (MemoryCache memoryCache : mMemoryCaches) {
             final Bitmap bitmapInMemoryCache = getBitmapInMemoryCache(url, memoryCache);
             if (bitmapInMemoryCache != null) {
