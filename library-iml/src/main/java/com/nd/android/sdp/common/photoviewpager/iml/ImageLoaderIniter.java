@@ -36,6 +36,9 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
 
     @Override
     public File getPicDiskCache(String url) {
+        if (url.startsWith("file://")) {
+            return new File(url.substring("file://".length()));
+        }
         final DiskCache diskCache = ImageLoader.getInstance().getDiskCache();
         return diskCache.get(url);
     }

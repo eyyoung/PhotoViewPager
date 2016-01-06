@@ -285,7 +285,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }
-            mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
+            mIvReal.setImage(ImageSource.uri(fileCache.getAbsolutePath()));
             mIvTemp.setVisibility(View.VISIBLE);
             mIvPreview.setVisibility(View.GONE);
             mIvReal.setVisibility(View.VISIBLE);
@@ -430,23 +430,22 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     public void call() {
                         mIvTemp.setVisibility(View.GONE);
 //                        mIvTemp.setImageBitmap(bitmap);
-                        final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
-                        if (diskCache != null && diskCache.exists()) {
-                            if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
+                        if (picDiskCache != null && picDiskCache.exists()) {
+                            if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
                                 mIvGif.setVisibility(View.GONE);
                                 final boolean origAvailable = isOrigAvailable();
                                 mView.removeView(mIvPreview);
                                 mIvReal.setVisibility(View.VISIBLE);
                                 ImageSource source = origAvailable ?
-                                        ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
-                                        ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.url)));
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
                                 mIvReal.setImage(source);
                                 mIvReal.setOnClickListener(mFinishClickListener);
                             } else {
                                 mIvReal.setVisibility(View.GONE);
                                 mIvGif.setVisibility(View.VISIBLE);
-                                mIvGif.setImageURI(Uri.fromFile(diskCache));
+                                mIvGif.setImageURI(Uri.fromFile(picDiskCache));
                                 mPb.setVisibility(View.GONE);
                                 mIvPreview.setVisibility(View.GONE);
                                 mView.removeView(mIvPreview);
