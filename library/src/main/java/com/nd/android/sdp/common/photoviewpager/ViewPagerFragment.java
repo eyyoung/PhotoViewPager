@@ -34,7 +34,6 @@ import android.widget.Toast;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
-import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -67,7 +66,6 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 
 public class ViewPagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
 
@@ -99,7 +97,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private TextView mTvError;
     private ImageView mIvExit;
     private OnPictureLongClickListener mOnPictureLongClickListener;
-    private Subscription mBitmapProgressSubscription;
     private boolean mIsAnimateFinishing = false;
     private OnFinishListener mOnFinishListener;
     private TextView mTvOrig;
@@ -182,7 +179,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             if (fileCache != null && fileCache.exists()
                     && fileCache.length() < 500 * 1024) {
                 // 直接放大
-                animateToBigImage(fileCache, origAvailable);
+                animateToBigImage(fileCache);
             } else {
                 animateToProgress();
             }
@@ -213,7 +210,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private void animateToBigImage(final File fileCache, final boolean origAvailable) {
+    private void animateToBigImage(final File fileCache) {
         mIsAreadyBigImage = true;
         mBg.setAlpha(0);
         mBg.animate()
@@ -223,12 +220,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 .start();
         final ImageView previewView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
         if (previewView == null) {
-            loadFileCache(fileCache, true, origAvailable);
+            loadFileCache(fileCache, true);
             return;
         }
         Bitmap previewBitmap = getPreviewBitmap();
         if (previewBitmap == null) {
-            loadFileCache(fileCache, true, origAvailable);
+            loadFileCache(fileCache, true);
             return;
         }
         final Bundle arguments = getArguments();
@@ -264,7 +261,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                loadFileCache(fileCache, false, origAvailable);
+                loadFileCache(fileCache, false);
             }
         });
         animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
@@ -278,7 +275,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mPb.setVisibility(View.GONE);
     }
 
-    private void loadFileCache(File fileCache, boolean needAnimate, boolean needBigOrig) {
+    private void loadFileCache(File fileCache, boolean needAnimate) {
         if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
             if (needAnimate) {
                 mIvReal.setAlpha(0);
@@ -288,36 +285,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         .setInterpolator(new AccelerateInterpolator())
                         .start();
             }
-            if (needBigOrig) {
-                mIvReal.setImage(ImageSource.uri(Uri.fromFile(fileCache)));
-                mIvTemp.setVisibility(View.VISIBLE);
-                mIvPreview.setVisibility(View.GONE);
-                mIvReal.setVisibility(View.VISIBLE);
-                mIvGif.setVisibility(View.GONE);
-                mIvReal.setOnClickListener(mFinishClickListener);
-            } else {
-                mConfiguration.startGetImage("file://" + fileCache.getAbsolutePath(),
-                        new ImageGetterCallback() {
-                            @Override
-                            public void setImageToView(Bitmap bitmap) {
-                                mIvReal.setImage(ImageSource.cachedBitmap(bitmap));
-                                mIvPreview.setVisibility(View.GONE);
-                                mIvReal.setVisibility(View.VISIBLE);
-                                mIvGif.setVisibility(View.GONE);
-                                mIvReal.setOnClickListener(mFinishClickListener);
-                            }
-
-                            @Override
-                            public void setProgress(long current, long total) {
-
-                            }
-
-                            @Override
-                            public void error(String imageUri, View view, Throwable cause) {
-
-                            }
-                        });
-            }
+            mIvReal.setImage(ImageSource.uri(fileCache.getAbsolutePath()));
+            mIvTemp.setVisibility(View.VISIBLE);
+            mIvPreview.setVisibility(View.GONE);
+            mIvReal.setVisibility(View.VISIBLE);
+            mIvGif.setVisibility(View.GONE);
+            mIvReal.setOnClickListener(mFinishClickListener);
         } else {
             if (needAnimate) {
                 mIvGif.setAlpha(0f);
@@ -417,80 +390,62 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         });
     }
 
-    private PublishSubject<Integer> mBitmapProgressSubject;
-
-    private void initProgressPublishSubject() {
-        mBitmapProgressSubject = PublishSubject.create();
-        mBitmapProgressSubscription = mBitmapProgressSubject
-                .throttleLast(1, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+    private void startGetImage() {
+        final File picDiskCache;
+        if (mPicInfo.url.startsWith("file://")) {
+            picDiskCache = new File(mPicInfo.url.substring("file://".length()));
+        } else {
+            picDiskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
+        }
+        mStartGetImageSubscription = Observable.just(picDiskCache)
+                .flatMap(new Func1<File, Observable<Pair<Integer, File>>>() {
                     @Override
-                    public void call(Integer integer) {
-                        if (integer > 0 && mPb.isIndeterminate()) {
+                    public Observable<Pair<Integer, File>> call(File file) {
+                        return picDiskCache.exists() ? Observable.just(new Pair<>(100, file))
+                                : download(mPicInfo.url, file);
+                    }
+                })
+                .throttleLast(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Pair<Integer, File>>() {
+                    @Override
+                    public void call(Pair<Integer, File> filePair) {
+                        if (filePair.first > 0 && mPb.isIndeterminate()) {
                             mPb.setIndeterminate(false);
                         }
-                        mPb.setProgress(integer);
+                        mPb.setProgress(filePair.first);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-
-                    }
-                });
-    }
-
-    private void startGetImage() {
-        initProgressPublishSubject();
-        mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
-            @Override
-            public void call(final Subscriber<? super Bitmap> subscriber) {
-                mConfiguration.startGetImage(mPicInfo.url, new ImageGetterCallback() {
-                    @Override
-                    public void setImageToView(Bitmap bitmap) {
-                        subscriber.onNext(bitmap);
-                        subscriber.onCompleted();
-                    }
-
-                    @Override
-                    public void setProgress(final long current, final long total) {
-                        final float currentProgress = ((float) current) / ((float) total) * 100;
-                        mBitmapProgressSubject.onNext((int) currentProgress);
-                    }
-
-                    @Override
-                    public void error(String imageUri, View view, Throwable cause) {
+                        throwable.printStackTrace();
                         mPb.setVisibility(View.GONE);
                         mTvError.setVisibility(View.VISIBLE);
                         mTvError.setOnLongClickListener(ViewPagerFragment.this);
                         mTvError.setOnClickListener(mFinishClickListener);
                     }
-                });
-            }
-        })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Bitmap>() {
+                }, new Action0() {
                     @Override
-                    public void call(final Bitmap bitmap) {
+                    public void call() {
                         mIvTemp.setVisibility(View.GONE);
 //                        mIvTemp.setImageBitmap(bitmap);
-                        final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
-                        if (diskCache != null && diskCache.exists()) {
-                            if (!Utils.isGifFile(diskCache.getAbsolutePath())) {
+                        if (picDiskCache != null && picDiskCache.exists()) {
+                            if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
                                 mIvGif.setVisibility(View.GONE);
                                 final boolean origAvailable = isOrigAvailable();
                                 mView.removeView(mIvPreview);
                                 mIvReal.setVisibility(View.VISIBLE);
                                 ImageSource source = origAvailable ?
-                                        ImageSource.uri(Uri.fromFile(mConfiguration.getPicDiskCache(mPicInfo.origUrl))) :
-                                        ImageSource.cachedBitmap(bitmap);
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
                                 mIvReal.setImage(source);
                                 mIvReal.setOnClickListener(mFinishClickListener);
                             } else {
                                 mIvReal.setVisibility(View.GONE);
                                 mIvGif.setVisibility(View.VISIBLE);
-                                mIvGif.setImageURI(Uri.fromFile(diskCache));
+                                mIvGif.setImageURI(Uri.fromFile(picDiskCache));
                                 mPb.setVisibility(View.GONE);
                                 mIvPreview.setVisibility(View.GONE);
                                 mView.removeView(mIvPreview);
@@ -499,22 +454,52 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                 mIvGif.setOnClickListener(mFinishClickListener);
                             }
                         }
-                        if (mBitmapProgressSubscription != null) {
-                            mBitmapProgressSubscription.unsubscribe();
-                        }
-                        mStartGetImageSubscription.unsubscribe();
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                    }
-                }, new Action0() {
-                    @Override
-                    public void call() {
                     }
                 });
 
+//        initProgressPublishSubject();
+//        mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
+//            @Override
+//            public void call(final Subscriber<? super Bitmap> subscriber) {
+//                mConfiguration.startGetImage(mPicInfo.url, new ImageGetterCallback() {
+//                    @Override
+//                    public void setImageToView(Bitmap bitmap) {
+//                        subscriber.onNext(bitmap);
+//                        subscriber.onCompleted();
+//                    }
+//
+//                    @Override
+//                    public void setProgress(final long current, final long total) {
+//                        final float currentProgress = ((float) current) / ((float) total) * 100;
+//                        mBitmapProgressSubject.onNext((int) currentProgress);
+//                    }
+//
+//                    @Override
+//                    public void error(String imageUri, View view, Throwable cause) {
+//                        mPb.setVisibility(View.GONE);
+//                        mTvError.setVisibility(View.VISIBLE);
+//                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
+//                        mTvError.setOnClickListener(mFinishClickListener);
+//                    }
+//                });
+//            }
+//        })
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Action1<Bitmap>() {
+//                    @Override
+//                    public void call(final Bitmap bitmap) {
+//
+//                    }
+//                }, new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                        throwable.printStackTrace();
+//                    }
+//                }, new Action0() {
+//                    @Override
+//                    public void call() {
+//                    }
+//                });
     }
 
     /**
@@ -536,11 +521,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mStartGetImageSubscription != null && !mStartGetImageSubscription.isUnsubscribed()) {
+        if (mStartGetImageSubscription != null
+                && !mStartGetImageSubscription.isUnsubscribed()) {
             mStartGetImageSubscription.unsubscribe();
-        }
-        if (mBitmapProgressSubscription != null) {
-            mBitmapProgressSubscription.unsubscribe();
         }
     }
 
@@ -560,10 +543,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void downloadFullSize() {
         final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
-        if (diskCache.exists()) {
-            startGetImage();
-            return;
-        }
         // 下载完成
         mTvOrig.setText(String.format("%d%%", 0));
         mFullSizeSubscription = download(mPicInfo.origUrl, diskCache)
@@ -592,7 +571,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     @Override
                     public void call() {
                         mTvOrig.setVisibility(View.GONE);
-                        loadFileCache(diskCache, false, true);
+                        loadFileCache(diskCache, false);
                     }
                 });
     }

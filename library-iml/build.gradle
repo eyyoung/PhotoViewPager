@@ -31,7 +31,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-//    compile 'com.nd.android.sdp.common:photoview:0.1.50'
+//    compile 'com.nd.android.sdp.common:photoview:' + rootProject.ext.module_version
     compile project(":library")
     compile('com.nostra13.universalimageloader:universal-image-loader:1.9.3_r9.1@aar') {
         transitive = true

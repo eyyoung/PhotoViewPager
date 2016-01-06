@@ -2,21 +2,11 @@ package com.nd.android.sdp.common.photoviewpager;
 
 import android.graphics.Bitmap;
 
-import com.nd.android.sdp.common.photoviewpager.getter.ImageGetterCallback;
-
 import java.io.File;
 
 /**
  */
 public interface IPhotoViewPagerConfiguration {
-
-    /**
-     * 获取图片
-     *
-     * @param url                 url
-     * @param imageGetterCallback 回调通知
-     */
-    void startGetImage(String url, ImageGetterCallback imageGetterCallback);
 
     /**
      * 获取指定Url的磁盘缓存
