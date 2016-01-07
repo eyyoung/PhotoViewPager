@@ -121,7 +121,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
+        if (mConfiguration == null) {
+            mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
+        }
     }
 
     @Override
@@ -718,7 +720,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 if (!isAdded()) {
                     return;
                 }
-                if(mIsAnimateFinishing){
+                if (mIsAnimateFinishing) {
                     return;
                 }
                 mIvTemp.setVisibility(View.GONE);
@@ -1012,5 +1014,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
         mOnPictureClickListener = onPictureClickListener;
+    }
+
+    public void setConfiguration(IPhotoViewPagerConfiguration configuration) {
+        mConfiguration = configuration;
+        if (mConfiguration == null) {
+            mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
+        }
     }
 }

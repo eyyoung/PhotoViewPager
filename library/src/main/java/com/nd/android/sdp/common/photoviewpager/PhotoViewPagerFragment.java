@@ -41,11 +41,13 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private View.OnClickListener mOnPictureClickListener;
+    private IPhotoViewPagerConfiguration mConfiguration;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<PicInfo> picInfos,
                                               int defaultPosition,
-                                              Callback callback) {
+                                              Callback callback,
+                                              IPhotoViewPagerConfiguration configuration) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
         args.putParcelableArrayList(PARAM_PICINFOS, picInfos);
@@ -59,8 +61,13 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
         }
         fragment.setCallbacks(callback);
+        fragment.setConfiguration(configuration);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void setConfiguration(IPhotoViewPagerConfiguration configuration) {
+        mConfiguration = configuration;
     }
 
     private void setCallbacks(Callback callback) {
@@ -127,6 +134,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
         mVpPhoto.setOnPictureClickListener(mOnPictureClickListener);
+        mVpPhoto.setConfigration(mConfiguration);
         mVpPhoto.post(new Runnable() {
             @Override
             public void run() {

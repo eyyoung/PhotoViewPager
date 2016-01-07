@@ -1,6 +1,7 @@
 package com.nd.android.sdp.common.photoviewpager;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.widget.ImageView;
@@ -42,10 +43,33 @@ public enum PhotoViewPagerManager {
                                                ArrayList<PicInfo> picInfos,
                                                int defaultPosition,
                                                Callback callback) {
+        return start(activity, imageView, picInfos, defaultPosition, callback, null);
+    }
+
+    /**
+     * Start
+     *
+     * @param activity                    the context
+     * @param imageView                   the image view
+     * @param picInfos                    the pic infos
+     * @param defaultPosition             the default position
+     * @param callback                    the callback
+     * @param photoViewPagerConfiguration Configuration
+     * @return the photo view pager fragment
+     */
+    @NonNull
+    public static PhotoViewPagerFragment start(FragmentActivity activity,
+                                               ImageView imageView,
+                                               ArrayList<PicInfo> picInfos,
+                                               int defaultPosition,
+                                               Callback callback,
+                                               @Nullable
+                                               IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
         final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(imageView,
                 picInfos,
                 defaultPosition,
-                callback);
+                callback,
+                photoViewPagerConfiguration);
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .add(Window.ID_ANDROID_CONTENT, fragment, PhotoViewPagerFragment.TAG_PHOTO)
