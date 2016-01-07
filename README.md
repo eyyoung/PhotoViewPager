@@ -22,7 +22,7 @@ PhotoViewPager
 Gradle依赖
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile("com.nd.android.sdp.common:photoview:0.3.76") {
+compile("com.nd.android.sdp.common:photoview:0.x.x") {
     transitive = true
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
