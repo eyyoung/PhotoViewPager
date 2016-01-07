@@ -39,9 +39,12 @@ public enum PhotoViewPagerManager {
      */
     @NonNull
     public static PhotoViewPagerFragment start(FragmentActivity activity,
+                                               @Nullable
                                                ImageView imageView,
+                                               @NonNull
                                                ArrayList<PicInfo> picInfos,
                                                int defaultPosition,
+                                               @Nullable
                                                Callback callback) {
         return start(activity, imageView, picInfos, defaultPosition, callback, null);
     }
@@ -59,12 +62,23 @@ public enum PhotoViewPagerManager {
      */
     @NonNull
     public static PhotoViewPagerFragment start(FragmentActivity activity,
+                                               @Nullable
                                                ImageView imageView,
-                                               ArrayList<PicInfo> picInfos,
+                                               @NonNull
+                                                   ArrayList<PicInfo> picInfos,
                                                int defaultPosition,
+                                               @Nullable
                                                Callback callback,
                                                @Nullable
                                                IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
+        if (callback == null) {
+            callback = new Callback() {
+                @Override
+                public ImageView getPreviewView(String url) {
+                    return null;
+                }
+            };
+        }
         final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(imageView,
                 picInfos,
                 defaultPosition,
