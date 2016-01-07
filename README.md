@@ -21,12 +21,15 @@ PhotoViewPager
 
 -   支持GIF动态图片
 
--   支持自定义增加界面新功能
+-   支持自定义增加界面新功能  
 
+ 
 
-<video src="http://git.sdp.nd/im-component/photoviewpager/raw/origin_pic/demo/demo.mp4" controls="controls">
-您的浏览器不支持 video 标签。
-</video>
+Demo
+----
+
+![](<http://git.sdp.nd/im-component/photoviewpager/raw/origin_pic/demo/demo.gif>)
+
  
 
 Gradle依赖
