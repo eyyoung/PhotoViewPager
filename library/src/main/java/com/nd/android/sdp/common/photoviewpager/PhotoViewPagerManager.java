@@ -32,6 +32,38 @@ public enum PhotoViewPagerManager {
      *
      * @param activity        the context
      * @param imageView       the image view
+     * @param defaultPosition the default position
+     * @param callback        the callback
+     * @return the photo view pager fragment
+     */
+    @NonNull
+    @Deprecated
+    public static PhotoViewPagerFragment start(FragmentActivity activity,
+                                               @Nullable
+                                               ImageView imageView,
+                                               @NonNull
+                                               ArrayList<String> picList,
+                                               ArrayList<String> previewList,
+                                               int defaultPosition,
+                                               @Nullable
+                                               Callback callback) {
+        if (picList.size() != previewList.size()) {
+            throw new IllegalArgumentException("Url and Preview size not same!");
+        }
+        ArrayList<PicInfo> picInfos = new ArrayList<>();
+        for (int i = 0, picListSize = picList.size(); i < picListSize; i++) {
+            String url = picList.get(i);
+            PicInfo picInfo = new PicInfo(url, picList.get(i), null, 0);
+            picInfos.add(picInfo);
+        }
+        return start(activity, imageView, picInfos, defaultPosition, callback, null);
+    }
+
+    /**
+     * Start
+     *
+     * @param activity        the context
+     * @param imageView       the image view
      * @param picInfos        the pic infos
      * @param defaultPosition the default position
      * @param callback        the callback
