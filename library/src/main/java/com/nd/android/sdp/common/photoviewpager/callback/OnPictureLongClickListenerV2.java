@@ -1,23 +1,23 @@
 package com.nd.android.sdp.common.photoviewpager.callback;
 
-import android.graphics.Bitmap;
 import android.view.View;
+
+import java.io.File;
 
 /**
  * Created by Administrator on 2015/12/23.
  */
-@Deprecated
-public interface OnPictureLongClickListener {
+public interface OnPictureLongClickListenerV2 {
 
     /**
      * 长按图片事件
      *
-     * @param v      长按控件
-     * @param mUrl   url
-     * @param bitmap 图片
+     * @param v     长按控件
+     * @param mUrl  url
+     * @param cache 图片缓存
      * @return 是否处理
      */
     boolean onLongClick(View v, String mUrl,
-                        Bitmap bitmap);
+                        File cache);
 
 }

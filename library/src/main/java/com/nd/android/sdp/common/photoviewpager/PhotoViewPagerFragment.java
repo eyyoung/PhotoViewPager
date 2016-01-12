@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
@@ -40,6 +41,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private OnFinishListener mOnFinishListener;
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
     private View.OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
 
@@ -131,6 +133,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
+        mVpPhoto.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
         mVpPhoto.setOnPictureClickListener(mOnPictureClickListener);
@@ -205,6 +208,10 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
+    public void setOnPictureLongClickListenerV2(OnPictureLongClickListenerV2 onPictureLongClickListenerV2) {
+        mOnPictureLongClickListenerV2 = onPictureLongClickListenerV2;
     }
 
     public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {

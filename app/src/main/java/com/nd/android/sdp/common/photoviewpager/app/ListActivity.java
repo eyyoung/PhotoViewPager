@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,13 @@ import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -116,6 +119,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
                 this);
         mPhotoViewPagerFragment.setOnViewCreatedListener(this);
         mPhotoViewPagerFragment.setOnFinishListener(this);
+        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(new OnPictureLongClickListenerV2() {
+            @Override
+            public boolean onLongClick(View v, String mUrl, File cache) {
+                Log.d("ListActivity", "cache:" + cache);
+                return true;
+            }
+        });
         mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
     }
 

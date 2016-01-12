@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ class PhotoViewPager extends ViewPager {
     private Callback mCallback;
     private View mBg;
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
     private OnFinishListener mOnFinishListener;
     private OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
@@ -73,6 +75,10 @@ class PhotoViewPager extends ViewPager {
         mOnPictureLongClickListener = onPictureLongClickListener;
     }
 
+    public void setOnPictureLongClickListenerV2(OnPictureLongClickListenerV2 onPictureLongClickListenerV2) {
+        mOnPictureLongClickListenerV2 = onPictureLongClickListenerV2;
+    }
+
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;
     }
@@ -102,6 +108,7 @@ class PhotoViewPager extends ViewPager {
             fragment.setCallback(mCallback);
             fragment.setOnPictureClickListener(mOnPictureClickListener);
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
+            fragment.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
             fragment.setConfiguration(mConfiguration);
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
