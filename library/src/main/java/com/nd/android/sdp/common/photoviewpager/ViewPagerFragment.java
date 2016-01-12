@@ -775,8 +775,13 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (drawable != null && drawable instanceof BitmapDrawable) {
             bitmap = ((BitmapDrawable) drawable).getBitmap();
         }
-        mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
-        return mOnPictureLongClickListenerV2.onLongClick(v, mPicInfo.url, mConfiguration.getPicDiskCache(mPicInfo.url));
+        if(mOnPictureLongClickListener!=null) {
+            mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
+        }
+        if(mOnPictureLongClickListenerV2!=null){
+            return mOnPictureLongClickListenerV2.onLongClick(v, mPicInfo.url, mConfiguration.getPicDiskCache(mPicInfo.url));
+        }
+        return false;
     }
 
     public void setCallback(Callback callback) {
