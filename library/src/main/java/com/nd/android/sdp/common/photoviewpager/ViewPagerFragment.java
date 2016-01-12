@@ -6,8 +6,12 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,10 +26,15 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
+import android.view.ViewStub;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,24 +53,14 @@ import com.nd.android.sdp.common.photoviewpager.widget.RevealImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.WidthEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 
 import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.exceptions.OnErrorThrowable;
 import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -105,6 +104,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private boolean mIsAreadyBigImage = false;
     private boolean mImageLoaded = false;
     private View.OnClickListener mOnPictureClickListener;
+    private ViewStub mVideoStub;
+    private TextureView mVideoView;
+    private View mBtnPlay;
+    private MediaPlayer mMediaPlayer;
 
     public ViewPagerFragment() {
     }
@@ -141,6 +144,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
         mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
         mTvOrig = ((TextView) mView.findViewById(R.id.tvOrig));
+        mVideoStub = ((ViewStub) mView.findViewById(R.id.vstubVideo));
         mFlPreview = mView.findViewById(R.id.flPreview);
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;
@@ -404,7 +408,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     @Override
                     public Observable<Pair<Integer, File>> call(File file) {
                         return picDiskCache.exists() ? Observable.just(new Pair<>(100, file))
-                                : download(mPicInfo.url, file);
+                                : Utils.download(mPicInfo.url, file);
                     }
                 })
                 .throttleLast(1, TimeUnit.SECONDS)
@@ -435,74 +439,33 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 //                        mIvTemp.setImageBitmap(bitmap);
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (picDiskCache != null && picDiskCache.exists()) {
-                            if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
-                                mIvGif.setVisibility(View.GONE);
-                                final boolean origAvailable = isOrigAvailable();
-                                mView.removeView(mIvPreview);
-                                mIvReal.setVisibility(View.VISIBLE);
-                                ImageSource source = origAvailable ?
-                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
-                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
-                                mIvReal.setImage(source);
-                                mIvReal.setOnClickListener(mFinishClickListener);
+                            if (mPicInfo.isVideo) {
+                                initVideo(picDiskCache);
                             } else {
-                                mIvReal.setVisibility(View.GONE);
-                                mIvGif.setVisibility(View.VISIBLE);
-                                mIvGif.setImageURI(Uri.fromFile(picDiskCache));
-                                mPb.setVisibility(View.GONE);
-                                mIvPreview.setVisibility(View.GONE);
-                                mView.removeView(mIvPreview);
-                                mIvTemp.setVisibility(View.GONE);
-                                mIvExit.setVisibility(View.GONE);
-                                mIvGif.setOnClickListener(mFinishClickListener);
+                                if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
+                                    mIvGif.setVisibility(View.GONE);
+                                    final boolean origAvailable = isOrigAvailable();
+                                    mIvReal.setVisibility(View.VISIBLE);
+                                    ImageSource source = origAvailable ?
+                                            ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
+                                            ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
+                                    mIvReal.setImage(source);
+                                    mIvReal.setOnClickListener(mFinishClickListener);
+                                } else {
+                                    mIvReal.setVisibility(View.GONE);
+                                    mIvGif.setVisibility(View.VISIBLE);
+                                    mIvGif.setImageURI(Uri.fromFile(picDiskCache));
+                                    mPb.setVisibility(View.GONE);
+                                    mView.removeView(mIvPreview);
+                                    mIvPreview.setVisibility(View.GONE);
+                                    mIvTemp.setVisibility(View.GONE);
+                                    mIvExit.setVisibility(View.GONE);
+                                    mIvGif.setOnClickListener(mFinishClickListener);
+                                }
                             }
                         }
                     }
                 });
-
-//        initProgressPublishSubject();
-//        mStartGetImageSubscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
-//            @Override
-//            public void call(final Subscriber<? super Bitmap> subscriber) {
-//                mConfiguration.startGetImage(mPicInfo.url, new ImageGetterCallback() {
-//                    @Override
-//                    public void setImageToView(Bitmap bitmap) {
-//                        subscriber.onNext(bitmap);
-//                        subscriber.onCompleted();
-//                    }
-//
-//                    @Override
-//                    public void setProgress(final long current, final long total) {
-//                        final float currentProgress = ((float) current) / ((float) total) * 100;
-//                        mBitmapProgressSubject.onNext((int) currentProgress);
-//                    }
-//
-//                    @Override
-//                    public void error(String imageUri, View view, Throwable cause) {
-//                        mPb.setVisibility(View.GONE);
-//                        mTvError.setVisibility(View.VISIBLE);
-//                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
-//                        mTvError.setOnClickListener(mFinishClickListener);
-//                    }
-//                });
-//            }
-//        })
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Action1<Bitmap>() {
-//                    @Override
-//                    public void call(final Bitmap bitmap) {
-//
-//                    }
-//                }, new Action1<Throwable>() {
-//                    @Override
-//                    public void call(Throwable throwable) {
-//                        throwable.printStackTrace();
-//                    }
-//                }, new Action0() {
-//                    @Override
-//                    public void call() {
-//                    }
-//                });
     }
 
     /**
@@ -548,7 +511,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
         // 下载完成
         mTvOrig.setText(String.format("%d%%", 0));
-        mFullSizeSubscription = download(mPicInfo.origUrl, diskCache)
+        mFullSizeSubscription = Utils.download(mPicInfo.origUrl, diskCache)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<Pair<Integer, File>>() {
@@ -578,86 +541,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         loadFileCache(diskCache, false);
                     }
                 });
-    }
-
-    public Observable<Pair<Integer, File>> download(final String url, final File file) {
-        return Observable.just(url)
-                .flatMap(new Func1<String, Observable<Pair<Integer, File>>>() {
-                    @Override
-                    public Observable<Pair<Integer, File>> call(String s) {
-                        return Observable.create(new Observable.OnSubscribe<Pair<Integer, File>>() {
-                            @Override
-                            public void call(final Subscriber<? super Pair<Integer, File>> subscriber) {
-                                Request request = new Request.Builder().url(url).build();
-                                final OkHttpClient okHttpClient = new OkHttpClient();
-                                Call call = okHttpClient.newCall(request);
-                                try {
-                                    Response response = call.execute();
-                                    if (response.code() == 200) {
-                                        InputStream inputStream = null;
-                                        OutputStream outputStream = null;
-                                        try {
-                                            File tempFile = new File(file.getParent(), file.getName() + "_temp");
-                                            if (tempFile.exists()) {
-                                                final boolean delete = tempFile.delete();
-                                                if (!delete) {
-                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
-                                                }
-                                            }
-                                            if (file.exists()) {
-                                                final boolean delete = file.delete();
-                                                if (!delete) {
-                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
-                                                }
-                                            }
-                                            inputStream = response.body().byteStream();
-                                            outputStream = new FileOutputStream(tempFile);
-                                            byte[] buff = new byte[1024 * 4];
-                                            long downloaded = 0;
-                                            long target = response.body().contentLength();
-                                            final Pair<Integer, File> filePair = new Pair<>(0, tempFile);
-                                            subscriber.onNext(filePair);
-                                            while (true) {
-                                                int readed = inputStream.read(buff);
-                                                if (readed == -1) {
-                                                    break;
-                                                }
-                                                downloaded += readed;
-                                                outputStream.write(buff, 0, readed);
-                                                final Pair<Integer, File> filePairProgress = new Pair<>(((int) (downloaded * 100 / target)), tempFile);
-                                                subscriber.onNext(filePairProgress);
-                                            }
-                                            if (downloaded == target) {
-                                                outputStream.flush();
-                                                final boolean result = tempFile.renameTo(file);
-                                                if (!result) {
-                                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new IOException(), url));
-                                                }
-                                                subscriber.onCompleted();
-                                            } else {
-                                                throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new Throwable("Http Error"), url));
-                                            }
-                                        } catch (IOException io) {
-                                            throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(io, url));
-                                        } finally {
-                                            if (inputStream != null) {
-                                                inputStream.close();
-                                            }
-                                            if (outputStream != null) {
-                                                outputStream.close();
-                                            }
-                                        }
-                                    } else {
-                                        throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(new Throwable("Http Error"), url));
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(e, url));
-                                }
-                            }
-                        });
-                    }
-                }).throttleLast(500, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -815,10 +698,17 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             animator1.start();
         } else {
             ViewPropertyAnimator animate;
-            if (mIvGif.getVisibility() == View.GONE) {
+            if (mIvGif.getVisibility() == View.VISIBLE) {
+                animate = mIvGif.animate();
+            } else if (mIvReal.getVisibility() == View.VISIBLE) {
                 animate = mIvReal.animate();
             } else {
-                animate = mIvGif.animate();
+                animate = mVideoView.animate();
+                mBtnPlay.animate()
+                        .alpha(0f)
+                        .setInterpolator(new AccelerateInterpolator())
+                        .setDuration(FADE_ANIMATE_DURATION)
+                        .start();
             }
             mIvExit.setVisibility(View.GONE);
             animate
@@ -1021,5 +911,117 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mConfiguration == null) {
             mConfiguration = PhotoViewPagerManager.INSTANCE.getConfiguration();
         }
+    }
+
+    private void initVideo(final File picDiskCache) {
+        mIvTemp.setVisibility(View.GONE);
+        mIvExit.setVisibility(View.GONE);
+        mIvGif.setVisibility(View.GONE);
+        mIvReal.setVisibility(View.GONE);
+        final View videoView = mVideoStub.inflate();
+        mVideoView = ((TextureView) videoView.findViewById(R.id.vd));
+        mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                Surface s = new Surface(surface);
+                try {
+                    mMediaPlayer = new MediaPlayer();
+                    mMediaPlayer.setDataSource(getContext(), Uri.fromFile(picDiskCache));
+                    mMediaPlayer.setSurface(s);
+                    mMediaPlayer.prepare();
+                    mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                        @Override
+                        public void onVideoSizeChanged(MediaPlayer mp, int videoWidth, int videoHeight) {
+                            double aspectRatio = (double) videoHeight / videoWidth;
+                            int newWidth, newHeight;
+                            final int viewHeight = mView.getHeight();
+                            final int viewWidth = mView.getWidth();
+                            if (viewHeight > (int) (viewWidth * aspectRatio)) {
+                                // limited by narrow width; restrict height
+                                newWidth = viewWidth;
+                                newHeight = (int) (viewWidth * aspectRatio);
+                            } else {
+                                // limited by short height; restrict width
+                                newWidth = (int) (viewHeight / aspectRatio);
+                                newHeight = viewHeight;
+                            }
+                            int xoff = (viewWidth - newWidth) / 2;
+                            int yoff = (viewHeight - newHeight) / 2;
+                            Matrix txform = new Matrix();
+                            txform.setScale((float) newWidth / viewWidth, (float) newHeight / viewHeight);
+                            txform.postTranslate(xoff, yoff);
+                            mVideoView.setTransform(txform);
+                        }
+                    });
+                    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mBtnPlay.setVisibility(View.VISIBLE);
+                        }
+                    });
+                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0);
+                    fadeOutAnimation.setDuration(FADE_ANIMATE_DURATION);
+                    fadeOutAnimation.setInterpolator(new AccelerateInterpolator());
+                    mPb.startAnimation(fadeOutAnimation);
+                    mIvPreview.startAnimation(fadeOutAnimation);
+                    mVideoView.setVisibility(View.GONE);
+                    fadeOutAnimation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            mIvPreview.setVisibility(View.GONE);
+                            mPb.setVisibility(View.GONE);
+                            mVideoView.setVisibility(View.VISIBLE);
+                            mBtnPlay.setVisibility(View.VISIBLE);
+                            AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
+                            fadeInAnimation.setDuration(FADE_ANIMATE_DURATION);
+                            fadeInAnimation.setInterpolator(new AccelerateInterpolator());
+                            mVideoView.startAnimation(fadeInAnimation);
+                            mBtnPlay.startAnimation(fadeInAnimation);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+            }
+        });
+        mBtnPlay = videoView.findViewById(R.id.btnPlay);
+        mBtnPlay.setVisibility(View.GONE);
+        mBtnPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mMediaPlayer.isPlaying()) {
+                    v.setVisibility(View.GONE);
+                    mMediaPlayer.start();
+                }
+            }
+        });
+        mVideoView.setFocusable(false);
+        mVideoView.setFocusableInTouchMode(false);
+        mView.requestFocus();
     }
 }

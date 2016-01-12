@@ -3,7 +3,6 @@ package com.nd.android.sdp.common.photoviewpager.app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -14,8 +13,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
@@ -110,6 +107,14 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             );
             picInfos.add(picInfo);
         }
+        final String videoPath = "file:///storage/emulated/0/ddmsrec.mp4";
+        PicInfo picInfo = new PicInfo(videoPath,
+                videoPath,
+                videoPath,
+                10 * 1024 * 1024,
+                true
+        );
+        picInfos.add(picInfo);
         mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
                 (ImageView) view, picInfos,
                 position,
@@ -140,13 +145,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onViewCreated(View view) {
-        final RelativeLayout relativeLayout = (RelativeLayout) view;
-        final TextView textView = new TextView(this);
-        textView.setText("EXIT");
-        textView.setTextColor(Color.WHITE);
-        textView.setPadding(20, 20, 0, 0);
-        textView.setOnClickListener(this);
-        relativeLayout.addView(textView);
+//        final RelativeLayout relativeLayout = (RelativeLayout) view;
+//        final TextView textView = new TextView(this);
+//        textView.setText("EXIT");
+//        textView.setTextColor(Color.WHITE);
+//        textView.setPadding(20, 20, 0, 0);
+//        textView.setOnClickListener(this);
+//        relativeLayout.addView(textView);
     }
 
     @Override
