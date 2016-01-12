@@ -98,8 +98,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             return;
         }
         init();
-
-        mOnViewCreatedListener.onViewCreated(view);
+        if (mOnViewCreatedListener != null) {
+            mOnViewCreatedListener.onViewCreated(view);
+        }
     }
 
     @Nullable
