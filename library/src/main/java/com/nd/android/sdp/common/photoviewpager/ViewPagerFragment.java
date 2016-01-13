@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -96,6 +97,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private TextView mTvError;
     private ImageView mIvExit;
     private OnPictureLongClickListener mOnPictureLongClickListener;
+    private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
     private boolean mIsAnimateFinishing = false;
     private OnFinishListener mOnFinishListener;
     private TextView mTvOrig;
@@ -648,15 +650,18 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     @Override
     public boolean onLongClick(View v) {
-        if (mOnPictureLongClickListener == null) {
-            return false;
+        if (mOnPictureLongClickListener != null) {
+            Bitmap bitmap = null;
+            final Drawable drawable = mIvTemp.getDrawable();
+            if (drawable != null && drawable instanceof BitmapDrawable) {
+                bitmap = ((BitmapDrawable) drawable).getBitmap();
+            }
+            mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
         }
-        Bitmap bitmap = null;
-        final Drawable drawable = mIvTemp.getDrawable();
-        if (drawable != null && drawable instanceof BitmapDrawable) {
-            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        if (mOnPictureLongClickListenerV2 != null) {
+            return mOnPictureLongClickListenerV2.onLongClick(v, mPicInfo.url, mConfiguration.getPicDiskCache(mPicInfo.url));
         }
-        return mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
+        return false;
     }
 
     public void setCallback(Callback callback) {
@@ -871,6 +876,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
+    }
+
+    public void setOnPictureLongClickListenerV2(OnPictureLongClickListenerV2 onPictureLongClickListenerV2) {
+        mOnPictureLongClickListenerV2 = onPictureLongClickListenerV2;
     }
 
     public void setOnFinishListener(OnFinishListener onFinishListener) {
