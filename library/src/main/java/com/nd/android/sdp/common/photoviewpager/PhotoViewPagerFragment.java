@@ -15,6 +15,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
+import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private Callback mCallback;
     private OnViewCreatedListener mOnViewCreatedListener;
     private OnFinishListener mOnFinishListener;
+    private ExtraDownloader mExtraDownloader;
 
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
@@ -134,6 +136,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
+        mVpPhoto.setExtraDownloader(mExtraDownloader);
         mVpPhoto.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
@@ -221,6 +224,11 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;
+    }
+
+
+    public void setExtraDownloader(ExtraDownloader extraDownloader) {
+        mExtraDownloader = extraDownloader;
     }
 
     @Override

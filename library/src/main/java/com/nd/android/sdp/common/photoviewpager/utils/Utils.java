@@ -1,7 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager.utils;
 
 import android.graphics.Rect;
-import android.support.v4.util.Pair;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -98,14 +97,14 @@ public class Utils {
         return isGif;
     }
 
-    public static Observable<Pair<Integer, File>> download(final String url, final File file) {
+    public static Observable<Integer> download(final String url, final File file) {
         return Observable.just(url)
-                .flatMap(new Func1<String, Observable<Pair<Integer, File>>>() {
+                .flatMap(new Func1<String, Observable<Integer>>() {
                     @Override
-                    public Observable<Pair<Integer, File>> call(String s) {
-                        return Observable.create(new Observable.OnSubscribe<Pair<Integer, File>>() {
+                    public Observable<Integer> call(String s) {
+                        return Observable.create(new Observable.OnSubscribe<Integer>() {
                             @Override
-                            public void call(final Subscriber<? super Pair<Integer, File>> subscriber) {
+                            public void call(final Subscriber<? super Integer> subscriber) {
                                 Request request = new Request.Builder().url(url).build();
                                 final OkHttpClient okHttpClient = new OkHttpClient();
                                 Call call = okHttpClient.newCall(request);
@@ -133,8 +132,7 @@ public class Utils {
                                             byte[] buff = new byte[1024 * 4];
                                             long downloaded = 0;
                                             long target = response.body().contentLength();
-                                            final Pair<Integer, File> filePair = new Pair<>(0, tempFile);
-                                            subscriber.onNext(filePair);
+                                            subscriber.onNext(0);
                                             while (true) {
                                                 int readed = inputStream.read(buff);
                                                 if (readed == -1) {
@@ -142,8 +140,8 @@ public class Utils {
                                                 }
                                                 downloaded += readed;
                                                 outputStream.write(buff, 0, readed);
-                                                final Pair<Integer, File> filePairProgress = new Pair<>(((int) (downloaded * 100 / target)), tempFile);
-                                                subscriber.onNext(filePairProgress);
+                                                final int progress = (int) (downloaded * 100 / target);
+                                                subscriber.onNext(progress);
                                             }
                                             if (downloaded == target) {
                                                 outputStream.flush();

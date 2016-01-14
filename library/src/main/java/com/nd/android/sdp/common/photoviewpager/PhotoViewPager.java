@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
+import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ class PhotoViewPager extends ViewPager {
     private OnFinishListener mOnFinishListener;
     private OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
+    private ExtraDownloader mExtraDownloader;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -91,6 +93,10 @@ class PhotoViewPager extends ViewPager {
         mConfiguration = configuration;
     }
 
+    public void setExtraDownloader(ExtraDownloader extraDownloader) {
+        mExtraDownloader = extraDownloader;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -103,13 +109,17 @@ class PhotoViewPager extends ViewPager {
             ViewPagerFragment fragment = ViewPagerFragment.newInstance(mArguments);
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
-            fragment.setPicInfo(mPicInfos.get(position));
+            final PicInfo picInfo = mPicInfos.get(position);
+            fragment.setPicInfo(picInfo);
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
             fragment.setOnPictureClickListener(mOnPictureClickListener);
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             fragment.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
             fragment.setConfiguration(mConfiguration);
+            if (picInfo.isVideo) {
+                fragment.setExtraDownloader(mExtraDownloader);
+            }
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
                 mDefaultPosition = -1;

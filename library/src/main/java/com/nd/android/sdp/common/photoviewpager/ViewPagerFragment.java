@@ -14,11 +14,11 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.util.Pair;
 import android.support.v7.graphics.Palette;
 import android.text.TextUtils;
 import android.text.format.Formatter;
@@ -44,6 +44,8 @@ import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
+import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
+import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -56,10 +58,12 @@ import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -110,6 +114,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private TextureView mVideoView;
     private View mBtnPlay;
     private MediaPlayer mMediaPlayer;
+    private ExtraDownloader mExtraDownloader;
 
     public ViewPagerFragment() {
     }
@@ -198,6 +203,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private boolean isOrigAvailable() {
+        if (mPicInfo.isVideo) {
+            mTvOrig.setVisibility(View.GONE);
+            return false;
+        }
         if (TextUtils.isEmpty(mPicInfo.origUrl)) {
             mTvOrig.setVisibility(View.GONE);
             return false;
@@ -406,28 +415,38 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             picDiskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
         }
         mStartGetImageSubscription = Observable.just(picDiskCache)
-                .flatMap(new Func1<File, Observable<Pair<Integer, File>>>() {
+                .flatMap(new Func1<File, Observable<Integer>>() {
                     @Override
-                    public Observable<Pair<Integer, File>> call(File file) {
-                        return picDiskCache.exists() ? Observable.just(new Pair<>(100, file))
-                                : Utils.download(mPicInfo.url, file);
+                    public Observable<Integer> call(File file) {
+                        final boolean exists = picDiskCache.exists();
+                        if (exists) {
+                            return Observable.just(100);
+                        } else {
+                            if (mExtraDownloader != null) {
+                                return downloadByExtraDownloader(mExtraDownloader, mPicInfo.url, file);
+                            } else {
+                                return Utils.download(mPicInfo.url, file);
+                            }
+                        }
                     }
                 })
                 .throttleLast(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Pair<Integer, File>>() {
+                .subscribe(new Action1<Integer>() {
                     @Override
-                    public void call(Pair<Integer, File> filePair) {
-                        if (filePair.first > 0 && mPb.isIndeterminate()) {
+                    public void call(Integer progress) {
+                        if (progress > 0 && mPb.isIndeterminate()) {
                             mPb.setIndeterminate(false);
                         }
-                        mPb.setProgress(filePair.first);
+                        mPb.setProgress(progress);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         throwable.printStackTrace();
+                        mIvPreview.setVisibility(View.GONE);
+                        mIvReal.setVisibility(View.GONE);
                         mPb.setVisibility(View.GONE);
                         mTvError.setVisibility(View.VISIBLE);
                         mTvError.setOnLongClickListener(ViewPagerFragment.this);
@@ -470,6 +489,52 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 });
     }
 
+    @NonNull
+    private Observable<Integer> downloadByExtraDownloader(final ExtraDownloader extraDownloader,
+                                                          @NonNull final String url,
+                                                          @NonNull final File file) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(final Subscriber<? super Integer> subscriber) {
+                extraDownloader.startDownload(url, file, new PhotoViewDownloaderCallback() {
+                    @Override
+                    public void updateProgress(String url, long current, long total) {
+                        if(total>0) {
+                            final int progress = (int) ((current * 100) / total);
+                            subscriber.onNext(progress);
+                        }else{
+                            subscriber.onNext(0);
+                        }
+                    }
+
+                    @Override
+                    public void cancelDownload(String url) {
+                    }
+
+                    @Override
+                    public void onComplete(String url) {
+                        subscriber.onCompleted();
+                    }
+
+                    @Override
+                    public void onError(String url, int httpCode) {
+                        subscriber.onError(new IOException());
+                    }
+
+                    @Override
+                    public void onPause(String url) {
+
+                    }
+
+                    @Override
+                    public void onCancel(String url) {
+                        finish();
+                    }
+                });
+            }
+        });
+    }
+
     /**
      * 判断是否竖照片
      *
@@ -493,6 +558,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 && !mStartGetImageSubscription.isUnsubscribed()) {
             mStartGetImageSubscription.unsubscribe();
         }
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+        }
     }
 
     @Override
@@ -507,6 +576,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvExit.setImageBitmap(null);
             mIvPreview.setImageBitmap(null);
         }
+        if(mExtraDownloader!=null) {
+            mExtraDownloader.cancelCallBack(mPicInfo.url);
+        }
     }
 
     public void downloadFullSize() {
@@ -516,10 +588,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mFullSizeSubscription = Utils.download(mPicInfo.origUrl, diskCache)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<Pair<Integer, File>>() {
+                .subscribe(new Action1<Integer>() {
                     @Override
-                    public void call(Pair<Integer, File> filePair) {
-                        final long progress = filePair.first;
+                    public void call(Integer progress) {
                         if (progress > 0) {
                             if (progress != 100) {
                                 mTvOrig.setText(String.format("%d%%", progress));
@@ -658,10 +729,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             }
             mOnPictureLongClickListener.onLongClick(v, mPicInfo.url, bitmap);
         }
-        if (mOnPictureLongClickListenerV2 != null) {
-            return mOnPictureLongClickListenerV2.onLongClick(v, mPicInfo.url, mConfiguration.getPicDiskCache(mPicInfo.url));
-        }
-        return false;
+        return mOnPictureLongClickListenerV2 != null
+                && mOnPictureLongClickListenerV2.onLongClick(v, mPicInfo.url, mConfiguration.getPicDiskCache(mPicInfo.url));
     }
 
     public void setCallback(Callback callback) {
@@ -960,6 +1029,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             txform.setScale((float) newWidth / viewWidth, (float) newHeight / viewHeight);
                             txform.postTranslate(xoff, yoff);
                             mVideoView.setTransform(txform);
+                            mVideoView.setOnClickListener(mFinishClickListener);
                         }
                     });
                     mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -969,6 +1039,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         }
                     });
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mMediaPlayer.seekTo(1);
                     AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0);
                     fadeOutAnimation.setDuration(FADE_ANIMATE_DURATION);
                     fadeOutAnimation.setInterpolator(new AccelerateInterpolator());
@@ -1032,5 +1103,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
         mView.requestFocus();
+    }
+
+    public void setExtraDownloader(ExtraDownloader extraDownloader) {
+        mExtraDownloader = extraDownloader;
     }
 }

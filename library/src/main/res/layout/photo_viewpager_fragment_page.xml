@@ -69,6 +69,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
+        android:textSize="12dp"
         android:background="@drawable/photo_viewpager_bg_view_orig"
         android:gravity="center"
         android:minWidth="72dp"
