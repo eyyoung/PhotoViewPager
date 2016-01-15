@@ -44,8 +44,8 @@ import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
-import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
+import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -189,8 +189,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
         if (mNeedTransition) {
             mNeedTransition = false;
-            if (fileCache != null && fileCache.exists()
-                    && fileCache.length() < 500 * 1024) {
+            final boolean fileExists = fileCache != null && fileCache.exists();
+            if (fileExists && fileCache.length() < 500 * 1024
+                    && !mPicInfo.isVideo) {
                 // 直接放大
                 animateToBigImage(fileCache);
             } else {
@@ -496,39 +497,44 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(final Subscriber<? super Integer> subscriber) {
-                extraDownloader.startDownload(url, file, new PhotoViewDownloaderCallback() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
-                    public void updateProgress(String url, long current, long total) {
-                        if(total>0) {
-                            final int progress = (int) ((current * 100) / total);
-                            subscriber.onNext(progress);
-                        }else{
-                            subscriber.onNext(0);
-                        }
-                    }
+                    public void run() {
+                        extraDownloader.startDownload(url, file, new PhotoViewDownloaderCallback() {
+                            @Override
+                            public void updateProgress(String url, long current, long total) {
+                                if (total > 0) {
+                                    final int progress = (int) ((current * 100) / total);
+                                    subscriber.onNext(progress);
+                                } else {
+                                    subscriber.onNext(0);
+                                }
+                            }
 
-                    @Override
-                    public void cancelDownload(String url) {
-                    }
+                            @Override
+                            public void cancelDownload(String url) {
+                            }
 
-                    @Override
-                    public void onComplete(String url) {
-                        subscriber.onCompleted();
-                    }
+                            @Override
+                            public void onComplete(String url) {
+                                subscriber.onCompleted();
+                            }
 
-                    @Override
-                    public void onError(String url, int httpCode) {
-                        subscriber.onError(new IOException());
-                    }
+                            @Override
+                            public void onError(String url, int httpCode) {
+                                subscriber.onError(new IOException());
+                            }
 
-                    @Override
-                    public void onPause(String url) {
+                            @Override
+                            public void onPause(String url) {
 
-                    }
+                            }
 
-                    @Override
-                    public void onCancel(String url) {
-                        finish();
+                            @Override
+                            public void onCancel(String url) {
+                                finish();
+                            }
+                        });
                     }
                 });
             }
