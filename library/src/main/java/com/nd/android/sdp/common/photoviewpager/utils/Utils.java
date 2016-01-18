@@ -1,6 +1,8 @@
 package com.nd.android.sdp.common.photoviewpager.utils;
 
+import android.content.Context;
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -97,7 +99,14 @@ public class Utils {
         return isGif;
     }
 
-    public static Observable<Integer> download(final String url, final File file) {
+    public static Observable<Integer> download(Context context, final String url, final File file) {
+        final boolean isAssets = url.startsWith("assets://");
+        return isAssets ? getAssetsDownloader(context, url, file)
+                : getHttpDownloader(url, file);
+    }
+
+    @NonNull
+    private static Observable<Integer> getHttpDownloader(final String url, final File file) {
         return Observable.just(url)
                 .flatMap(new Func1<String, Observable<Integer>>() {
                     @Override
@@ -174,5 +183,50 @@ public class Utils {
                         });
                     }
                 }).throttleLast(500, TimeUnit.MILLISECONDS);
+    }
+
+    public static Observable<Integer> getAssetsDownloader(final Context context, final String url, final File file) {
+        return Observable.just(url.substring("assets://".length()))
+                .flatMap(new Func1<String, Observable<Integer>>() {
+                    @Override
+                    public Observable<Integer> call(String s) {
+                        return Observable.create(new Observable.OnSubscribe<Integer>() {
+                            @Override
+                            public void call(final Subscriber<? super Integer> subscriber) {
+                                InputStream inputStream = null;
+                                OutputStream outputStream = null;
+                                try {
+                                    inputStream = context.getAssets().open(url);
+                                    outputStream = new FileOutputStream(file);
+                                    byte[] buff = new byte[1024 * 20];
+                                    subscriber.onNext(0);
+                                    while (true) {
+                                        int readed = inputStream.read(buff);
+                                        if (readed == -1) {
+                                            break;
+                                        }
+                                        outputStream.write(buff, 0, readed);
+                                        subscriber.onNext(0);
+                                    }
+                                    outputStream.flush();
+                                    subscriber.onCompleted();
+                                } catch (IOException io) {
+                                    throw OnErrorThrowable.from(OnErrorThrowable.addValueAsLastCause(io, url));
+                                } finally {
+                                    try {
+                                        if (inputStream != null) {
+                                            inputStream.close();
+                                        }
+                                        if (outputStream != null) {
+                                            outputStream.close();
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
     }
 }

@@ -426,7 +426,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             if (mExtraDownloader != null) {
                                 return downloadByExtraDownloader(mExtraDownloader, mPicInfo.url, file);
                             } else {
-                                return Utils.download(mPicInfo.url, file);
+                                return Utils.download(getContext(), mPicInfo.url, file);
                             }
                         }
                     }
@@ -582,7 +582,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvExit.setImageBitmap(null);
             mIvPreview.setImageBitmap(null);
         }
-        if(mExtraDownloader!=null) {
+        if (mExtraDownloader != null) {
             mExtraDownloader.cancelCallBack(mPicInfo.url);
         }
     }
@@ -591,7 +591,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
         // 下载完成
         mTvOrig.setText(String.format("%d%%", 0));
-        mFullSizeSubscription = Utils.download(mPicInfo.origUrl, diskCache)
+        mFullSizeSubscription = Utils.download(getActivity(), mPicInfo.origUrl, diskCache)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Action1<Integer>() {
