@@ -189,14 +189,14 @@ public class Utils {
         return Observable.just(url.substring("assets://".length()))
                 .flatMap(new Func1<String, Observable<Integer>>() {
                     @Override
-                    public Observable<Integer> call(String s) {
+                    public Observable<Integer> call(final String s) {
                         return Observable.create(new Observable.OnSubscribe<Integer>() {
                             @Override
                             public void call(final Subscriber<? super Integer> subscriber) {
                                 InputStream inputStream = null;
                                 OutputStream outputStream = null;
                                 try {
-                                    inputStream = context.getAssets().open(url);
+                                    inputStream = context.getAssets().open(s);
                                     outputStream = new FileOutputStream(file);
                                     byte[] buff = new byte[1024 * 20];
                                     subscriber.onNext(0);
