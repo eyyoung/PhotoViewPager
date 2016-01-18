@@ -60,8 +60,8 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             args.putInt(PARAM_TOP, locations[1]);
             args.putInt(PARAM_WIDTH, imageView.getWidth());
             args.putInt(PARAM_HEIGHT, imageView.getHeight());
-            args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
         }
+        args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
         fragment.setCallbacks(callback);
         fragment.setConfiguration(configuration);
         fragment.setArguments(args);
