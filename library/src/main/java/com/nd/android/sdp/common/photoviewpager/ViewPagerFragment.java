@@ -500,41 +500,43 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        extraDownloader.startDownload(url, file, new PhotoViewDownloaderCallback() {
-                            @Override
-                            public void updateProgress(String url, long current, long total) {
-                                if (total > 0) {
-                                    final int progress = (int) ((current * 100) / total);
-                                    subscriber.onNext(progress);
-                                } else {
-                                    subscriber.onNext(0);
-                                }
-                            }
+                        extraDownloader.startDownload(url, file,
+                                mPicInfo.md5,
+                                new PhotoViewDownloaderCallback() {
+                                    @Override
+                                    public void updateProgress(String url, long current, long total) {
+                                        if (total > 0) {
+                                            final int progress = (int) ((current * 100) / total);
+                                            subscriber.onNext(progress);
+                                        } else {
+                                            subscriber.onNext(0);
+                                        }
+                                    }
 
-                            @Override
-                            public void cancelDownload(String url) {
-                            }
+                                    @Override
+                                    public void cancelDownload(String url) {
+                                    }
 
-                            @Override
-                            public void onComplete(String url) {
-                                subscriber.onCompleted();
-                            }
+                                    @Override
+                                    public void onComplete(String url) {
+                                        subscriber.onCompleted();
+                                    }
 
-                            @Override
-                            public void onError(String url, int httpCode) {
-                                subscriber.onError(new IOException());
-                            }
+                                    @Override
+                                    public void onError(String url, int httpCode) {
+                                        subscriber.onError(new IOException());
+                                    }
 
-                            @Override
-                            public void onPause(String url) {
+                                    @Override
+                                    public void onPause(String url) {
 
-                            }
+                                    }
 
-                            @Override
-                            public void onCancel(String url) {
-                                finish();
-                            }
-                        });
+                                    @Override
+                                    public void onCancel(String url) {
+                                        finish();
+                                    }
+                                });
                     }
                 });
             }
@@ -777,32 +779,36 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             animator1.setDuration(mScaleDuration + EXIT_DURATION);
             animator1.start();
         } else {
-            ViewPropertyAnimator animate;
+            ViewPropertyAnimator animate = null;
             if (mIvGif.getVisibility() == View.VISIBLE) {
                 animate = mIvGif.animate();
             } else if (mIvReal.getVisibility() == View.VISIBLE) {
                 animate = mIvReal.animate();
             } else {
-                animate = mVideoView.animate();
-                mBtnPlay.animate()
+                if (mVideoView != null) {
+                    animate = mVideoView.animate();
+                    mBtnPlay.animate()
+                            .alpha(0f)
+                            .setInterpolator(new AccelerateInterpolator())
+                            .setDuration(FADE_ANIMATE_DURATION)
+                            .start();
+                }
+            }
+            mIvExit.setVisibility(View.GONE);
+            if (animate != null) {
+                animate
                         .alpha(0f)
                         .setInterpolator(new AccelerateInterpolator())
                         .setDuration(FADE_ANIMATE_DURATION)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                exit();
+                            }
+                        })
                         .start();
             }
-            mIvExit.setVisibility(View.GONE);
-            animate
-                    .alpha(0f)
-                    .setInterpolator(new AccelerateInterpolator())
-                    .setDuration(FADE_ANIMATE_DURATION)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            exit();
-                        }
-                    })
-                    .start();
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(FADE_ANIMATE_DURATION);
             animator1.start();
