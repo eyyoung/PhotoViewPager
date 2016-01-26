@@ -24,4 +24,6 @@ public interface ExtraDownloader {
             @NonNull
             String url);
 
+    void confirmDownload(PhotoViewConfirmDownloadCallback callback);
+
 }

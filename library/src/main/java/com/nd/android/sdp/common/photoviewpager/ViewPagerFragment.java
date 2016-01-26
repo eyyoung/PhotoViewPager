@@ -33,8 +33,6 @@ import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewStub;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -45,6 +43,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
+import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewConfirmDownloadCallback;
 import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
@@ -59,6 +58,7 @@ import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import pl.droidsonroids.gif.GifImageView;
@@ -190,8 +190,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mNeedTransition) {
             mNeedTransition = false;
             final boolean fileExists = fileCache != null && fileCache.exists();
-            if (fileExists && fileCache.length() < 500 * 1024
-                    && !mPicInfo.isVideo) {
+            if (fileExists && fileCache.length() < 500 * 1024) {
                 // 直接放大
                 animateToBigImage(fileCache);
             } else {
@@ -294,6 +293,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void loadFileCache(File fileCache, boolean needAnimate) {
+        if (mPicInfo.isVideo) {
+            initVideo();
+        }
         if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
             if (needAnimate) {
                 mIvReal.setAlpha(0);
@@ -322,7 +324,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvGif.setVisibility(View.VISIBLE);
             mIvGif.setImageURI(Uri.fromFile(fileCache));
             mIvExit.setVisibility(View.GONE);
-            mView.removeView(mIvPreview);
             mIvTemp.setVisibility(View.GONE);
             mIvGif.setOnClickListener(mFinishClickListener);
         }
@@ -409,12 +410,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void startGetImage() {
-        final File picDiskCache;
-        if (mPicInfo.url.startsWith("file://")) {
-            picDiskCache = new File(mPicInfo.url.substring("file://".length()));
-        } else {
-            picDiskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
-        }
+        final File picDiskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
         mStartGetImageSubscription = Observable.just(picDiskCache)
                 .flatMap(new Func1<File, Observable<Integer>>() {
                     @Override
@@ -423,11 +419,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         if (exists) {
                             return Observable.just(100);
                         } else {
-                            if (mExtraDownloader != null) {
-                                return downloadByExtraDownloader(mExtraDownloader, mPicInfo.url, file);
-                            } else {
-                                return Utils.download(getContext(), mPicInfo.url, file);
-                            }
+                            return Utils.download(getContext(), mPicInfo.url, file);
                         }
                     }
                 })
@@ -462,28 +454,26 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (picDiskCache != null && picDiskCache.exists()) {
                             if (mPicInfo.isVideo) {
-                                initVideo(picDiskCache);
+                                initVideo();
+                            }
+                            if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
+                                mIvGif.setVisibility(View.GONE);
+                                final boolean origAvailable = isOrigAvailable();
+                                mIvReal.setVisibility(View.VISIBLE);
+                                ImageSource source = origAvailable ?
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
+                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
+                                mIvReal.setImage(source);
+                                mIvReal.setOnClickListener(mFinishClickListener);
                             } else {
-                                if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
-                                    mIvGif.setVisibility(View.GONE);
-                                    final boolean origAvailable = isOrigAvailable();
-                                    mIvReal.setVisibility(View.VISIBLE);
-                                    ImageSource source = origAvailable ?
-                                            ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
-                                            ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
-                                    mIvReal.setImage(source);
-                                    mIvReal.setOnClickListener(mFinishClickListener);
-                                } else {
-                                    mIvReal.setVisibility(View.GONE);
-                                    mIvGif.setVisibility(View.VISIBLE);
-                                    mIvGif.setImageURI(Uri.fromFile(picDiskCache));
-                                    mPb.setVisibility(View.GONE);
-                                    mView.removeView(mIvPreview);
-                                    mIvPreview.setVisibility(View.GONE);
-                                    mIvTemp.setVisibility(View.GONE);
-                                    mIvExit.setVisibility(View.GONE);
-                                    mIvGif.setOnClickListener(mFinishClickListener);
-                                }
+                                mIvReal.setVisibility(View.GONE);
+                                mIvGif.setVisibility(View.VISIBLE);
+                                mIvGif.setImageURI(Uri.fromFile(picDiskCache));
+                                mPb.setVisibility(View.GONE);
+                                mIvPreview.setVisibility(View.GONE);
+                                mIvTemp.setVisibility(View.GONE);
+                                mIvExit.setVisibility(View.GONE);
+                                mIvGif.setOnClickListener(mFinishClickListener);
                             }
                         }
                     }
@@ -534,7 +524,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
                                     @Override
                                     public void onCancel(String url) {
-                                        finish();
+
                                     }
                                 });
                     }
@@ -592,7 +582,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     public void downloadFullSize() {
         final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
         // 下载完成
-        mTvOrig.setText(String.format("%d%%", 0));
+        mTvOrig.setText(String.format(Locale.ENGLISH, "%d%%", 0));
         mFullSizeSubscription = Utils.download(getActivity(), mPicInfo.origUrl, diskCache)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -601,7 +591,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     public void call(Integer progress) {
                         if (progress > 0) {
                             if (progress != 100) {
-                                mTvOrig.setText(String.format("%d%%", progress));
+                                mTvOrig.setText(String.format(Locale.ENGLISH, "%d%%", progress));
                             } else {
                                 mTvOrig.setVisibility(View.GONE);
                             }
@@ -853,6 +843,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mIvGif.getVisibility() == View.VISIBLE) {
             return false;
         }
+        if (mVideoView != null) {
+            return false;
+        }
         mScaleDuration = Math.abs((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));
         if (mScaleDuration > MAX_EXIT_SCALEDURATION) {
             mScaleDuration = MAX_EXIT_SCALEDURATION;
@@ -1003,13 +996,23 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private void initVideo(final File picDiskCache) {
-        mIvTemp.setVisibility(View.GONE);
-        mIvExit.setVisibility(View.GONE);
-        mIvGif.setVisibility(View.GONE);
-        mIvReal.setVisibility(View.GONE);
+    private void initVideo() {
         final View videoView = mVideoStub.inflate();
         mVideoView = ((TextureView) videoView.findViewById(R.id.vd));
+        mBtnPlay = videoView.findViewById(R.id.btnPlay);
+        mBtnPlay.setOnClickListener(mVideoPlayClickListener);
+        mVideoView.setFocusable(false);
+        mVideoView.setFocusableInTouchMode(false);
+        mView.requestFocus();
+        mVideoView.setVisibility(View.GONE);
+    }
+
+    private void initMediaPlayer(final File picDiskCache) {
+        mPb.setVisibility(View.GONE);
+        mIvReal.setVisibility(View.GONE);
+        mIvTemp.setVisibility(View.GONE);
+        mIvPreview.setVisibility(View.GONE);
+        mVideoView.setVisibility(View.VISIBLE);
         mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -1047,40 +1050,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
-                            mBtnPlay.setVisibility(View.VISIBLE);
                         }
                     });
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mMediaPlayer.seekTo(1);
-                    AlphaAnimation fadeOutAnimation = new AlphaAnimation(1.0f, 0);
-                    fadeOutAnimation.setDuration(FADE_ANIMATE_DURATION);
-                    fadeOutAnimation.setInterpolator(new AccelerateInterpolator());
-                    mPb.startAnimation(fadeOutAnimation);
-                    mIvPreview.startAnimation(fadeOutAnimation);
-                    mVideoView.setVisibility(View.GONE);
-                    fadeOutAnimation.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            mIvPreview.setVisibility(View.GONE);
-                            mPb.setVisibility(View.GONE);
-                            mVideoView.setVisibility(View.VISIBLE);
-                            mBtnPlay.setVisibility(View.VISIBLE);
-                            AlphaAnimation fadeInAnimation = new AlphaAnimation(0.0f, 1.0f);
-                            fadeInAnimation.setDuration(FADE_ANIMATE_DURATION);
-                            fadeInAnimation.setInterpolator(new AccelerateInterpolator());
-                            mVideoView.startAnimation(fadeInAnimation);
-                            mBtnPlay.startAnimation(fadeInAnimation);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-
-                        }
-                    });
+                    mMediaPlayer.start();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1101,23 +1074,90 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
             }
         });
-        mBtnPlay = videoView.findViewById(R.id.btnPlay);
-        mBtnPlay.setVisibility(View.GONE);
-        mBtnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mMediaPlayer.isPlaying()) {
-                    v.setVisibility(View.GONE);
-                    mMediaPlayer.start();
-                }
-            }
-        });
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
-        mView.requestFocus();
     }
 
     public void setExtraDownloader(ExtraDownloader extraDownloader) {
         mExtraDownloader = extraDownloader;
+    }
+
+    private View.OnClickListener mVideoPlayClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(final View v) {
+            final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
+            if (!diskCache.exists()) {
+                if (mExtraDownloader != null) {
+                    mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
+                        @Override
+                        public void confirm() {
+                            v.setVisibility(View.GONE);
+                            if (mPicInfo.origUrl == null) {
+                                Log.e(getClass().getName(), "PicInfo null");
+                                return;
+                            }
+                            mPb.setVisibility(View.VISIBLE);
+                            mIvReal.setVisibility(View.GONE);
+                            mIvTemp.setVisibility(View.GONE);
+                            ((RelativeLayout.LayoutParams) mFlPreview.getLayoutParams()).addRule(RelativeLayout.CENTER_IN_PARENT, 1);
+                            mFlPreview.requestLayout();
+                            mIvPreview.setDrawableRadius(mFrameSize / 2);
+                            mIvPreview.setVisibility(View.VISIBLE);
+                            final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mPicInfo.origUrl, diskCache);
+                            downloadFullVideo(download, diskCache);
+                        }
+
+                        @Override
+                        public void dismiss() {
+
+                        }
+                    });
+                } else {
+                    final Observable<Integer> download = Utils.download(getActivity(), mPicInfo.origUrl, diskCache);
+                    downloadFullVideo(download, diskCache);
+                }
+            } else {
+                v.setVisibility(View.GONE);
+                if (mMediaPlayer == null) {
+                    // 初始化
+                    initMediaPlayer(diskCache);
+                } else {
+                    // 已经初始化
+                    if (!mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.start();
+                    }
+                }
+            }
+        }
+    };
+
+    private void downloadFullVideo(Observable<Integer> observable, final File diskCache) {
+        observable
+                .throttleLast(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer progress) {
+                        if (progress > 0 && mPb.isIndeterminate()) {
+                            mPb.setIndeterminate(false);
+                        }
+                        mPb.setProgress(progress);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                        mIvPreview.setVisibility(View.GONE);
+                        mIvReal.setVisibility(View.GONE);
+                        mPb.setVisibility(View.GONE);
+                        mTvError.setVisibility(View.VISIBLE);
+                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
+                        mTvError.setOnClickListener(mFinishClickListener);
+                    }
+                }, new Action0() {
+                    @Override
+                    public void call() {
+                        initMediaPlayer(diskCache);
+                    }
+                });
     }
 }
