@@ -751,6 +751,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
+            mIsAnimateFinishing = true;
             return;
         }
         mIsAnimateFinishing = true;
