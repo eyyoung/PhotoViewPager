@@ -42,7 +42,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=960",
             "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
+            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
+            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=960"
 //            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
     };
 
@@ -55,7 +56,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=160",
             "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
+            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
+            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=160"
 //            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
     };
 
@@ -68,7 +70,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d",
             "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
+            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
+            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=160"
 //            ""
     };
 
@@ -103,21 +106,18 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ArrayList<PicInfo> picInfos = new ArrayList<>();
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
+            boolean isVideo = false;
+            if (i == urlsLength - 1) {
+                isVideo = true;
+            }
             PicInfo picInfo = new PicInfo(urls[i],
                     preview_urls[i],
                     orig_urls[i],
-                    new Random().nextInt(10 * 1024 * 1024)
+                    new Random().nextInt(10 * 1024 * 1024),
+                    isVideo
             );
             picInfos.add(picInfo);
         }
-        final String videoPath = "file:///storage/emulated/0/ddmsrec.mp4";
-        PicInfo picInfo = new PicInfo(videoPath,
-                videoPath,
-                videoPath,
-                10 * 1024 * 1024,
-                true
-        );
-        picInfos.add(picInfo);
         mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
                 (ImageView) view, picInfos,
                 position,

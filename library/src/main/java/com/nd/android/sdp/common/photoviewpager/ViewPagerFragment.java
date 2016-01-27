@@ -1017,14 +1017,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void initMediaPlayer(final File picDiskCache) {
+        mPb.setVisibility(View.GONE);
+        mIvReal.setVisibility(View.GONE);
+        mIvTemp.setVisibility(View.GONE);
+        mIvPreview.setVisibility(View.GONE);
+        mVideoView.setVisibility(View.VISIBLE);
         mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                mPb.setVisibility(View.GONE);
-                mIvReal.setVisibility(View.GONE);
-                mIvTemp.setVisibility(View.GONE);
-                mIvPreview.setVisibility(View.GONE);
-                mVideoView.setVisibility(View.VISIBLE);
                 Surface s = new Surface(surface);
                 try {
                     mMediaPlayer = new MediaPlayer();
