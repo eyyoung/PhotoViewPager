@@ -115,6 +115,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private View mBtnPlay;
     private MediaPlayer mMediaPlayer;
     private ExtraDownloader mExtraDownloader;
+    private Subscription mDownloadFullVideoSubscription;
 
     public ViewPagerFragment() {
     }
@@ -455,6 +456,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvReal.setOnLongClickListener(ViewPagerFragment.this);
                         if (picDiskCache != null && picDiskCache.exists()) {
                             if (mPicInfo.isVideo) {
+                                // 视频情况inflate
                                 initVideo();
                             }
                             if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
@@ -577,6 +579,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
         if (mExtraDownloader != null) {
             mExtraDownloader.cancelCallBack(mPicInfo.url);
+        }
+        if (mDownloadFullVideoSubscription != null) {
+            mDownloadFullVideoSubscription.unsubscribe();
         }
     }
 
@@ -749,10 +754,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 //                && !mIvReal.isReady()) {
 //            return;
 //        }
+        if (mBg.getAlpha() != 1f) {
+            return;
+        }
         int[] location = new int[2];
         mView.getLocationOnScreen(location);
         if (location[0] < 0) {
-            mIsAnimateFinishing = true;
             return;
         }
         mIsAnimateFinishing = true;
@@ -1010,14 +1017,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void initMediaPlayer(final File picDiskCache) {
-        mPb.setVisibility(View.GONE);
-        mIvReal.setVisibility(View.GONE);
-        mIvTemp.setVisibility(View.GONE);
-        mIvPreview.setVisibility(View.GONE);
-        mVideoView.setVisibility(View.VISIBLE);
         mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                mPb.setVisibility(View.GONE);
+                mIvReal.setVisibility(View.GONE);
+                mIvTemp.setVisibility(View.GONE);
+                mIvPreview.setVisibility(View.GONE);
+                mVideoView.setVisibility(View.VISIBLE);
                 Surface s = new Surface(surface);
                 try {
                     mMediaPlayer = new MediaPlayer();
@@ -1133,7 +1140,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     };
 
     private void downloadFullVideo(Observable<Integer> observable, final File diskCache) {
-        observable
+        mDownloadFullVideoSubscription = observable
                 .throttleLast(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
