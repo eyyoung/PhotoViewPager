@@ -164,6 +164,15 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     @Override
     public void onPageScrollStateChanged(int state) {
+        final int currentItem = mVpPhoto.getCurrentItem();
+        final ViewPagerFragment fragment = mVpPhoto.getFragmentByPosition(currentItem - 1);
+        if (fragment != null) {
+            fragment.stopPlayVideo();
+        }
+        final ViewPagerFragment fragment2 = mVpPhoto.getFragmentByPosition(currentItem + 1);
+        if (fragment2 != null) {
+            fragment2.stopPlayVideo();
+        }
     }
 
     public void exit() {

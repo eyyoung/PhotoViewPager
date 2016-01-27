@@ -295,6 +295,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private void loadFileCache(File fileCache, boolean needAnimate) {
         if (mPicInfo.isVideo) {
             initVideo();
+            mBtnPlay.setVisibility(View.VISIBLE);
         }
         if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
             if (needAnimate) {
@@ -1051,6 +1052,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                     mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                         @Override
                         public void onCompletion(MediaPlayer mp) {
+                            mBtnPlay.setVisibility(View.VISIBLE);
                         }
                     });
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -1160,5 +1162,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         initMediaPlayer(diskCache);
                     }
                 });
+    }
+
+    public void stopPlayVideo() {
+        if (mPicInfo.isVideo
+                && mMediaPlayer != null
+                && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.seekTo(0);
+            mMediaPlayer.pause();
+            mBtnPlay.setVisibility(View.VISIBLE);
+        }
     }
 }
