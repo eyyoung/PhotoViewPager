@@ -765,13 +765,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mIsAnimateFinishing = true;
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
+            final FragmentActivity activity = getActivity();
             mIvReal.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isAdded()) {
-                        return;
-                    }
-                    exit();
+                    exit(activity);
                 }
             }, mScaleDuration + EXIT_DURATION);
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
@@ -795,6 +793,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             }
             mIvExit.setVisibility(View.GONE);
             if (animate != null) {
+                final FragmentActivity activity = getActivity();
                 animate
                         .alpha(0f)
                         .setInterpolator(new AccelerateInterpolator())
@@ -803,7 +802,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 super.onAnimationEnd(animation);
-                                exit();
+                                exit(activity);
                             }
                         })
                         .start();
@@ -822,14 +821,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private void exit() {
-        final FragmentActivity activity = getActivity();
-        if (activity == null) {
-            return;
-        }
-        if (!isAdded()) {
-            return;
-        }
+    private void exit(FragmentActivity activity) {
         final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
         final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
         if (fragment == null) {
