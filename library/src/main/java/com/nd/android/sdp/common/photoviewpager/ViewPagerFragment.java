@@ -781,14 +781,15 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
             final FragmentActivity activity = getActivity();
-            mIvReal.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    exit(activity);
-                }
-            }, mScaleDuration + EXIT_DURATION);
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(mScaleDuration + EXIT_DURATION);
+            animator1.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    exit(activity);
+                }
+            });
             animator1.start();
         } else {
             ViewPropertyAnimator animate = null;
@@ -808,22 +809,22 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             }
             mIvExit.setVisibility(View.GONE);
             if (animate != null) {
-                final FragmentActivity activity = getActivity();
                 animate
                         .alpha(0f)
                         .setInterpolator(new AccelerateInterpolator())
                         .setDuration(FADE_ANIMATE_DURATION)
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                super.onAnimationEnd(animation);
-                                exit(activity);
-                            }
-                        })
                         .start();
             }
+            final FragmentActivity activity = getActivity();
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(FADE_ANIMATE_DURATION);
+            animator1.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    exit(activity);
+                }
+            });
             animator1.start();
         }
         if (mPb.getVisibility() == View.VISIBLE) {
