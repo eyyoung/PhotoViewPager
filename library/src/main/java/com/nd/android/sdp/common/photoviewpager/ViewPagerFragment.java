@@ -79,6 +79,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private static final int REVEAL_IN_ANIMATE_DURATION = 300;
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
 
+    private enum State{
+        Animate,
+        Loading,
+        Loaded,
+        Finishing,
+        Finished
+    }
+
     private View mBg;
     private ViewGroup mView;
     private CircularProgressView mPb;
@@ -116,6 +124,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private MediaPlayer mMediaPlayer;
     private ExtraDownloader mExtraDownloader;
     private Subscription mDownloadFullVideoSubscription;
+
+    private State mState;
 
     public ViewPagerFragment() {
     }
@@ -201,6 +211,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         } else {
             noAnimateInit();
         }
+        mState = State.Animate;
     }
 
     private boolean isOrigAvailable() {
@@ -294,6 +305,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void loadFileCache(File fileCache, boolean needAnimate) {
+        mState = State.Loading;
         if (mPicInfo.isVideo) {
             initVideo();
             mBtnPlay.setVisibility(View.VISIBLE);
@@ -412,6 +424,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private void startGetImage() {
+        mState = State.Loading;
         final File picDiskCache = mConfiguration.getPicDiskCache(mPicInfo.url);
         mStartGetImageSubscription = Observable.just(picDiskCache)
                 .flatMap(new Func1<File, Observable<Integer>>() {
@@ -634,6 +647,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             return;
         }
         mImageLoaded = true;
+        mState = State.Loaded;
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
         float maxScale;
@@ -754,7 +768,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 //                && !mIvReal.isReady()) {
 //            return;
 //        }
-        if (mBg.getAlpha() != 1f) {
+        if (mState == State.Animate) {
             return;
         }
         int[] location = new int[2];
@@ -762,6 +776,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (location[0] < 0) {
             return;
         }
+        mState = State.Finishing;
         mIsAnimateFinishing = true;
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
@@ -823,14 +838,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     private void exit(FragmentActivity activity) {
         final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
-        final Fragment fragment = supportFragmentManager.findFragmentByTag(PhotoViewPagerFragment.TAG_PHOTO);
-        if (fragment == null) {
-            return;
-        }
         supportFragmentManager
                 .beginTransaction()
-                .remove(fragment)
+                .remove(getParentFragment())
                 .commitAllowingStateLoss();
+        mState = State.Finished;
     }
 
     private boolean animateFinish() {
