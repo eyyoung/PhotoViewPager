@@ -41,10 +41,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=960",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
-            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=960"
-//            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
+            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=960"
     };
 
     String[] preview_urls = new String[]{
@@ -55,10 +58,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=160",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
-            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=160"
-//            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=1680x0&quality=96&stripmeta=0&type=jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
+            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=160"
     };
 
     String[] orig_urls = new String[]{
@@ -69,10 +75,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png",
-            "http://172.24.133.153/v0.1/download?dentryId=02314646-69cc-4b76-b5e1-acb47967c95c&size=160"
-//            ""
+            "http://ww2.sinaimg.cn/bmiddle/6f9303b5gw1ezhod4l65wj20pe0zkjxq.jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
+            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d"
     };
 
     private ListView mLv;
@@ -107,9 +116,6 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayList<PicInfo> picInfos = new ArrayList<>();
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
             boolean isVideo = false;
-            if (i == urlsLength - 1) {
-                isVideo = true;
-            }
             PicInfo picInfo = new PicInfo(urls[i],
                     preview_urls[i],
                     orig_urls[i],
