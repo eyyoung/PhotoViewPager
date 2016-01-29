@@ -211,7 +211,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         } else {
             noAnimateInit();
         }
-        mState = State.Animate;
+        // 如果进入Loading状态了则不需要设置，如直接放大的情况实际上已经进入加载了
+        if (mState != State.Loading) {
+            mState = State.Animate;
+        }
     }
 
     private boolean isOrigAvailable() {
