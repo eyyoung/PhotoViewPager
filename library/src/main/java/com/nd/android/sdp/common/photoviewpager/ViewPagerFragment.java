@@ -1188,4 +1188,10 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mBtnPlay.setVisibility(View.VISIBLE);
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopPlayVideo();
+    }
 }
