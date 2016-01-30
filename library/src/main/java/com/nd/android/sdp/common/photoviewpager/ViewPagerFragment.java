@@ -78,8 +78,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     private static final int FADE_ANIMATE_DURATION = 300;
     private static final int REVEAL_IN_ANIMATE_DURATION = 300;
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
+    private Surface mSurface;
 
-    private enum State{
+    private enum State {
         Animate,
         Loading,
         Loaded,
@@ -579,6 +580,9 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mMediaPlayer.stop();
             mMediaPlayer.release();
         }
+        if (mSurface != null) {
+            mSurface.release();
+        }
     }
 
     @Override
@@ -1033,11 +1037,19 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                Surface s = new Surface(surface);
                 try {
+                    boolean needPlay = true;
+                    if (mSurface != null) {
+                        mSurface.release();
+                    }
+                    mSurface = new Surface(surface);
+                    if (mMediaPlayer != null) {
+                        mMediaPlayer.release();
+                        needPlay = false;
+                    }
                     mMediaPlayer = new MediaPlayer();
                     mMediaPlayer.setDataSource(getContext(), Uri.fromFile(picDiskCache));
-                    mMediaPlayer.setSurface(s);
+                    mMediaPlayer.setSurface(mSurface);
                     mMediaPlayer.prepare();
                     mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
                         @Override
@@ -1071,7 +1083,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         }
                     });
                     mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mMediaPlayer.start();
+                    if (needPlay) {
+                        mMediaPlayer.start();
+                    } else {
+                        mMediaPlayer.seekTo(1);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1192,6 +1208,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     @Override
     public void onPause() {
         super.onPause();
-        stopPlayVideo();
+        if (mPicInfo.isVideo
+                && mMediaPlayer != null
+                && mMediaPlayer.isPlaying()) {
+            mMediaPlayer.stop();
+            mBtnPlay.setVisibility(View.VISIBLE);
+        }
     }
 }
