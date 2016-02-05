@@ -6,46 +6,34 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.graphics.Palette;
-import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
-import android.view.ViewStub;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
-import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
-import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewConfirmDownloadCallback;
-import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 import com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView;
@@ -57,13 +45,10 @@ import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -71,14 +56,13 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class ViewPagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
+public abstract class BasePagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
 
     private static final int EXIT_DURATION = 300;
     private static final int MAX_EXIT_SCALEDURATION = 300;
     private static final int FADE_ANIMATE_DURATION = 300;
     private static final int REVEAL_IN_ANIMATE_DURATION = 300;
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
-    private Surface mSurface;
 
     private enum State {
         Animate,
@@ -89,55 +73,38 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
     }
 
     private View mBg;
-    private ViewGroup mView;
-    private CircularProgressView mPb;
-    private RevealCircleImageView mIvPreview;
-    private RevealImageView mIvTemp;
+    protected ViewGroup mView;
+    protected CircularProgressView mPb;
+    protected RevealCircleImageView mIvPreview;
+    protected RevealImageView mIvTemp;
     private boolean mNeedTransition;
     private Subscription mStartGetImageSubscription;
-    private SubsamplingScaleImageView mIvReal;
+    protected SubsamplingScaleImageView mIvReal;
     private Callback mActivityCallback;
     private float mOrigScale;
     private long mScaleDuration;
     private int mSceenWidth;
     private int mSceenHeight;
-    private Subscription mFullSizeSubscription;
     private int mStatusBarHeight;
-    private View mFlPreview;
-    private int mFrameSize;
+    protected View mFlPreview;
+    protected int mFrameSize;
     private GifImageView mIvGif;
-    private IPhotoViewPagerConfiguration mConfiguration;
-    private TextView mTvError;
+    protected IPhotoViewPagerConfiguration mConfiguration;
+    protected TextView mTvError;
     private ImageView mIvExit;
     private OnPictureLongClickListener mOnPictureLongClickListener;
     private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
     private boolean mIsAnimateFinishing = false;
     private OnFinishListener mOnFinishListener;
-    private TextView mTvOrig;
-    private PicInfo mPicInfo;
+    protected PicInfo mPicInfo;
     private boolean mIsLoaded;
     private boolean mIsAreadyBigImage = false;
-    private boolean mImageLoaded = false;
+    protected boolean mImageLoaded = false;
     private View.OnClickListener mOnPictureClickListener;
-    private ViewStub mVideoStub;
-    private TextureView mVideoView;
-    private View mBtnPlay;
-    private MediaPlayer mMediaPlayer;
-    private ExtraDownloader mExtraDownloader;
-    private Subscription mDownloadFullVideoSubscription;
 
     private State mState;
 
-    public ViewPagerFragment() {
-    }
-
-    public static ViewPagerFragment newInstance(Bundle arguments) {
-        ViewPagerFragment viewPagerFragment = new ViewPagerFragment();
-        if (arguments == null) {
-            arguments = new Bundle();
-        }
-        viewPagerFragment.setArguments(arguments);
-        return viewPagerFragment;
+    public BasePagerFragment() {
     }
 
     @Override
@@ -150,31 +117,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mView = (ViewGroup) inflater.inflate(R.layout.photo_viewpager_fragment_page, container, false);
-        if (mActivityCallback == null) {
-            Log.d("PhotoViewPagerFragment", "not support save instance");
-            return mView;
-        }
-        mPb = (CircularProgressView) mView.findViewById(R.id.pb);
-        mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
-        mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
-        mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
-        mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
-        mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
-        mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
-        mTvOrig = ((TextView) mView.findViewById(R.id.tvOrig));
-        mVideoStub = ((ViewStub) mView.findViewById(R.id.vstubVideo));
-        mFlPreview = mView.findViewById(R.id.flPreview);
-        final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-        mSceenWidth = displayMetrics.widthPixels;
-        mSceenHeight = displayMetrics.heightPixels;
-        mStatusBarHeight = Utils.getStatusBarHeightFix(getActivity().getWindow());
-        mIvReal.setOnLongClickListener(ViewPagerFragment.this);
-        mIvGif.setOnLongClickListener(ViewPagerFragment.this);
-        mIvReal.setOnImageEventListener(this);
-        mIvTemp.setOnClickListener(mFinishClickListener);
-        mTvOrig.setOnClickListener(mViewOrig);
-        return mView;
+        return inflater.inflate(R.layout.photo_viewpager_fragment_static_photo_page, container, false);
     }
 
     @Override
@@ -183,6 +126,21 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mPicInfo == null) {
             return;
         }
+        if (mActivityCallback == null) {
+            Log.d("PhotoViewPagerFragment", "not support save instance");
+            return;
+        }
+        mView = (ViewGroup) view;
+        findView(mView);
+        final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        mSceenWidth = displayMetrics.widthPixels;
+        mSceenHeight = displayMetrics.heightPixels;
+        mStatusBarHeight = Utils.getStatusBarHeightFix(getActivity().getWindow());
+        mIvReal.setOnLongClickListener(BasePagerFragment.this);
+        mIvGif.setOnLongClickListener(BasePagerFragment.this);
+        mIvReal.setOnImageEventListener(this);
+        mIvTemp.setOnClickListener(mFinishClickListener);
+
         // 边框大小
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
         final ImageView imageView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
@@ -197,8 +155,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 mIvPreview.setImageBitmap(previewBitmap);
             }
         }
-        final boolean origAvailable = isOrigAvailable();
-        final File fileCache = mConfiguration.getPicDiskCache(origAvailable ? mPicInfo.origUrl : mPicInfo.url);
+        final File fileCache = getShowFileCache();
         if (mNeedTransition) {
             mNeedTransition = false;
             final boolean fileExists = fileCache != null && fileCache.exists();
@@ -218,39 +175,27 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private boolean isOrigAvailable() {
-        if (mPicInfo.isVideo) {
-            mTvOrig.setVisibility(View.GONE);
-            return false;
-        }
-        if (TextUtils.isEmpty(mPicInfo.origUrl)) {
-            mTvOrig.setVisibility(View.GONE);
-            return false;
-        } else {
-            final File origCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
-            if (origCache != null && origCache.exists()) {
-                mTvOrig.setVisibility(View.GONE);
-                return true;
-            } else {
-                mTvOrig.setVisibility(View.VISIBLE);
-                if (mPicInfo.size > 0) {
-                    mTvOrig.setText(getString(R.string.photo_viewpager_view_origin_with_size, Formatter.formatFileSize(getContext(), mPicInfo.size)));
-                } else {
-                    mTvOrig.setText(R.string.photo_viewpager_view_origin);
-                }
-                return false;
-            }
-        }
+    protected void findView(View view) {
+        mPb = (CircularProgressView) mView.findViewById(R.id.pb);
+        mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
+        mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
+        mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
+        mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
+        mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
+        mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
+        mFlPreview = mView.findViewById(R.id.flPreview);
     }
+
+    /**
+     * 起始显示图片缓存
+     *
+     * @return 图片缓存
+     */
+    protected abstract File getShowFileCache();
 
     private void animateToBigImage(final File fileCache) {
         mIsAreadyBigImage = true;
-        mBg.setAlpha(0);
-        mBg.animate()
-                .alpha(1.0f)
-                .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .start();
+        AnimateUtils.fadeInView(mBg);
         final ImageView previewView = mActivityCallback.getPreviewView(mPicInfo.previewUrl);
         if (previewView == null) {
             loadFileCache(fileCache, true);
@@ -308,20 +253,12 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mPb.setVisibility(View.GONE);
     }
 
-    private void loadFileCache(File fileCache, boolean needAnimate) {
+    @CallSuper
+    protected void loadFileCache(File fileCache, boolean needAnimate) {
         mState = State.Loading;
-        if (mPicInfo.isVideo) {
-            initVideo();
-            mBtnPlay.setVisibility(View.VISIBLE);
-        }
         if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
             if (needAnimate) {
-                mIvReal.setAlpha(0);
-                mIvReal.animate()
-                        .alpha(1.0f)
-                        .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
-                        .setInterpolator(new AccelerateInterpolator())
-                        .start();
+                AnimateUtils.fadeInView(mIvReal);
             }
             mIvReal.setImage(ImageSource.uri(fileCache.getAbsolutePath()));
             mIvTemp.setVisibility(View.VISIBLE);
@@ -331,12 +268,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             mIvReal.setOnClickListener(mFinishClickListener);
         } else {
             if (needAnimate) {
-                mIvGif.setAlpha(0f);
-                mIvGif.animate()
-                        .alpha(1.0f)
-                        .setDuration(TRANSLATE_IN_ANIMATE_DURATION)
-                        .setInterpolator(new AccelerateInterpolator())
-                        .start();
+                AnimateUtils.fadeInView(mIvGif);
             }
             mIvReal.setVisibility(View.GONE);
             mIvGif.setVisibility(View.VISIBLE);
@@ -386,18 +318,20 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (arguments == null) {
             return;
         }
+        final int startViewWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mFrameSize);
+        final int startViewHeight = arguments.getInt(PhotoViewPagerFragment.PARAM_HEIGHT, mFrameSize);
         // 边距大小
         int marginSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_margin);
-        final int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        final int screenHeight = getResources().getDisplayMetrics().heightPixels;
-        int startWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mFrameSize) + marginSize * 2;
-        int startHeight = arguments.getInt(PhotoViewPagerFragment.PARAM_HEIGHT, mFrameSize) + marginSize * 2;
-        final int targetLeft = (screenWidth - mFrameSize) / 2;
-        final int targetTop = (screenHeight - mFrameSize) / 2 + mStatusBarHeight;
+        int startWidth = startViewWidth + marginSize * 2;
+        int startHeight = startViewHeight + marginSize * 2;
+        final int targetLeft = (mSceenWidth - mFrameSize) / 2;
+        final int startViewLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, targetLeft);
+        final int targetTop = (mSceenHeight - mFrameSize) / 2 + mStatusBarHeight;
+        final int startViewTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, targetTop);
         // 起始x位置
-        final int startLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, targetLeft) - marginSize;
+        final int startLeft = startViewLeft - marginSize;
         // 起始y位置
-        final int startTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, targetTop) - marginSize + mStatusBarHeight;
+        final int startTop = startViewTop - marginSize + mStatusBarHeight;
         final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mFlPreview), startWidth, mFrameSize);
         final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(mFlPreview), startHeight, mFrameSize);
         final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mFlPreview), startLeft, targetLeft);
@@ -461,7 +395,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mIvReal.setVisibility(View.GONE);
                         mPb.setVisibility(View.GONE);
                         mTvError.setVisibility(View.VISIBLE);
-                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
+                        mTvError.setOnLongClickListener(BasePagerFragment.this);
                         mTvError.setOnClickListener(mFinishClickListener);
                     }
                 }, new Action0() {
@@ -470,19 +404,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                         mPb.setIndeterminate(true);
                         mIvTemp.setVisibility(View.GONE);
 //                        mIvTemp.setImageBitmap(bitmap);
-                        mIvReal.setOnLongClickListener(ViewPagerFragment.this);
+                        mIvReal.setOnLongClickListener(BasePagerFragment.this);
                         if (picDiskCache != null && picDiskCache.exists()) {
-                            if (mPicInfo.isVideo) {
-                                // 视频情况inflate
-                                initVideo();
-                            }
                             if (!Utils.isGifFile(picDiskCache.getAbsolutePath())) {
                                 mIvGif.setVisibility(View.GONE);
-                                final boolean origAvailable = isOrigAvailable();
+                                final File showFileCache = getShowFileCache();
+                                String path = showFileCache.getAbsolutePath();
                                 mIvReal.setVisibility(View.VISIBLE);
-                                ImageSource source = origAvailable ?
-                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.origUrl).getAbsolutePath()) :
-                                        ImageSource.uri(mConfiguration.getPicDiskCache(mPicInfo.url).getAbsolutePath());
+                                ImageSource source = ImageSource.uri(path);
                                 mIvReal.setImage(source);
                                 mIvReal.setOnClickListener(mFinishClickListener);
                             } else {
@@ -495,62 +424,14 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                                 mIvExit.setVisibility(View.GONE);
                                 mIvGif.setOnClickListener(mFinishClickListener);
                             }
+                            afterGetImg();
                         }
                     }
                 });
     }
 
-    @NonNull
-    private Observable<Integer> downloadByExtraDownloader(final ExtraDownloader extraDownloader,
-                                                          @NonNull final String url,
-                                                          @NonNull final File file) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(final Subscriber<? super Integer> subscriber) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        extraDownloader.startDownload(url, file,
-                                mPicInfo.md5,
-                                new PhotoViewDownloaderCallback() {
-                                    @Override
-                                    public void updateProgress(String url, long current, long total) {
-                                        if (total > 0) {
-                                            final int progress = (int) ((current * 100) / total);
-                                            subscriber.onNext(progress);
-                                        } else {
-                                            subscriber.onNext(0);
-                                        }
-                                    }
+    protected void afterGetImg() {
 
-                                    @Override
-                                    public void cancelDownload(String url) {
-                                    }
-
-                                    @Override
-                                    public void onComplete(String url) {
-                                        subscriber.onCompleted();
-                                    }
-
-                                    @Override
-                                    public void onError(String url, int httpCode) {
-                                        subscriber.onError(new IOException());
-                                    }
-
-                                    @Override
-                                    public void onPause(String url) {
-
-                                    }
-
-                                    @Override
-                                    public void onCancel(String url) {
-
-                                    }
-                                });
-                    }
-                });
-            }
-        });
     }
 
     /**
@@ -576,68 +457,17 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
                 && !mStartGetImageSubscription.isUnsubscribed()) {
             mStartGetImageSubscription.unsubscribe();
         }
-        if (mMediaPlayer != null) {
-            mMediaPlayer.stop();
-            mMediaPlayer.release();
-        }
-        if (mSurface != null) {
-            mSurface.release();
-        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mFullSizeSubscription != null) {
-            mFullSizeSubscription.unsubscribe();
-        }
         // onsaveinstance
         if (mIvTemp != null) {
             mIvTemp.setImageBitmap(null);
             mIvExit.setImageBitmap(null);
             mIvPreview.setImageBitmap(null);
         }
-        if (mExtraDownloader != null) {
-            mExtraDownloader.cancelCallBack(mPicInfo.url);
-        }
-        if (mDownloadFullVideoSubscription != null) {
-            mDownloadFullVideoSubscription.unsubscribe();
-        }
-    }
-
-    public void downloadFullSize() {
-        final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
-        // 下载完成
-        mTvOrig.setText(String.format(Locale.ENGLISH, "%d%%", 0));
-        mFullSizeSubscription = Utils.download(getActivity(), mPicInfo.origUrl, diskCache)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer progress) {
-                        if (progress > 0) {
-                            if (progress != 100) {
-                                mTvOrig.setText(String.format(Locale.ENGLISH, "%d%%", progress));
-                            } else {
-                                mTvOrig.setVisibility(View.GONE);
-                            }
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mTvOrig.setText(R.string.photo_viewpager_view_origin);
-                        Toast.makeText(getContext(), R.string.photo_viewpager_download_failed, Toast.LENGTH_SHORT).show();
-                        throwable.printStackTrace();
-                    }
-                }, new Action0() {
-                    @Override
-                    public void call() {
-                        mTvOrig.setVisibility(View.GONE);
-                        mImageLoaded = false;
-                        loadFileCache(diskCache, false);
-                    }
-                });
     }
 
     @Override
@@ -658,14 +488,26 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
         float maxScale;
-        if (isPortrait(sWidth, sHeight)) {
+        final float widthScale = ((float) sWidth) / ((float) mSceenWidth);
+        final float heightScale = ((float) sHeight) / ((float) mSceenHeight);
+        float currentScale;
+        final boolean portrait = isPortrait(sWidth, sHeight);
+        if (portrait) {
             // 竖照片，放大宽
-            maxScale = ((float) sWidth) / ((float) mSceenWidth);
+            maxScale = widthScale;
+            currentScale = heightScale;
         } else {
-            maxScale = ((float) sHeight) / ((float) mSceenHeight);
+            maxScale = heightScale;
+            currentScale = widthScale;
         }
         if (maxScale < 1) {
             maxScale = 1f / maxScale;
+        }
+        if (currentScale < 1) {
+            currentScale = 1f / currentScale;
+        }
+        if (maxScale - currentScale < 1.5) {
+            maxScale = maxScale + 1.5f;
         }
         mIvReal.setMaxScale(maxScale);
         mIvReal.setDoubleTapZoomScale(maxScale);
@@ -770,11 +612,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         if (mIsAnimateFinishing) {
             return;
         }
-        // 还没加载完
-//        if (mIvGif.getVisibility() == View.GONE
-//                && !mIvReal.isReady()) {
-//            return;
-//        }
         if (mState == State.Animate) {
             return;
         }
@@ -805,14 +642,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             } else if (mIvReal.getVisibility() == View.VISIBLE) {
                 animate = mIvReal.animate();
             } else {
-                if (mVideoView != null) {
-                    animate = mVideoView.animate();
-                    mBtnPlay.animate()
-                            .alpha(0f)
-                            .setInterpolator(new AccelerateInterpolator())
-                            .setDuration(FADE_ANIMATE_DURATION)
-                            .start();
-                }
+                animate = fadeOutContentViewAnimate();
             }
             mIvExit.setVisibility(View.GONE);
             if (animate != null) {
@@ -844,6 +674,11 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
+    @Nullable
+    protected ViewPropertyAnimator fadeOutContentViewAnimate() {
+        return null;
+    }
+
     private void exit(FragmentActivity activity) {
         final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
         supportFragmentManager
@@ -853,7 +688,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mState = State.Finished;
     }
 
-    private boolean animateFinish() {
+    protected boolean animateFinish() {
         if (mActivityCallback == null) {
             return false;
         }
@@ -862,9 +697,6 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
             return false;
         }
         if (mIvGif.getVisibility() == View.VISIBLE) {
-            return false;
-        }
-        if (mVideoView != null) {
             return false;
         }
         mScaleDuration = Math.abs((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));
@@ -981,17 +813,7 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         mOnFinishListener = onFinishListener;
     }
 
-    private View.OnClickListener mViewOrig = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (mFullSizeSubscription != null && !mFullSizeSubscription.isUnsubscribed()) {
-                return;
-            }
-            downloadFullSize();
-        }
-    };
-
-    private final View.OnClickListener mFinishClickListener = new View.OnClickListener() {
+    protected final View.OnClickListener mFinishClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (mOnPictureClickListener != null) {
@@ -1017,202 +839,8 @@ public class ViewPagerFragment extends Fragment implements SubsamplingScaleImage
         }
     }
 
-    private void initVideo() {
-        final View videoView = mVideoStub.inflate();
-        mVideoView = ((TextureView) videoView.findViewById(R.id.vd));
-        mBtnPlay = videoView.findViewById(R.id.btnPlay);
-        mBtnPlay.setOnClickListener(mVideoPlayClickListener);
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
-        mView.requestFocus();
-        mVideoView.setVisibility(View.GONE);
+    public void onParentScroll() {
+
     }
 
-    private void initMediaPlayer(final File picDiskCache) {
-        mPb.setVisibility(View.GONE);
-        mIvReal.setVisibility(View.GONE);
-        mIvTemp.setVisibility(View.GONE);
-        mIvPreview.setVisibility(View.GONE);
-        mVideoView.setVisibility(View.VISIBLE);
-        mVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                try {
-                    boolean needPlay = true;
-                    if (mSurface != null) {
-                        mSurface.release();
-                    }
-                    mSurface = new Surface(surface);
-                    if (mMediaPlayer != null) {
-                        mMediaPlayer.release();
-                        needPlay = false;
-                    }
-                    mMediaPlayer = new MediaPlayer();
-                    mMediaPlayer.setDataSource(getContext(), Uri.fromFile(picDiskCache));
-                    mMediaPlayer.setSurface(mSurface);
-                    mMediaPlayer.prepare();
-                    mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
-                        @Override
-                        public void onVideoSizeChanged(MediaPlayer mp, int videoWidth, int videoHeight) {
-                            double aspectRatio = (double) videoHeight / videoWidth;
-                            int newWidth, newHeight;
-                            final int viewHeight = mView.getHeight();
-                            final int viewWidth = mView.getWidth();
-                            if (viewHeight > (int) (viewWidth * aspectRatio)) {
-                                // limited by narrow width; restrict height
-                                newWidth = viewWidth;
-                                newHeight = (int) (viewWidth * aspectRatio);
-                            } else {
-                                // limited by short height; restrict width
-                                newWidth = (int) (viewHeight / aspectRatio);
-                                newHeight = viewHeight;
-                            }
-                            int xoff = (viewWidth - newWidth) / 2;
-                            int yoff = (viewHeight - newHeight) / 2;
-                            Matrix txform = new Matrix();
-                            txform.setScale((float) newWidth / viewWidth, (float) newHeight / viewHeight);
-                            txform.postTranslate(xoff, yoff);
-                            mVideoView.setTransform(txform);
-                            mVideoView.setOnClickListener(mFinishClickListener);
-                        }
-                    });
-                    mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            mBtnPlay.setVisibility(View.VISIBLE);
-                        }
-                    });
-                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    if (needPlay) {
-                        mMediaPlayer.start();
-                    } else {
-                        mMediaPlayer.seekTo(1);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
-    }
-
-    public void setExtraDownloader(ExtraDownloader extraDownloader) {
-        mExtraDownloader = extraDownloader;
-    }
-
-    private View.OnClickListener mVideoPlayClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
-            if (!diskCache.exists()) {
-                if (mExtraDownloader != null) {
-                    mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
-                        @Override
-                        public void confirm() {
-                            v.setVisibility(View.GONE);
-                            if (mPicInfo.origUrl == null) {
-                                Log.e(getClass().getName(), "PicInfo null");
-                                return;
-                            }
-                            mPb.setVisibility(View.VISIBLE);
-                            mIvReal.setVisibility(View.GONE);
-                            mIvTemp.setVisibility(View.GONE);
-                            ((RelativeLayout.LayoutParams) mFlPreview.getLayoutParams()).addRule(RelativeLayout.CENTER_IN_PARENT, 1);
-                            mFlPreview.requestLayout();
-                            mIvPreview.setDrawableRadius(mFrameSize / 2);
-                            mIvPreview.setVisibility(View.VISIBLE);
-                            final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mPicInfo.origUrl, diskCache);
-                            downloadFullVideo(download, diskCache);
-                        }
-
-                        @Override
-                        public void dismiss() {
-
-                        }
-                    });
-                } else {
-                    final Observable<Integer> download = Utils.download(getActivity(), mPicInfo.origUrl, diskCache);
-                    downloadFullVideo(download, diskCache);
-                }
-            } else {
-                v.setVisibility(View.GONE);
-                if (mMediaPlayer == null) {
-                    // 初始化
-                    initMediaPlayer(diskCache);
-                } else {
-                    // 已经初始化
-                    if (!mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.start();
-                    }
-                }
-            }
-        }
-    };
-
-    private void downloadFullVideo(Observable<Integer> observable, final File diskCache) {
-        mDownloadFullVideoSubscription = observable
-                .throttleLast(1, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
-                    @Override
-                    public void call(Integer progress) {
-                        if (progress > 0 && mPb.isIndeterminate()) {
-                            mPb.setIndeterminate(false);
-                        }
-                        mPb.setProgress(progress);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                        mIvPreview.setVisibility(View.GONE);
-                        mIvReal.setVisibility(View.GONE);
-                        mPb.setVisibility(View.GONE);
-                        mTvError.setVisibility(View.VISIBLE);
-                        mTvError.setOnLongClickListener(ViewPagerFragment.this);
-                        mTvError.setOnClickListener(mFinishClickListener);
-                    }
-                }, new Action0() {
-                    @Override
-                    public void call() {
-                        initMediaPlayer(diskCache);
-                    }
-                });
-    }
-
-    public void stopPlayVideo() {
-        if (mPicInfo.isVideo
-                && mMediaPlayer != null
-                && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.seekTo(0);
-            mMediaPlayer.pause();
-            mBtnPlay.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mPicInfo.isVideo
-                && mMediaPlayer != null
-                && mMediaPlayer.isPlaying()) {
-            mMediaPlayer.stop();
-            mBtnPlay.setVisibility(View.VISIBLE);
-        }
-    }
 }

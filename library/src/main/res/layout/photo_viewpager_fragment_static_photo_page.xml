@@ -42,12 +42,6 @@
             app:cpv_thickness="4dp"/>
     </FrameLayout>
 
-    <ViewStub
-        android:id="@+id/vstubVideo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout="@layout/photo_viewpager_layout_video"/>
-
     <ImageView
         android:id="@+id/ivExitPreview"
         android:layout_width="match_parent"

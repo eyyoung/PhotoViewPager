@@ -156,7 +156,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     @Override
     public void onPageSelected(int position) {
-        final ViewPagerFragment fragment = mVpPhoto.getFragmentByPosition(position);
+        final BasePagerFragment fragment = mVpPhoto.getFragmentByPosition(position);
         if (fragment != null) {
             fragment.selected();
         }
@@ -165,19 +165,19 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     @Override
     public void onPageScrollStateChanged(int state) {
         final int currentItem = mVpPhoto.getCurrentItem();
-        final ViewPagerFragment fragment = mVpPhoto.getFragmentByPosition(currentItem - 1);
+        final BasePagerFragment fragment = mVpPhoto.getFragmentByPosition(currentItem - 1);
         if (fragment != null) {
-            fragment.stopPlayVideo();
+            fragment.onParentScroll();
         }
-        final ViewPagerFragment fragment2 = mVpPhoto.getFragmentByPosition(currentItem + 1);
+        final BasePagerFragment fragment2 = mVpPhoto.getFragmentByPosition(currentItem + 1);
         if (fragment2 != null) {
-            fragment2.stopPlayVideo();
+            fragment2.onParentScroll();
         }
     }
 
     public void exit() {
         final int currentItem = mVpPhoto.getCurrentItem();
-        final ViewPagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+        final BasePagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
         fragmentByPosition.finish();
     }
 

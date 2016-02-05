@@ -31,7 +31,7 @@ class PhotoViewPager extends ViewPager {
     private ArrayList<PicInfo> mPicInfos;
     private Bundle mArguments;
     private int mDefaultPosition;
-    private SparseArray<ViewPagerFragment> mFragmentMap = new SparseArray<>();
+    private SparseArray<BasePagerFragment> mFragmentMap = new SparseArray<>();
     private Callback mCallback;
     private View mBg;
     private OnPictureLongClickListener mOnPictureLongClickListener;
@@ -106,10 +106,16 @@ class PhotoViewPager extends ViewPager {
 
         @Override
         public Fragment getItem(int position) {
-            ViewPagerFragment fragment = ViewPagerFragment.newInstance(mArguments);
+            final PicInfo picInfo = mPicInfos.get(position);
+            BasePagerFragment fragment;
+            if (picInfo.isVideo) {
+                fragment = VideoPagerFragment.newVideoInstance(mArguments);
+                ((VideoPagerFragment) fragment).setExtraDownloader(mExtraDownloader);
+            } else {
+                fragment = PhotoPagerFragment.newPhotoInstance(mArguments);
+            }
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
-            final PicInfo picInfo = mPicInfos.get(position);
             fragment.setPicInfo(picInfo);
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
@@ -117,9 +123,6 @@ class PhotoViewPager extends ViewPager {
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             fragment.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
             fragment.setConfiguration(mConfiguration);
-            if (picInfo.isVideo) {
-                fragment.setExtraDownloader(mExtraDownloader);
-            }
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
                 mDefaultPosition = -1;
@@ -139,7 +142,7 @@ class PhotoViewPager extends ViewPager {
         }
     }
 
-    public ViewPagerFragment getFragmentByPosition(int position) {
+    public BasePagerFragment getFragmentByPosition(int position) {
         return mFragmentMap.get(position);
     }
 

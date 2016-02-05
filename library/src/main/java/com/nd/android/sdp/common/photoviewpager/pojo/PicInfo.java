@@ -18,41 +18,28 @@ public class PicInfo implements Parcelable {
     public String origUrl;
     @Nullable
     public String md5;
-    public boolean isVideo;
     public long size;
 
+    @Deprecated
     public PicInfo(@NonNull String url,
                    @NonNull String previewUrl,
                    @Nullable String origUrl,
                    long size) {
-        this(url, previewUrl, origUrl, size, false);
+        this(url, previewUrl, origUrl, size, null);
     }
 
+    @Deprecated
     public PicInfo(@NonNull String url,
                    @NonNull String previewUrl,
                    @Nullable String origUrl,
                    long size,
-                   boolean isVideo,
                    @Nullable
                    String md5) {
         this.url = url;
         this.previewUrl = previewUrl;
         this.origUrl = origUrl;
         this.size = size;
-        this.isVideo = isVideo;
         this.md5 = md5;
-    }
-
-    public PicInfo(@NonNull String url,
-                   @NonNull String previewUrl,
-                   @Nullable String origUrl,
-                   long size,
-                   boolean isVideo) {
-        this.url = url;
-        this.previewUrl = previewUrl;
-        this.origUrl = origUrl;
-        this.size = size;
-        this.isVideo = isVideo;
     }
 
     protected PicInfo(Parcel in) {
@@ -60,8 +47,19 @@ public class PicInfo implements Parcelable {
         previewUrl = in.readString();
         origUrl = in.readString();
         size = in.readLong();
-        isVideo = in.readInt() != 0;
         md5 = in.readString();
+    }
+
+    private PicInfo(Builder builder) {
+        url = builder.url;
+        previewUrl = builder.previewUrl;
+        origUrl = builder.origUrl;
+        md5 = builder.md5;
+        size = builder.size;
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     @Override
@@ -70,7 +68,6 @@ public class PicInfo implements Parcelable {
         dest.writeString(previewUrl);
         dest.writeString(origUrl);
         dest.writeLong(size);
-        dest.writeInt(isVideo ? 1 : 0);
         dest.writeString(md5);
     }
 
@@ -90,4 +87,50 @@ public class PicInfo implements Parcelable {
             return new PicInfo[size];
         }
     };
+
+    public static final class Builder {
+        private String url;
+        private String previewUrl;
+        private String origUrl;
+        private String md5;
+        private long size;
+
+        private Builder() {
+        }
+
+        @NonNull
+        public Builder url(@NonNull String val) {
+            url = val;
+            return this;
+        }
+
+        @NonNull
+        public Builder previewUrl(@NonNull String val) {
+            previewUrl = val;
+            return this;
+        }
+
+        @NonNull
+        public Builder origUrl(@NonNull String val) {
+            origUrl = val;
+            return this;
+        }
+
+        @NonNull
+        public Builder md5(@NonNull String val) {
+            md5 = val;
+            return this;
+        }
+
+        @NonNull
+        public Builder size(long val) {
+            size = val;
+            return this;
+        }
+
+        @NonNull
+        public PicInfo build() {
+            return new PicInfo(this);
+        }
+    }
 }
