@@ -16,6 +16,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListe
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
+import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private IPhotoViewPagerConfiguration mConfiguration;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
-                                              ArrayList<PicInfo> picInfos,
+                                              ArrayList<? extends Info> picInfos,
                                               int defaultPosition,
                                               Callback callback,
                                               IPhotoViewPagerConfiguration configuration) {

@@ -22,6 +22,8 @@ import android.widget.RelativeLayout;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewConfirmDownloadCallback;
 import com.nd.android.sdp.common.photoviewpager.downloader.PhotoViewDownloaderCallback;
+import com.nd.android.sdp.common.photoviewpager.pojo.Info;
+import com.nd.android.sdp.common.photoviewpager.pojo.VideoInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 
 import java.io.File;
@@ -49,10 +51,11 @@ public class VideoPagerFragment extends BasePagerFragment {
     private Subscription mDownloadFullVideoSubscription;
     private Surface mSurface;
     private FrameLayout mFlVideo;
+    private VideoInfo mVideoInfo;
 
     @Override
     protected File getShowFileCache() {
-        return mConfiguration.getPicDiskCache(mPicInfo.url);
+        return mConfiguration.getPicDiskCache(mInfo.getUrl());
     }
 
     @Override
@@ -89,7 +92,7 @@ public class VideoPagerFragment extends BasePagerFragment {
     public void onDestroy() {
         super.onDestroy();
         if (mExtraDownloader != null) {
-            mExtraDownloader.cancelCallBack(mPicInfo.url);
+            mExtraDownloader.cancelCallBack(mInfo.getOrigUrl());
         }
         if (mDownloadFullVideoSubscription != null) {
             mDownloadFullVideoSubscription.unsubscribe();
@@ -207,7 +210,7 @@ public class VideoPagerFragment extends BasePagerFragment {
     private View.OnClickListener mVideoPlayClickListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final File diskCache = mConfiguration.getPicDiskCache(mPicInfo.origUrl);
+            final File diskCache = mConfiguration.getPicDiskCache(mVideoInfo.videoUrl);
             if (!diskCache.exists()) {
                 if (mExtraDownloader != null) {
                     mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
@@ -215,8 +218,7 @@ public class VideoPagerFragment extends BasePagerFragment {
                         public void confirm() {
                             if (initStartDownload()) return;
                             v.setVisibility(View.GONE);
-                            assert mPicInfo.origUrl != null;
-                            final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mPicInfo.origUrl, diskCache);
+                            final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mVideoInfo.videoUrl, diskCache);
                             downloadFullVideo(download, diskCache);
                         }
 
@@ -228,8 +230,8 @@ public class VideoPagerFragment extends BasePagerFragment {
                 } else {
                     if (initStartDownload()) return;
                     v.setVisibility(View.GONE);
-                    assert mPicInfo.origUrl != null;
-                    final Observable<Integer> download = Utils.download(getActivity(), mPicInfo.origUrl, diskCache);
+                    assert mInfo.getOrigUrl() != null;
+                    final Observable<Integer> download = Utils.download(getActivity(), mInfo.getOrigUrl(), diskCache);
                     downloadFullVideo(download, diskCache);
                 }
             } else {
@@ -309,7 +311,7 @@ public class VideoPagerFragment extends BasePagerFragment {
                     @Override
                     public void run() {
                         extraDownloader.startDownload(url, file,
-                                mPicInfo.md5,
+                                mVideoInfo.videoUrl,
                                 new PhotoViewDownloaderCallback() {
                                     @Override
                                     public void updateProgress(String url, long current, long total) {
@@ -372,10 +374,6 @@ public class VideoPagerFragment extends BasePagerFragment {
     }
 
     protected boolean initStartDownload() {
-        if (mPicInfo.origUrl == null) {
-            Log.e(getClass().getName(), "PicInfo null");
-            return true;
-        }
         mPb.setVisibility(View.VISIBLE);
         mIvReal.setVisibility(View.GONE);
         mIvTemp.setVisibility(View.GONE);
@@ -384,5 +382,11 @@ public class VideoPagerFragment extends BasePagerFragment {
         mIvPreview.setDrawableRadius(mFrameSize / 2);
         mIvPreview.setVisibility(View.VISIBLE);
         return false;
+    }
+
+    @Override
+    public void setInfo(Info picInfo) {
+        super.setInfo(picInfo);
+        mVideoInfo = (VideoInfo) picInfo;
     }
 }

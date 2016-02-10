@@ -14,11 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <pl.droidsonroids.gif.GifImageView
-        android:id="@+id/ivGif"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
     <FrameLayout
         android:id="@+id/flPreview"
         android:layout_width="@dimen/photo_viewpager_preview_size"

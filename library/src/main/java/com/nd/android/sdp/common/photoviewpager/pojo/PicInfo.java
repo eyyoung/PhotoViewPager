@@ -1,14 +1,19 @@
 package com.nd.android.sdp.common.photoviewpager.pojo;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.nd.android.sdp.common.photoviewpager.BasePagerFragment;
+import com.nd.android.sdp.common.photoviewpager.PhotoPagerFragment;
+import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
+
 /**
  * 图片信息
  */
-public class PicInfo implements Parcelable {
+public class PicInfo implements Parcelable, Info {
 
     @NonNull
     public String url;
@@ -87,6 +92,29 @@ public class PicInfo implements Parcelable {
             return new PicInfo[size];
         }
     };
+
+    @Override
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    @Override
+    public String getUrl() {
+        return url;
+    }
+
+    @Override
+    public String getOrigUrl() {
+        return origUrl;
+    }
+
+    @Override
+    public BasePagerFragment getFragment(Bundle bundle,
+                                         ExtraDownloader extraDownloader) {
+        BasePagerFragment basePagerFragment = PhotoPagerFragment.newPhotoInstance(bundle);
+        basePagerFragment.setInfo(this);
+        return basePagerFragment;
+    }
 
     public static final class Builder {
         private String url;

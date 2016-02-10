@@ -17,6 +17,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
+import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import java.util.ArrayList;
  */
 class PhotoViewPager extends ViewPager {
 
-    private ArrayList<PicInfo> mPicInfos;
+    private ArrayList<? extends Info> mPicInfos;
     private Bundle mArguments;
     private int mDefaultPosition;
     private SparseArray<BasePagerFragment> mFragmentMap = new SparseArray<>();
@@ -55,8 +56,8 @@ class PhotoViewPager extends ViewPager {
         }
     }
 
-    public void init(FragmentManager fragmentManager, ArrayList<PicInfo> images,
-            Bundle arguments, int defaultPosition) {
+    public void init(FragmentManager fragmentManager, ArrayList<? extends Info> images,
+                     Bundle arguments, int defaultPosition) {
         mPicInfos = images;
         mArguments = arguments;
         mDefaultPosition = defaultPosition;
@@ -106,17 +107,11 @@ class PhotoViewPager extends ViewPager {
 
         @Override
         public Fragment getItem(int position) {
-            final PicInfo picInfo = mPicInfos.get(position);
-            BasePagerFragment fragment;
-            if (picInfo.isVideo) {
-                fragment = VideoPagerFragment.newVideoInstance(mArguments);
-                ((VideoPagerFragment) fragment).setExtraDownloader(mExtraDownloader);
-            } else {
-                fragment = PhotoPagerFragment.newPhotoInstance(mArguments);
-            }
+            Info info = mPicInfos.get(position);
+            BasePagerFragment fragment = info.getFragment(mArguments,
+                    mExtraDownloader);
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
-            fragment.setPicInfo(picInfo);
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
             fragment.setOnPictureClickListener(mOnPictureClickListener);

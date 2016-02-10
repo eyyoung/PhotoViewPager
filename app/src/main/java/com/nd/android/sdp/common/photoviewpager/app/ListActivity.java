@@ -23,7 +23,9 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
+import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.common.photoviewpager.pojo.VideoInfo;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -113,21 +115,25 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ArrayList<PicInfo> picInfos = new ArrayList<>();
+        ArrayList<Info> picInfos = new ArrayList<>();
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
-            boolean isVideo = false;
+            Info info;
             if (i == urlsLength - 1) {
-                isVideo = true;
+                info = VideoInfo.newBuilder()
+                        .size(new Random().nextInt(10 * 1024 * 1024))
+                        .thumb(preview_urls[i])
+                        .videoUrl(orig_urls[i])
+                        .build();
+            } else {
+                info = new PicInfo(urls[i],
+                        preview_urls[i],
+                        orig_urls[i],
+                        new Random().nextInt(10 * 1024 * 1024)
+                );
             }
-            PicInfo picInfo = new PicInfo(urls[i],
-                    preview_urls[i],
-                    orig_urls[i],
-                    new Random().nextInt(10 * 1024 * 1024),
-                    isVideo
-            );
-            picInfos.add(picInfo);
+            picInfos.add(info);
         }
-        mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
+        mPhotoViewPagerFragment = PhotoViewPagerManager.startView(this,
                 (ImageView) view, picInfos,
                 position,
                 this);

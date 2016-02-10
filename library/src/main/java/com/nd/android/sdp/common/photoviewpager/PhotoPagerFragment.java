@@ -1,17 +1,26 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.text.format.Formatter;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nd.android.sdp.common.photoviewpager.pojo.Info;
+import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 
 import java.io.File;
 import java.util.Locale;
 
+import pl.droidsonroids.gif.GifImageView;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -25,10 +34,19 @@ public class PhotoPagerFragment extends BasePagerFragment {
 
     private Subscription mFullSizeSubscription;
     private TextView mTvOrig;
+    private PicInfo mPicInfo;
+    private GifImageView mIvGif;
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.photo_viewpager_fragment_static_photo_page, container, false);
+    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mIvGif.setOnLongClickListener(this);
     }
 
     @Override
@@ -36,6 +54,7 @@ public class PhotoPagerFragment extends BasePagerFragment {
         super.findView(view);
         mTvOrig = ((TextView) mView.findViewById(R.id.tvOrig));
         mTvOrig.setOnClickListener(mViewOrig);
+        mIvGif = ((GifImageView) mView.findViewById(R.id.ivGif));
     }
 
     @Override
@@ -125,6 +144,46 @@ public class PhotoPagerFragment extends BasePagerFragment {
         super.onDestroy();
         if (mFullSizeSubscription != null) {
             mFullSizeSubscription.unsubscribe();
+        }
+    }
+
+    @Nullable
+    @Override
+    protected ViewPropertyAnimator fadeOutContentViewAnimate() {
+        if (mIvGif.getVisibility() == View.VISIBLE) {
+            return mIvGif.animate();
+        }
+        return super.fadeOutContentViewAnimate();
+    }
+
+    @Override
+    protected boolean animateFinish() {
+        return mIvGif.getVisibility() != View.VISIBLE && super.animateFinish();
+    }
+
+    @Override
+    public void setInfo(Info picInfo) {
+        super.setInfo(picInfo);
+        mPicInfo = ((PicInfo) picInfo);
+    }
+
+    @Override
+    protected void loadFileCache(File fileCache, boolean needAnimate) {
+        if (!Utils.isGifFile(fileCache.getAbsolutePath())) {
+            super.loadFileCache(fileCache, needAnimate);
+        } else {
+            mState = State.Loading;
+            if (needAnimate) {
+                AnimateUtils.fadeInView(mIvGif);
+            }
+            mPb.setVisibility(View.GONE);
+            mIvReal.setVisibility(View.GONE);
+            mIvGif.setVisibility(View.VISIBLE);
+            mIvGif.setImageURI(Uri.fromFile(fileCache));
+            mIvExit.setVisibility(View.GONE);
+            mIvTemp.setVisibility(View.GONE);
+            mIvPreview.setVisibility(View.GONE);
+            mIvGif.setOnClickListener(mFinishClickListener);
         }
     }
 }
