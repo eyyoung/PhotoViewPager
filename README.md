@@ -3,7 +3,7 @@ PhotoViewPager
 
  
 
-最新版本：0.3.79
+最新版本：1.0.111
 
  
 
@@ -22,6 +22,8 @@ PhotoViewPager
 -   支持GIF动态图片
 
 -   支持自定义增加界面新功能  
+
+-   支持小视频播放
 
  
 
@@ -61,27 +63,63 @@ ImageLoaderIniter.INSTANCE.init();
 看大图界面打开函数：
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-PhotoViewPagerManager#start(FragmentActivity, //Activity
+PhotoViewPagerManager#startView(FragmentActivity, //Activity
         ImageView, //ImageView,可为空
-        ArrayList<PicInfo>, //图片信息
+        ArrayList<Info>, //图片信息
         int, //默认页面
         Callback, //回调（用于获取界面上对应的控件），可为空
         IPhotoViewPagerConfiguration)//磁盘与内存缓存配置，为空使用全局配置
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
- 
+ Info类型先支持两种：图片与视频
 
 PicInfo 图片信息
 
--   url 大图URL
+-   url 大图URL（必填）
 
--   previewUrl 缩略图URL
+-   previewUrl 缩略图URL（必填）
 
--   origUrl 原图URL
+-   origUrl 原图URL（选填）
 
--   size 原图大小
+-   size 原图大小（选填）
 
- 
+-   md5值（选填）
+
+ 构造方式：
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PicInfo.newBuilder()
+       .previewUrl(thumbPath)
+       .origUrl(originalPath)
+       .url(fullPath)
+       .size(pictureKeyMessage.getSize())
+       .md5(pictureKeyMessage.getMd5())
+       .build();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+VideoInfo 视频信息
+
+-   thumb 缩略图URL（必填）
+
+-   bigthumb 用于未进行播放时展示的缩略图URL（必填）
+
+-   videoUrl 视频URL（选填）
+
+-   size 视频大小（选填）
+
+-   md5 视频md5值（选填）
+
+构造方式：
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+VideoInfo.newBuilder()
+         .videoUrl(originalPath)
+         .thumb(thumbPath)
+         .bigthumb(fullPath)
+         .size(pictureKeyMessage.getSize())
+         .md5(pictureKeyMessage.getMd5())
+         .build();
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 本库依赖：
 ----------

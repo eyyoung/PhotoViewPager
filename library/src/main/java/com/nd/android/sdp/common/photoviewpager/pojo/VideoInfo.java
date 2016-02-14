@@ -18,9 +18,9 @@ import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
  */
 public class VideoInfo implements Parcelable, Info {
 
-    @Nullable
+    @NonNull
     public String thumb;
-    @Nullable
+    @NonNull
     public String bigthumb;
     @NonNull
     public String videoUrl;
