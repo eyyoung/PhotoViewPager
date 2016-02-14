@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
@@ -210,44 +209,48 @@ public class VideoPagerFragment extends BasePagerFragment {
     private View.OnClickListener mVideoPlayClickListener = new View.OnClickListener() {
         @Override
         public void onClick(final View v) {
-            final File diskCache = mConfiguration.getPicDiskCache(mVideoInfo.videoUrl);
-            if (!diskCache.exists()) {
-                if (mExtraDownloader != null) {
-                    mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
-                        @Override
-                        public void confirm() {
-                            if (initStartDownload()) return;
-                            v.setVisibility(View.GONE);
-                            final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mVideoInfo.videoUrl, diskCache);
-                            downloadFullVideo(download, diskCache);
-                        }
+            startPlay(v);
+        }
+    };
 
-                        @Override
-                        public void dismiss() {
-
-                        }
-                    });
-                } else {
-                    if (initStartDownload()) return;
-                    v.setVisibility(View.GONE);
-                    assert mInfo.getOrigUrl() != null;
-                    final Observable<Integer> download = Utils.download(getActivity(), mInfo.getOrigUrl(), diskCache);
-                    downloadFullVideo(download, diskCache);
-                }
-            } else {
-                v.setVisibility(View.GONE);
-                if (mMediaPlayer == null) {
-                    // 初始化
-                    initMediaPlayer(diskCache);
-                } else {
-                    // 已经初始化
-                    if (!mMediaPlayer.isPlaying()) {
-                        mMediaPlayer.start();
+    protected void startPlay(final View v) {
+        final File diskCache = mConfiguration.getPicDiskCache(mVideoInfo.videoUrl);
+        if (!diskCache.exists()) {
+            if (mExtraDownloader != null) {
+                mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
+                    @Override
+                    public void confirm() {
+                        if (initStartDownload()) return;
+                        v.setVisibility(View.GONE);
+                        final Observable<Integer> download = downloadByExtraDownloader(mExtraDownloader, mVideoInfo.videoUrl, diskCache);
+                        downloadFullVideo(download, diskCache);
                     }
+
+                    @Override
+                    public void dismiss() {
+
+                    }
+                });
+            } else {
+                if (initStartDownload()) return;
+                v.setVisibility(View.GONE);
+                assert mInfo.getOrigUrl() != null;
+                final Observable<Integer> download = Utils.download(getActivity(), mInfo.getOrigUrl(), diskCache);
+                downloadFullVideo(download, diskCache);
+            }
+        } else {
+            v.setVisibility(View.GONE);
+            if (mMediaPlayer == null) {
+                // 初始化
+                initMediaPlayer(diskCache);
+            } else {
+                // 已经初始化
+                if (!mMediaPlayer.isPlaying()) {
+                    mMediaPlayer.start();
                 }
             }
         }
-    };
+    }
 
     private void downloadFullVideo(Observable<Integer> observable, final File diskCache) {
         mDownloadFullVideoSubscription = observable
@@ -388,5 +391,13 @@ public class VideoPagerFragment extends BasePagerFragment {
     public void setInfo(Info picInfo) {
         super.setInfo(picInfo);
         mVideoInfo = (VideoInfo) picInfo;
+    }
+
+    @Override
+    public void onImageLoadError(Exception e) {
+        super.onImageLoadError(e);
+        mTvError.setVisibility(View.GONE);
+        initVideo();
+        startPlay(mBtnPlay);
     }
 }

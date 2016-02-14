@@ -5,6 +5,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.nd.android.sdp.common.photoviewpager.BasePagerFragment;
 import com.nd.android.sdp.common.photoviewpager.VideoPagerFragment;
@@ -19,6 +20,8 @@ public class VideoInfo implements Parcelable, Info {
 
     @Nullable
     public String thumb;
+    @Nullable
+    public String bigthumb;
     @NonNull
     public String videoUrl;
     @Nullable
@@ -28,6 +31,7 @@ public class VideoInfo implements Parcelable, Info {
     private VideoInfo(Builder builder) {
         thumb = builder.thumb;
         videoUrl = builder.videoUrl;
+        bigthumb = builder.bigthumb;
         md5 = builder.md5;
         size = builder.size;
     }
@@ -43,7 +47,7 @@ public class VideoInfo implements Parcelable, Info {
 
     @Override
     public String getUrl() {
-        return thumb;
+        return TextUtils.isEmpty(bigthumb) ? thumb : bigthumb;
     }
 
     @Override
@@ -65,6 +69,7 @@ public class VideoInfo implements Parcelable, Info {
         private String videoUrl;
         private String md5;
         private long size;
+        private String bigthumb;
 
         private Builder() {
         }
@@ -94,6 +99,12 @@ public class VideoInfo implements Parcelable, Info {
         }
 
         @NonNull
+        public Builder bigthumb(@NonNull String val){
+            bigthumb = val;
+            return this;
+        }
+
+        @NonNull
         public VideoInfo build() {
             return new VideoInfo(this);
         }
@@ -107,6 +118,7 @@ public class VideoInfo implements Parcelable, Info {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.thumb);
+        dest.writeString(this.bigthumb);
         dest.writeString(this.videoUrl);
         dest.writeString(this.md5);
         dest.writeLong(this.size);
@@ -114,6 +126,7 @@ public class VideoInfo implements Parcelable, Info {
 
     protected VideoInfo(Parcel in) {
         this.thumb = in.readString();
+        this.bigthumb = in.readString();
         this.videoUrl = in.readString();
         this.md5 = in.readString();
         this.size = in.readLong();

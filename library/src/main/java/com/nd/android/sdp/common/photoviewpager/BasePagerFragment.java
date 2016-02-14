@@ -8,7 +8,6 @@ import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
@@ -19,7 +18,6 @@ import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -33,7 +31,6 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
-import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
@@ -48,7 +45,6 @@ import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 
-import pl.droidsonroids.gif.GifImageView;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -376,6 +372,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                         mTvError.setVisibility(View.VISIBLE);
                         mTvError.setOnLongClickListener(BasePagerFragment.this);
                         mTvError.setOnClickListener(mFinishClickListener);
+                        onImageLoadError((Exception) throwable);
                     }
                 }, new Action0() {
                     @Override
@@ -652,7 +649,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         if (mActivityCallback == null) {
             return false;
         }
-        final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getUrl());
+        final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
         if (previewView == null) {
             return false;
         }
