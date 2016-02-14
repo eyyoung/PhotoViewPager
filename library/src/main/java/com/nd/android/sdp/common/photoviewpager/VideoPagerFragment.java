@@ -110,6 +110,9 @@ public class VideoPagerFragment extends BasePagerFragment {
     }
 
     private void initVideo() {
+        if (mFlVideo != null) {
+            return;
+        }
         mFlVideo = (FrameLayout) mVideoStub.inflate();
         mVideoView = ((TextureView) mFlVideo.findViewById(R.id.vd));
         mBtnPlay = mFlVideo.findViewById(R.id.btnPlay);

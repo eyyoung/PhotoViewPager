@@ -121,7 +121,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             if (i == urlsLength - 1) {
                 info = VideoInfo.newBuilder()
                         .size(new Random().nextInt(10 * 1024 * 1024))
-                        .thumb(preview_urls[i])
+                        .thumb("image://test.jpg")
                         .videoUrl(orig_urls[i])
                         .build();
             } else {
