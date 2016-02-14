@@ -3,7 +3,6 @@ package com.nd.android.sdp.common.photoviewpager.app;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -15,8 +14,6 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
@@ -44,9 +41,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=960",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
-//            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
+            "http://betacs.101.com/v0.1/download?dentryId=388933c0-4c0a-4438-8051-06a2012b3c93"
     };
 
     String[] preview_urls = new String[]{
@@ -57,9 +58,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=160",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
-//            "file:///storage/emulated/0/Pictures/Test/test (20).jpg"
+            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=1680x0&quality=96&stripmeta=0&type=jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
+            "http://betacs.101.com/v0.1/download?dentryId=388933c0-4c0a-4438-8051-06a2012b3c93&size=160"
     };
 
     String[] orig_urls = new String[]{
@@ -70,9 +75,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
             "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d",
-            "file:///storage/emulated/0/Pictures/World.jpg",
-            "file:///storage/emulated/0/Pictures/Screenshots/Screenshot_20160106-150515.png"
-//            ""
+            "http://ww2.sinaimg.cn/bmiddle/6f9303b5gw1ezhod4l65wj20pe0zkjxq.jpg",
+            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
+            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
+            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
+            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
+            "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c977"
     };
 
     private ListView mLv;
@@ -106,10 +115,15 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ArrayList<PicInfo> picInfos = new ArrayList<>();
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
+            boolean isVideo = false;
+            if (i == urlsLength - 1) {
+                isVideo = true;
+            }
             PicInfo picInfo = new PicInfo(urls[i],
                     preview_urls[i],
                     orig_urls[i],
-                    new Random().nextInt(10 * 1024 * 1024)
+                    new Random().nextInt(10 * 1024 * 1024),
+                    isVideo
             );
             picInfos.add(picInfo);
         }
@@ -150,13 +164,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public void onViewCreated(View view) {
-        final RelativeLayout relativeLayout = (RelativeLayout) view;
-        final TextView textView = new TextView(this);
-        textView.setText("EXIT");
-        textView.setTextColor(Color.WHITE);
-        textView.setPadding(20, 20, 0, 0);
-        textView.setOnClickListener(this);
-        relativeLayout.addView(textView);
+//        final RelativeLayout relativeLayout = (RelativeLayout) view;
+//        final TextView textView = new TextView(this);
+//        textView.setText("EXIT");
+//        textView.setTextColor(Color.WHITE);
+//        textView.setPadding(20, 20, 0, 0);
+//        textView.setOnClickListener(this);
+//        relativeLayout.addView(textView);
     }
 
     @Override

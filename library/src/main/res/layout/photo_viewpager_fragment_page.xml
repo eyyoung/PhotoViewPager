@@ -42,6 +42,12 @@
             app:cpv_thickness="4dp"/>
     </FrameLayout>
 
+    <ViewStub
+        android:id="@+id/vstubVideo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout="@layout/photo_viewpager_layout_video"/>
+
     <ImageView
         android:id="@+id/ivExitPreview"
         android:layout_width="match_parent"
@@ -63,10 +69,11 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
+        android:textSize="12dp"
+        android:background="@drawable/photo_viewpager_bg_view_orig"
         android:gravity="center"
         android:minWidth="72dp"
-        android:textColor="#dddddd"
-        android:background="@drawable/photo_viewpager_bg_view_orig"
-        android:text="@string/photo_viewpager_view_origin"/>
+        android:text="@string/photo_viewpager_view_origin"
+        android:textColor="#dddddd"/>
 
 </RelativeLayout>

@@ -16,16 +16,43 @@ public class PicInfo implements Parcelable {
     public String previewUrl;
     @Nullable
     public String origUrl;
+    @Nullable
+    public String md5;
+    public boolean isVideo;
     public long size;
 
     public PicInfo(@NonNull String url,
                    @NonNull String previewUrl,
                    @Nullable String origUrl,
                    long size) {
+        this(url, previewUrl, origUrl, size, false);
+    }
+
+    public PicInfo(@NonNull String url,
+                   @NonNull String previewUrl,
+                   @Nullable String origUrl,
+                   long size,
+                   boolean isVideo,
+                   @Nullable
+                   String md5) {
         this.url = url;
         this.previewUrl = previewUrl;
         this.origUrl = origUrl;
         this.size = size;
+        this.isVideo = isVideo;
+        this.md5 = md5;
+    }
+
+    public PicInfo(@NonNull String url,
+                   @NonNull String previewUrl,
+                   @Nullable String origUrl,
+                   long size,
+                   boolean isVideo) {
+        this.url = url;
+        this.previewUrl = previewUrl;
+        this.origUrl = origUrl;
+        this.size = size;
+        this.isVideo = isVideo;
     }
 
     protected PicInfo(Parcel in) {
@@ -33,6 +60,8 @@ public class PicInfo implements Parcelable {
         previewUrl = in.readString();
         origUrl = in.readString();
         size = in.readLong();
+        isVideo = in.readInt() != 0;
+        md5 = in.readString();
     }
 
     @Override
@@ -41,6 +70,8 @@ public class PicInfo implements Parcelable {
         dest.writeString(previewUrl);
         dest.writeString(origUrl);
         dest.writeLong(size);
+        dest.writeInt(isVideo ? 1 : 0);
+        dest.writeString(md5);
     }
 
     @Override
