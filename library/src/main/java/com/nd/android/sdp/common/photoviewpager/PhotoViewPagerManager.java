@@ -145,7 +145,7 @@ public enum PhotoViewPagerManager {
         if (callback == null) {
             callback = new Callback() {
                 @Override
-                public ImageView getPreviewView(String url) {
+                public ImageView getPreviewView(String previewUrl) {
                     return null;
                 }
             };

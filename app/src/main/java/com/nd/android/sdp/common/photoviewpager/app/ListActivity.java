@@ -150,11 +150,11 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public ImageView getPreviewView(String url) {
+    public ImageView getPreviewView(String previewUrl) {
         final int childCount = mLv.getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View iv = mLv.getChildAt(i);
-            if (iv.getTag().equals(url)) {
+            if (iv.getTag().equals(previewUrl)) {
                 return (ImageView) iv;
             }
         }

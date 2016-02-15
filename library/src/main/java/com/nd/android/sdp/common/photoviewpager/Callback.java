@@ -6,9 +6,9 @@ public interface Callback {
     /**
      * 获取预览控件
      *
-     * @param url url
+     * @param previewUrl previewUrl
      * @return 预览控件
      */
-    ImageView getPreviewView(String url);
+    ImageView getPreviewView(String previewUrl);
 
 }

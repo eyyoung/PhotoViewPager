@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
     }
 
     @Override
-    public ImageView getPreviewView(String url) {
-        if (url.equals(preview_urls[0])) {
+    public ImageView getPreviewView(String previewUrl) {
+        if (previewUrl.equals(preview_urls[0])) {
             return null;
         } else {
             return mIv2;
