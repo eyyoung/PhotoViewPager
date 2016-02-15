@@ -3,7 +3,10 @@ PhotoViewPager
 
  
 
-最新版本：1.0.111
+最新版本：
+
+[Nexus仓库Latest
+Version](<http://nexus.sdp.nd/nexus/#nexus-search;gav~com.nd.android.sdp.common~photoview~~~>)
 
  
 
