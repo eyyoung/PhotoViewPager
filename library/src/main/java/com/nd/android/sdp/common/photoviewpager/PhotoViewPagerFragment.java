@@ -248,6 +248,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void addOnPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener) {
         mOnPageListeners.add(onPageChangeListener);
+        if (mVpPhoto != null) {
+            mVpPhoto.addOnPageChangeListener(onPageChangeListener);
+        }
     }
 
     /**
