@@ -229,4 +229,43 @@ public class Utils {
                     }
                 });
     }
+
+    /**
+     * 复制文件
+     *
+     * @param fromFile 源文件
+     * @param toFile   目标文件
+     * @param rewrite  覆盖
+     * @return
+     */
+    public static boolean copyfile(File fromFile, File toFile, Boolean rewrite) {
+        if (fromFile.exists() && fromFile.isFile() && fromFile.canRead()) {
+            if (!toFile.getParentFile().exists()) {
+                toFile.getParentFile().mkdirs();
+            }
+
+            if (toFile.exists() && rewrite.booleanValue()) {
+                toFile.delete();
+            }
+
+            try {
+                FileInputStream ex = new FileInputStream(fromFile);
+                FileOutputStream os = new FileOutputStream(toFile);
+                byte[] bt = new byte[1024];
+
+                int c;
+                while ((c = ex.read(bt)) > 0) {
+                    os.write(bt, 0, c);
+                }
+
+                ex.close();
+                os.close();
+            } catch (Exception var8) {
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

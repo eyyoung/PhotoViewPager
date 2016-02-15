@@ -18,7 +18,6 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListe
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
-import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 
 import java.util.ArrayList;
 
@@ -104,6 +103,10 @@ class PhotoViewPager extends ViewPager {
             super(fm);
         }
 
+        @Override
+        public int getItemPosition(Object object) {
+            return POSITION_NONE;
+        }
 
         @Override
         public Fragment getItem(int position) {

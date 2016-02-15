@@ -3,5 +3,7 @@
     <string name="photo_viewpager_download_failed">Download Image Failed</string>
     <string name="photo_viewpager_view_origin">Full Size</string>
     <string name="photo_viewpager_view_origin_with_size">Full Size(%s)</string>
+    <string name="photo_viewpager_save_completed">Save Success！</string>
+    <string name="photo_viewpager_save_failed">File save failed</string>
 
 </resources>

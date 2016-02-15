@@ -1,15 +1,19 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
@@ -17,11 +21,15 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListe
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
-import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Photo view pager fragment.
+ */
 public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPageChangeListener {
 
     private List<ViewPager.OnPageChangeListener> mOnPageListeners = new ArrayList<>();
@@ -37,7 +45,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     public static final String TAG_PHOTO = "tag_photo";
     private static final String PARAM_DEFAULT_POSITION = "default_position";
     private PhotoViewPager mVpPhoto;
-    private ArrayList<PicInfo> mImages;
+    private ArrayList<Info> mImages;
     private Callback mCallback;
     private OnViewCreatedListener mOnViewCreatedListener;
     private OnFinishListener mOnFinishListener;
@@ -72,6 +80,12 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     }
 
     private void setConfiguration(IPhotoViewPagerConfiguration configuration) {
+        if (configuration == null) {
+            configuration = PhotoViewPagerManager.INSTANCE.getConfiguration();
+        }
+        if (configuration == null) {
+            throw new IllegalArgumentException("Must Have a Configuration");
+        }
         mConfiguration = configuration;
     }
 
@@ -96,6 +110,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
                 supportFragmentManager
                         .beginTransaction()
                         .remove(fragment)
+                        .addToBackStack(TAG_PHOTO)
                         .commit();
             }
             return;
@@ -209,34 +224,79 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void deletePosition(int position) {
         mImages.remove(position);
-        mVpPhoto.getAdapter().notifyDataSetChanged();
+        final PagerAdapter adapter = mVpPhoto.getAdapter();
+        adapter.notifyDataSetChanged();
+        mVpPhoto.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!isAdded()) {
+                    return;
+                }
+                final int currentItem = mVpPhoto.getCurrentItem();
+                final BasePagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+                if (fragmentByPosition != null) {
+                    fragmentByPosition.selected();
+                }
+            }
+        });
     }
 
+    /**
+     * Add on page change listener.
+     *
+     * @param onPageChangeListener the on page change listener
+     */
     public void addOnPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener) {
         mOnPageListeners.add(onPageChangeListener);
     }
 
+    /**
+     * Sets on view created listener.
+     *
+     * @param onViewCreatedListener the on view created listener
+     */
     public void setOnViewCreatedListener(OnViewCreatedListener onViewCreatedListener) {
         mOnViewCreatedListener = onViewCreatedListener;
     }
 
+    @Deprecated
     public void setOnPictureLongClickListener(OnPictureLongClickListener onPictureLongClickListener) {
         mOnPictureLongClickListener = onPictureLongClickListener;
     }
 
+    /**
+     * Sets on picture long click listener v 2.
+     *
+     * @param onPictureLongClickListenerV2 the on picture long click listener v 2
+     */
     public void setOnPictureLongClickListenerV2(OnPictureLongClickListenerV2 onPictureLongClickListenerV2) {
         mOnPictureLongClickListenerV2 = onPictureLongClickListenerV2;
     }
 
+    /**
+     * Sets on picture click listener.
+     *
+     * @param onPictureClickListener the on picture click listener
+     */
     public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
         mOnPictureClickListener = onPictureClickListener;
     }
 
+    /**
+     * Sets on finish listener.
+     *
+     * @param onFinishListener the on finish listener
+     */
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;
     }
 
 
+    /**
+     * Sets extra downloader.
+     *
+     * @param extraDownloader the extra downloader
+     */
     public void setExtraDownloader(ExtraDownloader extraDownloader) {
         mExtraDownloader = extraDownloader;
     }
@@ -245,4 +305,52 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     public void onDestroy() {
         super.onDestroy();
     }
+
+    /**
+     * Gets current info.
+     *
+     * @return the current info
+     */
+    public Info getCurrentInfo() {
+        final int currentPosition = getCurrentPosition();
+        return mImages.get(currentPosition);
+    }
+
+    /**
+     * 保存当前图片
+     *
+     * @param targetParentFile 保存父级位置
+     */
+    public void saveCurrentPhoto(File targetParentFile) {
+        final Info currentInfo = getCurrentInfo();
+        final String origUrl = currentInfo.getOrigUrl();
+        File saveSource = null;
+        if (origUrl != null) {
+            final File origCache = mConfiguration.getPicDiskCache(origUrl);
+            if (origCache != null && origCache.exists()) {
+                saveSource = origCache;
+            }
+        }
+        if (saveSource == null) {
+            saveSource = mConfiguration.getPicDiskCache(currentInfo.getUrl());
+        }
+        if (saveSource == null || !saveSource.exists()) {
+            Toast.makeText(getContext(), R.string.photo_viewpager_save_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String ext;
+        if (Utils.isGifFile(targetParentFile.getAbsolutePath())) {
+            ext = ".gif";
+        } else {
+            ext = ".jpg";
+        }
+        File desFile = new File(targetParentFile, saveSource.getName() + ext);
+        Utils.copyfile(saveSource, desFile, true);
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri contentUri = Uri.fromFile(desFile);
+        mediaScanIntent.setData(contentUri);
+        getContext().sendBroadcast(mediaScanIntent);
+        Toast.makeText(getContext(), R.string.photo_viewpager_save_completed, Toast.LENGTH_LONG).show();
+    }
+
 }

@@ -44,8 +44,8 @@ public class PhotoPagerFragment extends BasePagerFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    protected void initView(ViewGroup view) {
+        super.initView(view);
         mIvGif.setOnLongClickListener(this);
     }
 

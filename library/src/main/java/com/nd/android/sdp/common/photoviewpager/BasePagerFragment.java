@@ -121,7 +121,11 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             Log.d("PhotoViewPagerFragment", "not support save instance");
             return;
         }
-        mView = (ViewGroup) view;
+        initView((ViewGroup) view);
+    }
+
+    protected void initView(ViewGroup view) {
+        mView = view;
         findView(mView);
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;

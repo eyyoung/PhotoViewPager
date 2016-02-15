@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
     };
     private ImageView mIv;
     private ImageView mIv2;
+    private PhotoViewPagerFragment mPhotoViewPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,13 +93,13 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
             );
             picInfos.add(picInfo);
         }
-        final PhotoViewPagerFragment photoViewPagerFragment = PhotoViewPagerManager.start(this,
+        mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
                 (ImageView) view,
                 picInfos,
                 mIv == view ? 0 : 1,
                 this);
-        photoViewPagerFragment.setOnPictureLongClickListener(this);
-        photoViewPagerFragment.setOnViewCreatedListener(this);
+        mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
+        mPhotoViewPagerFragment.setOnViewCreatedListener(this);
     }
 
     @Override
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
 
     @Override
     public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
+        mPhotoViewPagerFragment.deletePosition(mPhotoViewPagerFragment.getCurrentPosition());
         Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
         return true;
     }

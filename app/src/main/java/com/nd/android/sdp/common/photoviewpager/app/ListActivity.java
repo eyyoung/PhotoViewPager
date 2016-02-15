@@ -164,6 +164,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
+        mPhotoViewPagerFragment.deletePosition(mPhotoViewPagerFragment.getCurrentPosition());
         Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
         return false;
     }

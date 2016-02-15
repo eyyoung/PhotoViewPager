@@ -119,6 +119,8 @@ public class VideoPagerFragment extends BasePagerFragment {
         mBtnPlay.setOnClickListener(mVideoPlayClickListener);
         mVideoView.setFocusable(false);
         mVideoView.setFocusableInTouchMode(false);
+        mView.setFocusableInTouchMode(true);
+        mView.setFocusable(true);
         mView.requestFocus();
         mVideoView.setVisibility(View.GONE);
     }
