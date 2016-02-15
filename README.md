@@ -103,7 +103,7 @@ VideoInfo 视频信息
 
 -   bigthumb 用于未进行播放时展示的缩略图URL（必填）
 
--   videoUrl 视频URL（选填）
+-   videoUrl 视频URL（必填）
 
 -   size 视频大小（选填）
 
