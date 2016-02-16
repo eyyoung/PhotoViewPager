@@ -223,22 +223,31 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      * Delete position.
      */
     public void deletePosition(int position) {
-        mImages.remove(position);
-        final PagerAdapter adapter = mVpPhoto.getAdapter();
-        adapter.notifyDataSetChanged();
-        mVpPhoto.post(new Runnable() {
-            @Override
-            public void run() {
-                if (!isAdded()) {
-                    return;
+        if (mImages.size() == 1) {
+            final FragmentManager supportFragmentManager = getFragmentManager();
+            supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .remove(this)
+                    .commitAllowingStateLoss();
+        } else {
+            mImages.remove(position);
+            final PagerAdapter adapter = mVpPhoto.getAdapter();
+            adapter.notifyDataSetChanged();
+            mVpPhoto.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isAdded()) {
+                        return;
+                    }
+                    final int currentItem = mVpPhoto.getCurrentItem();
+                    final BasePagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
+                    if (fragmentByPosition != null) {
+                        fragmentByPosition.selected();
+                    }
                 }
-                final int currentItem = mVpPhoto.getCurrentItem();
-                final BasePagerFragment fragmentByPosition = mVpPhoto.getFragmentByPosition(currentItem);
-                if (fragmentByPosition != null) {
-                    fragmentByPosition.selected();
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -274,6 +283,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void setOnPictureLongClickListenerV2(OnPictureLongClickListenerV2 onPictureLongClickListenerV2) {
         mOnPictureLongClickListenerV2 = onPictureLongClickListenerV2;
+        if (mVpPhoto != null) {
+            mVpPhoto.setOnPictureLongClickListenerV2(onPictureLongClickListenerV2);
+        }
     }
 
     /**
@@ -283,6 +295,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
         mOnPictureClickListener = onPictureClickListener;
+        if (mVpPhoto != null) {
+            mVpPhoto.setOnPictureClickListener(onPictureClickListener);
+        }
     }
 
     /**
@@ -292,6 +307,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void setOnFinishListener(OnFinishListener onFinishListener) {
         mOnFinishListener = onFinishListener;
+        if (mVpPhoto != null) {
+            mVpPhoto.setOnFinishListener(onFinishListener);
+        }
     }
 
 
@@ -302,6 +320,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void setExtraDownloader(ExtraDownloader extraDownloader) {
         mExtraDownloader = extraDownloader;
+        if (mVpPhoto != null) {
+            mVpPhoto.setExtraDownloader(mExtraDownloader);
+        }
     }
 
     @Override
