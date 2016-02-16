@@ -253,7 +253,8 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         }
         mIvReal.setImage(ImageSource.uri(fileCache.getAbsolutePath()));
         mIvTemp.setVisibility(View.VISIBLE);
-        mIvPreview.setVisibility(View.GONE);
+        // 保持Preview状态，由调用方自己决定是否显示
+//        mIvPreview.setVisibility(View.GONE);
         mIvReal.setVisibility(View.VISIBLE);
         mIvReal.setOnClickListener(mFinishClickListener);
     }
@@ -469,7 +470,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         if (currentScale < 1) {
             currentScale = 1f / currentScale;
         }
-        if (maxScale - currentScale < 1.5) {
+        if (Math.abs(maxScale - currentScale) < 1.5) {
             maxScale = maxScale + 1.5f;
         }
         mIvReal.setMaxScale(maxScale);
