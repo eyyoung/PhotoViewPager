@@ -363,7 +363,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             return;
         }
         String ext;
-        if (Utils.isGifFile(targetParentFile.getAbsolutePath())) {
+        if (Utils.isGifFile(saveSource.getAbsolutePath())) {
             ext = ".gif";
         } else {
             ext = ".jpg";
