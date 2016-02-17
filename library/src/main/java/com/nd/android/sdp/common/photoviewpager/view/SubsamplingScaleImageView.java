@@ -33,6 +33,7 @@ import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.Message;
@@ -57,6 +58,7 @@ import com.nd.android.sdp.common.photoviewpager.view.decoder.SkiaImageRegionDeco
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +86,10 @@ import rx.subscriptions.CompositeSubscription;
 public class SubsamplingScaleImageView extends View {
 
     private static final String TAG = SubsamplingScaleImageView.class.getSimpleName();
+
+    private static String[] SOFT_LAYERTYPE_DEVICE = new String[]{
+      "ATH-AL00"
+    };
 
     /**
      * Attempt to use EXIF information on the image to rotate it. Works for external files only.
@@ -291,6 +297,9 @@ public class SubsamplingScaleImageView extends View {
 
     public SubsamplingScaleImageView(Context context, AttributeSet attr) {
         super(context, attr);
+        if (Arrays.binarySearch(SOFT_LAYERTYPE_DEVICE, Build.MODEL) != -1) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        }
         mCompositeSubscription = new CompositeSubscription();
         setMinimumDpi(160);
         setDoubleTapZoomDpi(160);
