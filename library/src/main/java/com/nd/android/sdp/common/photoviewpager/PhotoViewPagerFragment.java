@@ -162,6 +162,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             @Override
             public void run() {
                 onPageSelected(defaultPosition);
+                for (ViewPager.OnPageChangeListener onPageListeners : mOnPageListeners) {
+                    onPageListeners.onPageSelected(defaultPosition);
+                }
             }
         });
     }
@@ -215,7 +218,15 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mVpPhoto.setCurrentItem(position);
     }
 
+    /**
+     * Gets current position.
+     *
+     * @return the current position
+     */
     public int getCurrentPosition() {
+        if (mVpPhoto == null) {
+            return 0;
+        }
         return mVpPhoto.getCurrentItem();
     }
 
