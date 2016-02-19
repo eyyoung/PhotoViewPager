@@ -106,6 +106,12 @@ public class VideoInfo implements Parcelable, Info {
 
         @NonNull
         public VideoInfo build() {
+            if (thumb == null) {
+                thumb = "";
+            }
+            if (bigthumb == null) {
+                bigthumb = "";
+            }
             return new VideoInfo(this);
         }
     }

@@ -49,7 +49,10 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
-            "http://betacs.101.com/v0.1/download?dentryId=388933c0-4c0a-4438-8051-06a2012b3c93"
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            ""
     };
 
     String[] preview_urls = new String[]{
@@ -66,7 +69,10 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
-            "http://betacs.101.com/v0.1/download?dentryId=388933c0-4c0a-4438-8051-06a2012b3c93&size=160"
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            ""
     };
 
     String[] orig_urls = new String[]{
@@ -83,6 +89,9 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
             "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
             "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c977"
     };
 
