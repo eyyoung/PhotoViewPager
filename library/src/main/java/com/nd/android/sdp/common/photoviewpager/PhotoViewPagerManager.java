@@ -1,15 +1,18 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
-import android.view.Window;
 import android.widget.ImageView;
 
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 管理类
@@ -17,6 +20,10 @@ import java.util.ArrayList;
 public enum PhotoViewPagerManager {
 
     INSTANCE;
+
+    private static long sLastCallTime;
+
+    private int mStatusHeight;
 
     private IPhotoViewPagerConfiguration mConfiguration;
 
@@ -132,7 +139,7 @@ public enum PhotoViewPagerManager {
      * @return the photo view pager fragment
      */
     @NonNull
-    public static PhotoViewPagerFragment startView(FragmentActivity activity,
+    public static PhotoViewPagerFragment startView(@NonNull FragmentActivity activity,
                                                    @Nullable
                                                    ImageView imageView,
                                                    @NonNull
@@ -155,11 +162,38 @@ public enum PhotoViewPagerManager {
                 defaultPosition,
                 callback,
                 photoViewPagerConfiguration);
-        activity.getSupportFragmentManager()
-                .beginTransaction()
-                .add(Window.ID_ANDROID_CONTENT, fragment, PhotoViewPagerFragment.TAG_PHOTO)
-                .commitAllowingStateLoss();
+        final long id = System.currentTimeMillis();
+        PhotoViewPagerManager.INSTANCE.mFragmentMap.put(id, fragment);
+        initStatusBarHeight(activity);
+        ContainerActivity.start(activity, id);
         return fragment;
     }
 
+    private static void initStatusBarHeight(Activity activity) {
+        if (PhotoViewPagerManager.INSTANCE.mStatusHeight == 0) {
+            PhotoViewPagerManager.INSTANCE.mStatusHeight = Utils.getStatusBarHeightFix(activity.getWindow());
+        }
+    }
+
+    private Map<Long, PhotoViewPagerFragment> mFragmentMap = new HashMap<>();
+
+    public void removeFragment(PhotoViewPagerFragment photoViewPagerFragment) {
+        for (Long key : mFragmentMap.keySet()) {
+            final PhotoViewPagerFragment value = mFragmentMap.get(key);
+            if (value == photoViewPagerFragment) {
+                mFragmentMap.remove(key);
+            }
+        }
+    }
+
+    public int getStatusHeight(Activity activity) {
+        if (mStatusHeight == 0) {
+            initStatusBarHeight(activity);
+        }
+        return mStatusHeight;
+    }
+
+    public PhotoViewPagerFragment getFragmentById(long id) {
+        return mFragmentMap.get(id);
+    }
 }

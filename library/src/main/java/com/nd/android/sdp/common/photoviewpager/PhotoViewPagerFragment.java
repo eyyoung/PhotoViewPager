@@ -1,5 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.nd.android.sdp.common.photoviewpager.callback.OnDetachCallBack;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
@@ -43,7 +45,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     public static final String PARAM_WIDTH = "width";
     public static final String PARAM_HEIGHT = "height";
     public static final String TAG_PHOTO = "tag_photo";
-    private static final String PARAM_DEFAULT_POSITION = "default_position";
+    public static final String PARAM_DEFAULT_POSITION = "default_position";
     private PhotoViewPager mVpPhoto;
     private ArrayList<Info> mImages;
     private Callback mCallback;
@@ -55,6 +57,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private OnPictureLongClickListenerV2 mOnPictureLongClickListenerV2;
     private View.OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
+    private OnDetachCallBack mDetachCallBack;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<? extends Info> picInfos,
@@ -388,4 +391,25 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         Toast.makeText(getContext(), R.string.photo_viewpager_save_completed, Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        PhotoViewPagerManager.INSTANCE.removeFragment(this);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnDetachCallBack) {
+            mDetachCallBack = ((OnDetachCallBack) context);
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mDetachCallBack != null) {
+            mDetachCallBack.onDetach();
+        }
+    }
 }

@@ -130,24 +130,20 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         mSceenWidth = displayMetrics.widthPixels;
         mSceenHeight = displayMetrics.heightPixels;
-        mStatusBarHeight = Utils.getStatusBarHeightFix(getActivity().getWindow());
         mIvReal.setOnLongClickListener(BasePagerFragment.this);
         mIvReal.setOnImageEventListener(this);
         mIvTemp.setOnClickListener(mFinishClickListener);
 
         // 边框大小
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
-        final ImageView imageView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
-        if (imageView != null) {
-            final Bitmap previewBitmap = getPreviewBitmap();
-            if (previewBitmap != null) {
-                Palette palette = Palette.from(previewBitmap).generate();
-                final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
-                if (lightVibrantSwatch != null) {
-                    mPb.setColor(lightVibrantSwatch.getRgb());
-                }
-                mIvPreview.setImageBitmap(previewBitmap);
+        final Bitmap previewBitmap = getPreviewBitmap();
+        if (previewBitmap != null) {
+            Palette palette = Palette.from(previewBitmap).generate();
+            final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
+            if (lightVibrantSwatch != null) {
+                mPb.setColor(lightVibrantSwatch.getRgb());
             }
+            mIvPreview.setImageBitmap(previewBitmap);
         }
         final File fileCache = getShowFileCache();
         if (mNeedTransition) {
@@ -205,19 +201,19 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         // 起始x位置
         final int startLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, 0);
         // 起始y位置
-        final int startTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, 0) + mStatusBarHeight;
+        final int startTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, 0) + getStatusBarHeight();
         int targetHeight;
         int targetWidth;
         int targetTop;
         int targetLeft;
         if (isPortrait(previewBitmap.getWidth(), previewBitmap.getHeight())) {
             targetTop = 0;
-            targetHeight = mSceenHeight + mStatusBarHeight;
+            targetHeight = mSceenHeight + getStatusBarHeight();
             targetWidth = (int) (((float) previewBitmap.getWidth()) / ((float) previewBitmap.getHeight()) * targetHeight);
             targetLeft = (mSceenWidth - targetWidth) / 2;
         } else {
             targetHeight = (int) (((float) previewBitmap.getHeight()) / ((float) previewBitmap.getWidth()) * mSceenWidth);
-            targetTop = (mSceenHeight + mStatusBarHeight - targetHeight) / 2;
+            targetTop = (mSceenHeight + getStatusBarHeight() - targetHeight) / 2;
             targetLeft = 0;
             targetWidth = mSceenWidth;
         }
@@ -306,12 +302,12 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         int startHeight = startViewHeight + marginSize * 2;
         final int targetLeft = (mSceenWidth - mFrameSize) / 2;
         final int startViewLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, targetLeft);
-        final int targetTop = (mSceenHeight - mFrameSize) / 2 + mStatusBarHeight;
+        final int targetTop = (mSceenHeight - mFrameSize) / 2 + getStatusBarHeight();
         final int startViewTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, targetTop);
         // 起始x位置
         final int startLeft = startViewLeft - marginSize;
         // 起始y位置
-        final int startTop = startViewTop - marginSize + mStatusBarHeight;
+        final int startTop = startViewTop - marginSize + getStatusBarHeight();
         final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mFlPreview), startWidth, mFrameSize);
         final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(mFlPreview), startHeight, mFrameSize);
         final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mFlPreview), startLeft, targetLeft);
@@ -407,7 +403,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
      */
     private boolean isPortrait(float bmWidth, float bmHeight) {
         return bmHeight / bmWidth
-                > ((float) mSceenHeight + mStatusBarHeight) / (float) mSceenWidth;
+                > ((float) mSceenHeight + getStatusBarHeight()) / (float) mSceenWidth;
     }
 
     public void startDefaultTransition() {
@@ -532,9 +528,6 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     }
 
     public void selected() {
-        mView.setFocusableInTouchMode(true);
-        mView.requestFocus();
-        mView.setOnKeyListener(this);
         if (!mIsLoaded) {
             startGetImage();
             mIsLoaded = true;
@@ -731,7 +724,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         valueAnimator3.setStartDelay(mScaleDuration);
         valueAnimator3.setDuration(EXIT_DURATION);
         valueAnimator3.start();
-        final ValueAnimator valueAnimator4 = ValueAnimator.ofFloat(startY, location[1] + mStatusBarHeight);
+        final ValueAnimator valueAnimator4 = ValueAnimator.ofFloat(startY, location[1] + getStatusBarHeight());
         valueAnimator4.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
@@ -800,6 +793,13 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     public void onParentScroll() {
 
+    }
+
+    public int getStatusBarHeight() {
+        if (mStatusBarHeight == 0) {
+            mStatusBarHeight = PhotoViewPagerManager.INSTANCE.getStatusHeight(getActivity());
+        }
+        return mStatusBarHeight;
     }
 
 }

@@ -117,11 +117,6 @@ public class VideoPagerFragment extends BasePagerFragment {
         mVideoView = ((TextureView) mFlVideo.findViewById(R.id.vd));
         mBtnPlay = mFlVideo.findViewById(R.id.btnPlay);
         mBtnPlay.setOnClickListener(mVideoPlayClickListener);
-        mVideoView.setFocusable(false);
-        mVideoView.setFocusableInTouchMode(false);
-        mView.setFocusableInTouchMode(true);
-        mView.setFocusable(true);
-        mView.requestFocus();
         mVideoView.setVisibility(View.GONE);
     }
 
