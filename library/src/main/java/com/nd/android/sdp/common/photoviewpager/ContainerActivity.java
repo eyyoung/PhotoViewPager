@@ -18,6 +18,7 @@ public class ContainerActivity extends FragmentActivity implements OnDetachCallB
 
     public static void start(Context context, long id) {
         Intent starter = new Intent(context, ContainerActivity.class);
+        starter.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         starter.putExtra(PARAM_FRAGMENT_ID, id);
         context.startActivity(starter);
     }
@@ -25,6 +26,11 @@ public class ContainerActivity extends FragmentActivity implements OnDetachCallB
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
         final long id = getIntent().getLongExtra(PARAM_FRAGMENT_ID, 0);
         mLastFragment = PhotoViewPagerManager.INSTANCE.getFragmentById(id);
         getSupportFragmentManager()
@@ -36,6 +42,12 @@ public class ContainerActivity extends FragmentActivity implements OnDetachCallB
     @Override
     public void onDetach() {
         finish();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(0, 0);
     }
 
     @Override

@@ -297,8 +297,10 @@ public class SubsamplingScaleImageView extends View {
 
     public SubsamplingScaleImageView(Context context, AttributeSet attr) {
         super(context, attr);
-        if (Arrays.binarySearch(SOFT_LAYERTYPE_DEVICE, Build.MODEL) != -1) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        for (String device : SOFT_LAYERTYPE_DEVICE) {
+            if (Build.MODEL.contains(device) || device.contains(Build.MODEL)) {
+                setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+            }
         }
         mCompositeSubscription = new CompositeSubscription();
         setMinimumDpi(160);

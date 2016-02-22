@@ -8,7 +8,7 @@
     <application>
         <activity
             android:name=".ContainerActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+            android:theme="@style/photo_viewpager_PhotoViewPagerBaseTheme"/>
     </application>
 
 </manifest>
