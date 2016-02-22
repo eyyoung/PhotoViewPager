@@ -5,6 +5,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@null</item>
+        <item name="colorAccent">#38adff</item>
     </style>
 
 </resources>

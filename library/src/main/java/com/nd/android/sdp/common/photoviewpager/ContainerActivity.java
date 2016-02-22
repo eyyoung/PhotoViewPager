@@ -9,14 +9,22 @@ import android.view.Window;
 import com.nd.android.sdp.common.photoviewpager.callback.OnDetachCallBack;
 
 /**
- * 兼容有父级Activity的界面
+ * 容器界面
+ *
+ * @author Young
  */
 public class ContainerActivity extends FragmentActivity implements OnDetachCallBack {
 
     private static final String PARAM_FRAGMENT_ID = "id";
     private PhotoViewPagerFragment mLastFragment;
 
-    public static void start(Context context, long id) {
+    /**
+     * Start.
+     *
+     * @param context the context
+     * @param id      the id
+     */
+    static void start(Context context, long id) {
         Intent starter = new Intent(context, ContainerActivity.class);
         starter.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         starter.putExtra(PARAM_FRAGMENT_ID, id);
