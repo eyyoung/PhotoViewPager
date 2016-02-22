@@ -447,30 +447,31 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mState = State.Loaded;
         final int sHeight = mIvReal.getSHeight();
         final int sWidth = mIvReal.getSWidth();
-        float maxScale;
+        float doubleZoomScale;
         final float widthScale = ((float) sWidth) / ((float) mSceenWidth);
         final float heightScale = ((float) sHeight) / ((float) mSceenHeight);
         float currentScale;
         final boolean portrait = isPortrait(sWidth, sHeight);
         if (portrait) {
             // 竖照片，放大宽
-            maxScale = widthScale;
+            doubleZoomScale = widthScale;
             currentScale = heightScale;
         } else {
-            maxScale = heightScale;
+            doubleZoomScale = heightScale;
             currentScale = widthScale;
         }
-        if (maxScale < 1) {
-            maxScale = 1f / maxScale;
+        if (doubleZoomScale < 1) {
+            doubleZoomScale = 1f / doubleZoomScale;
         }
         if (currentScale < 1) {
             currentScale = 1f / currentScale;
         }
-        if (Math.abs(maxScale - currentScale) < 1.5) {
-            maxScale = maxScale + 1.5f;
+        float maxScale = doubleZoomScale;
+        if (Math.abs(doubleZoomScale - currentScale) < 1.5) {
+            maxScale = doubleZoomScale + 1.5f;
         }
         mIvReal.setMaxScale(maxScale);
-        mIvReal.setDoubleTapZoomScale(maxScale);
+        mIvReal.setDoubleTapZoomScale(doubleZoomScale);
         final float minScale = mIvReal.getMinScale();
         if (mIvReal.getScale() < minScale) {
             mIvReal.animateScale(minScale)
