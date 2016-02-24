@@ -5,5 +5,6 @@
     <string name="photo_viewpager_view_origin_with_size">Full Size(%s)</string>
     <string name="photo_viewpager_save_completed">Save Success！</string>
     <string name="photo_viewpager_save_failed">File save failed</string>
+    <string name="photo_viewpager_image_load_failed">Decode Image Failed</string>
 
 </resources>

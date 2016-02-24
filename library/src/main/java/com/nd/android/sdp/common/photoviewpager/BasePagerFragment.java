@@ -30,6 +30,7 @@ import com.github.rahatarmanahmed.cpv.CircularProgressView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
+import com.nd.android.sdp.common.photoviewpager.exception.HttpIOException;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
@@ -366,14 +367,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                        mIvPreview.setVisibility(View.GONE);
-                        mIvReal.setVisibility(View.GONE);
-                        mPb.setVisibility(View.GONE);
-                        mTvError.setVisibility(View.VISIBLE);
-                        mTvError.setOnLongClickListener(BasePagerFragment.this);
-                        mTvError.setOnClickListener(mFinishClickListener);
-                        onImageLoadError((Exception) throwable);
+                        onImageLoadError(new HttpIOException("NetWorkError", throwable));
                     }
                 }, new Action0() {
                     @Override
@@ -520,7 +514,18 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     @Override
     public void onImageLoadError(Exception e) {
-
+        e.printStackTrace();
+        mIvPreview.setVisibility(View.GONE);
+        mIvReal.setVisibility(View.GONE);
+        mPb.setVisibility(View.GONE);
+        mTvError.setVisibility(View.VISIBLE);
+        mTvError.setOnLongClickListener(BasePagerFragment.this);
+        mTvError.setOnClickListener(mFinishClickListener);
+        if (e instanceof HttpIOException) {
+            mTvError.setText(R.string.photo_viewpager_download_failed);
+        } else {
+            mTvError.setText(R.string.photo_viewpager_image_load_failed);
+        }
     }
 
     @Override
