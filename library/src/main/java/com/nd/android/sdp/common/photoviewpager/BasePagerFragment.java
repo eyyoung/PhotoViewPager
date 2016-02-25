@@ -188,11 +188,13 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         AnimateUtils.fadeInView(mBg);
         final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
         if (previewView == null) {
+            mIvPreview.setVisibility(View.GONE);
             loadFileCache(fileCache, true);
             return;
         }
         Bitmap previewBitmap = getPreviewBitmap();
         if (previewBitmap == null) {
+            mIvPreview.setVisibility(View.GONE);
             loadFileCache(fileCache, true);
             return;
         }
