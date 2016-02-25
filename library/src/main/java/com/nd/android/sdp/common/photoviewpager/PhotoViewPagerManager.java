@@ -175,13 +175,15 @@ public enum PhotoViewPagerManager {
         }
     }
 
-    private Map<Long, PhotoViewPagerFragment> mFragmentMap = new HashMap<>();
+    private final Map<Long, PhotoViewPagerFragment> mFragmentMap = new HashMap<>();
 
     public void removeFragment(PhotoViewPagerFragment photoViewPagerFragment) {
-        for (Long key : mFragmentMap.keySet()) {
-            final PhotoViewPagerFragment value = mFragmentMap.get(key);
-            if (value == photoViewPagerFragment) {
-                mFragmentMap.remove(key);
+        synchronized (mFragmentMap) {
+            for (Long key : mFragmentMap.keySet()) {
+                final PhotoViewPagerFragment value = mFragmentMap.get(key);
+                if (value == photoViewPagerFragment) {
+                    mFragmentMap.remove(key);
+                }
             }
         }
     }
