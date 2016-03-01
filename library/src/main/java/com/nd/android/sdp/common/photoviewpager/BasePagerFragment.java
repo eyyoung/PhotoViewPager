@@ -13,11 +13,9 @@ import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
@@ -54,7 +52,7 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public abstract class BasePagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnKeyListener, View.OnLongClickListener {
+public abstract class BasePagerFragment extends Fragment implements SubsamplingScaleImageView.OnImageEventListener, View.OnLongClickListener {
 
     private static final int EXIT_DURATION = 300;
     private static final int MAX_EXIT_SCALEDURATION = 300;
@@ -543,15 +541,6 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     }
 
     @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-            finish();
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     public boolean onLongClick(View v) {
         if (mOnPictureLongClickListener != null) {
             Bitmap bitmap = null;
@@ -589,14 +578,17 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mIsAnimateFinishing = true;
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
-            final FragmentActivity activity = getActivity();
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(mScaleDuration + EXIT_DURATION);
             animator1.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    exit(activity);
+                    final FragmentActivity activity = getActivity();
+                    if (activity != null && !activity.isFinishing()) {
+                        activity.finish();
+                    }
+                    mState = State.Finished;
                 }
             });
             animator1.start();
@@ -615,14 +607,17 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                         .setDuration(FADE_ANIMATE_DURATION)
                         .start();
             }
-            final FragmentActivity activity = getActivity();
             final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
             animator1.setDuration(FADE_ANIMATE_DURATION);
             animator1.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    exit(activity);
+                    final FragmentActivity activity = getActivity();
+                    if (activity != null && activity.isFinishing()) {
+                        activity.finish();
+                    }
+                    mState = State.Finished;
                 }
             });
             animator1.start();
@@ -640,19 +635,6 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     @Nullable
     protected ViewPropertyAnimator fadeOutContentViewAnimate() {
         return null;
-    }
-
-    private void exit(FragmentActivity activity) {
-        if (activity.isFinishing()) {
-            // 有可能被不保留活动清理了
-            return;
-        }
-        final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
-        supportFragmentManager
-                .beginTransaction()
-                .remove(getParentFragment())
-                .commitAllowingStateLoss();
-        mState = State.Finished;
     }
 
     protected boolean animateFinish() {
