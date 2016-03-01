@@ -277,7 +277,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mInfo.getPreviewUrl());
         if (previewBitmap == null) {
             final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
-            if (!Utils.isViewAvaliable(previewView)) {
+            if (Utils.isViewAvaliable(previewView)) {
                 final Drawable drawable = previewView.getDrawable();
                 if (drawable != null && drawable instanceof BitmapDrawable) {
                     previewBitmap = ((BitmapDrawable) drawable).getBitmap();
