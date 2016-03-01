@@ -268,4 +268,8 @@ public class Utils {
             return false;
         }
     }
+
+    public static boolean isViewAvaliable(View view) {
+        return view != null && view.isShown();
+    }
 }

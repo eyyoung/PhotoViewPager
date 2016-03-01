@@ -185,7 +185,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mIsAreadyBigImage = true;
         AnimateUtils.fadeInView(mBg);
         final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
-        if (previewView == null) {
+        if (!Utils.isViewAvaliable(previewView)) {
             mIvPreview.setVisibility(View.GONE);
             loadFileCache(fileCache, true);
             return;
@@ -277,7 +277,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         Bitmap previewBitmap = mConfiguration.getPreviewBitmap(mInfo.getPreviewUrl());
         if (previewBitmap == null) {
             final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
-            if (previewView != null) {
+            if (!Utils.isViewAvaliable(previewView)) {
                 final Drawable drawable = previewView.getDrawable();
                 if (drawable != null && drawable instanceof BitmapDrawable) {
                     previewBitmap = ((BitmapDrawable) drawable).getBitmap();
@@ -614,7 +614,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     final FragmentActivity activity = getActivity();
-                    if (activity != null && activity.isFinishing()) {
+                    if (activity != null && !activity.isFinishing()) {
                         activity.finish();
                     }
                     mState = State.Finished;
@@ -642,7 +642,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             return false;
         }
         final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
-        if (previewView == null) {
+        if (!Utils.isViewAvaliable(previewView)) {
             return false;
         }
         mScaleDuration = Math.abs((long) ((mIvReal.getScale() - mOrigScale) / 0.2 * 100));

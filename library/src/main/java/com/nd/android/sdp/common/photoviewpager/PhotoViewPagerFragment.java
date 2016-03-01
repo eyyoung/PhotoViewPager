@@ -113,7 +113,6 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
                 supportFragmentManager
                         .beginTransaction()
                         .remove(fragment)
-                        .addToBackStack(TAG_PHOTO)
                         .commit();
             }
             return;

@@ -122,5 +122,6 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
     public void onViewCreated(View view) {
 
     }
+
 }
 
