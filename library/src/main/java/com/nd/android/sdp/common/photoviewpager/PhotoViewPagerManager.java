@@ -12,6 +12,7 @@ import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -178,12 +179,11 @@ public enum PhotoViewPagerManager {
     private final Map<Long, PhotoViewPagerFragment> mFragmentMap = new HashMap<>();
 
     public void removeFragment(PhotoViewPagerFragment photoViewPagerFragment) {
-        synchronized (mFragmentMap) {
-            for (Long key : mFragmentMap.keySet()) {
-                final PhotoViewPagerFragment value = mFragmentMap.get(key);
-                if (value == photoViewPagerFragment) {
-                    mFragmentMap.remove(key);
-                }
+        Iterator<Map.Entry<Long, PhotoViewPagerFragment>> iterator = mFragmentMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, PhotoViewPagerFragment> entry = iterator.next();
+            if (entry.getValue() == photoViewPagerFragment) {
+                iterator.remove();
             }
         }
     }

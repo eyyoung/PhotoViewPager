@@ -46,7 +46,7 @@ task uploadPhotoView(type: Upload) {
                 pom.version = rootProject.ext.module_version
                 pom.artifactId = "photoview"
                 pom.groupId = "com.nd.android.sdp.common"
-            }
+            }ian
         }
     } catch (java.lang.Exception e) {
     }

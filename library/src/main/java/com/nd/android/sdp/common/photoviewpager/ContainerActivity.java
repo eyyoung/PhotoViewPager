@@ -34,6 +34,10 @@ public class ContainerActivity extends FragmentActivity implements OnDetachCallB
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            finish();
+            return;
+        }
         final long id = getIntent().getLongExtra(PARAM_FRAGMENT_ID, 0);
         mLastFragment = PhotoViewPagerManager.INSTANCE.getFragmentById(id);
         getSupportFragmentManager()

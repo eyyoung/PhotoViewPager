@@ -643,6 +643,10 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     }
 
     private void exit(FragmentActivity activity) {
+        if (activity.isFinishing()) {
+            // 有可能被不保留活动清理了
+            return;
+        }
         final FragmentManager supportFragmentManager = activity.getSupportFragmentManager();
         supportFragmentManager
                 .beginTransaction()

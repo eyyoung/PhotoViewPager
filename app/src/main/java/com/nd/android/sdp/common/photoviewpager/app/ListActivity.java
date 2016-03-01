@@ -52,6 +52,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
             ""
     };
 
@@ -72,6 +73,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
             ""
     };
 
@@ -92,6 +94,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
             "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
+            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
             "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c977"
     };
 
