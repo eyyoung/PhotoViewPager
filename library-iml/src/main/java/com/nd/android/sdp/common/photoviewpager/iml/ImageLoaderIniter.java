@@ -2,6 +2,7 @@ package com.nd.android.sdp.common.photoviewpager.iml;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import com.nd.android.sdp.common.photoviewpager.IPhotoViewPagerConfiguration;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
@@ -45,6 +46,9 @@ public enum ImageLoaderIniter implements IPhotoViewPagerConfiguration {
 
     @Override
     public Bitmap getPreviewBitmap(String url) {
+        if (TextUtils.isEmpty(url)) {
+            return null;
+        }
         if (!mMemoryCaches.contains(ImageLoader.getInstance().getMemoryCache())) {
             mMemoryCaches.add(ImageLoader.getInstance().getMemoryCache());
         }
