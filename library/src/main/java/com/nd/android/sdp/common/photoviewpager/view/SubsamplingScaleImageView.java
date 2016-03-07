@@ -1586,6 +1586,7 @@ public class SubsamplingScaleImageView extends View {
     }
 
     private void startTileLoad(final SubsamplingScaleImageView view, final ImageRegionDecoder decoder, final Tile tile){
+        tile.loading = true;
         final Subscription subscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
             public void call(Subscriber<? super Bitmap> subscriber) {
@@ -1606,6 +1607,7 @@ public class SubsamplingScaleImageView extends View {
                     Log.e(TAG, "Failed to decode tile", e);
                     subscriber.onError(e);
                 }
+                subscriber.onCompleted();
             }
         }).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -1721,6 +1723,7 @@ public class SubsamplingScaleImageView extends View {
                     Log.e(TAG, "Failed to load bitmap", e);
                     subscriber.onError(e);
                 }
+                subscriber.onCompleted();
             }
         }).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())

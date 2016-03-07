@@ -248,7 +248,8 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         if (needAnimate) {
             AnimateUtils.fadeInView(mIvReal);
         }
-        mIvReal.setImage(ImageSource.uri(fileCache.getAbsolutePath()));
+        final ImageSource source = ImageSource.uri(fileCache.getAbsolutePath());
+        mIvReal.setImage(source);
         mIvTemp.setVisibility(View.VISIBLE);
         // 保持Preview状态，由调用方自己决定是否显示
 //        mIvPreview.setVisibility(View.GONE);
