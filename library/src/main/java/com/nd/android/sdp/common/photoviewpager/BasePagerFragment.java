@@ -340,7 +340,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     private void startGetImage() {
         mState = State.Loading;
-        final File picDiskCache = mConfiguration.getPicDiskCache(mInfo.getUrl());
+        final File picDiskCache = getShowFileCache();
         mStartGetImageSubscription = Observable.just(picDiskCache)
                 .flatMap(new Func1<File, Observable<Integer>>() {
                     @Override
