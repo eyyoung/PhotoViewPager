@@ -30,13 +30,15 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListe
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.exception.HttpIOException;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
+import com.nd.android.sdp.common.photoviewpager.reveal.animation.SupportAnimator;
+import com.nd.android.sdp.common.photoviewpager.reveal.animation.ViewAnimationUtils;
+import com.nd.android.sdp.common.photoviewpager.reveal.widget.RevealFrameLayout;
 import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 import com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.HeightEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView;
-import com.nd.android.sdp.common.photoviewpager.widget.RevealImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.WidthEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.XEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.YEvaluator;
@@ -59,6 +61,8 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     private static final int FADE_ANIMATE_DURATION = 300;
     private static final int REVEAL_IN_ANIMATE_DURATION = 300;
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
+    private int mMarginSize;
+    private RevealFrameLayout mRvFrame;
 
     protected enum State {
         Animate,
@@ -72,7 +76,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     protected ViewGroup mView;
     protected CircularProgressView mPb;
     protected RevealCircleImageView mIvPreview;
-    protected RevealImageView mIvTemp;
+    protected RevealCircleImageView mIvTemp;
     private boolean mNeedTransition;
     private Subscription mStartGetImageSubscription;
     protected SubsamplingScaleImageView mIvReal;
@@ -167,11 +171,12 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     protected void findView(View view) {
         mPb = (CircularProgressView) mView.findViewById(R.id.pb);
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
-        mIvTemp = (RevealImageView) mView.findViewById(R.id.ivTemp);
+        mIvTemp = (RevealCircleImageView) mView.findViewById(R.id.ivTemp);
         mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
         mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
         mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
         mFlPreview = mView.findViewById(R.id.flPreview);
+        mRvFrame = (RevealFrameLayout) mView.findViewById(R.id.rvFrame);
     }
 
     /**
@@ -299,17 +304,17 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         final int startViewWidth = arguments.getInt(PhotoViewPagerFragment.PARAM_WIDTH, mFrameSize);
         final int startViewHeight = arguments.getInt(PhotoViewPagerFragment.PARAM_HEIGHT, mFrameSize);
         // 边距大小
-        int marginSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_margin);
-        int startWidth = startViewWidth + marginSize * 2;
-        int startHeight = startViewHeight + marginSize * 2;
+        mMarginSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_margin);
+        int startWidth = startViewWidth + mMarginSize * 2;
+        int startHeight = startViewHeight + mMarginSize * 2;
         final int targetLeft = (mSceenWidth - mFrameSize) / 2;
         final int startViewLeft = arguments.getInt(PhotoViewPagerFragment.PARAM_LEFT, targetLeft);
         final int targetTop = (mSceenHeight - mFrameSize) / 2 + getStatusBarHeight();
         final int startViewTop = arguments.getInt(PhotoViewPagerFragment.PARAM_TOP, targetTop);
         // 起始x位置
-        final int startLeft = startViewLeft - marginSize;
+        final int startLeft = startViewLeft - mMarginSize;
         // 起始y位置
-        final int startTop = startViewTop - marginSize + getStatusBarHeight();
+        final int startTop = startViewTop - mMarginSize + getStatusBarHeight();
         final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mFlPreview), startWidth, mFrameSize);
         final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(mFlPreview), startHeight, mFrameSize);
         final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mFlPreview), startLeft, targetLeft);
@@ -319,7 +324,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         animatorSet.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
         animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvPreview, RevealCircleImageView.RADIUS,
-                0, (mFrameSize - marginSize * 2) / 2);
+                0, (mFrameSize - mMarginSize * 2) / 2);
         final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 0, 1);
         AnimatorSet set = new AnimatorSet();
         set.playTogether(animator, animator1);
@@ -486,13 +491,41 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mIvExit.setVisibility(View.GONE);
         mIvPreview.setVisibility(View.GONE);
         mPb.setVisibility(View.GONE);
-        final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.RADIUS,
-                mFrameSize / 2, 0);
-        final ObjectAnimator animator2 = ObjectAnimator.ofFloat(mIvTemp, RevealImageView.ALPHA,
-                0, 1);
+
+        revealAndScaleTempView(sHeight, sWidth, portrait);
+    }
+
+    private void revealAndScaleTempView(float sHeight, float sWidth, boolean portrait) {
+        final int previewSize = mFrameSize - mMarginSize * 2;
+        final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mIvTemp.getLayoutParams();
+        layoutParams.width = previewSize;
+        layoutParams.height = previewSize;
+        final int startTop = (mSceenHeight - layoutParams.width) / 2 + getStatusBarHeight();
+        layoutParams.topMargin = startTop;
+        final int startLeft = (mSceenWidth - layoutParams.height) / 2;
+        layoutParams.leftMargin = startLeft;
+        mIvTemp.requestLayout();
+
+        final int targetHeight;
+        final int targetWidth;
+        if (!portrait) {
+            targetHeight = (int) (sHeight / sWidth * mIvReal.getWidth());
+            targetWidth = mIvReal.getWidth();
+        } else {
+            targetWidth = (int) (sWidth / sHeight * mIvReal.getHeight());
+            targetHeight = mIvReal.getHeight();
+        }
+
+        mIvTemp.alwaysCircle(true);
+        int targetTop = (mIvReal.getHeight() - targetHeight) / 2;
+        int targetLeft = (mSceenWidth - targetWidth) / 2;
+        final ValueAnimator widthAnimator = ValueAnimator.ofObject(new WidthEvaluator(mIvTemp), previewSize, targetWidth);
+        final ValueAnimator heightAnimator = ValueAnimator.ofObject(new HeightEvaluator(mIvTemp), previewSize, targetHeight);
+        final ValueAnimator xAnimator = ValueAnimator.ofObject(new XEvaluator(mIvTemp), startLeft, targetLeft);
+        final ValueAnimator yAnimator = ValueAnimator.ofObject(new YEvaluator(mIvTemp), startTop, targetTop);
         AnimatorSet set = new AnimatorSet();
-        set.playTogether(animator, animator2);
-        set.setDuration(REVEAL_IN_ANIMATE_DURATION).start();
+        set.playTogether(widthAnimator, heightAnimator, xAnimator, yAnimator);
+        set.setDuration(150).start();
         set.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animator) {
@@ -502,10 +535,27 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                 if (mIsAnimateFinishing) {
                     return;
                 }
+                mIvTemp.alwaysCircle(false);
+            }
+        });
+
+        final int startRadius = targetWidth > targetHeight ? targetHeight : targetWidth;
+        final double endRadius = Math.hypot(targetWidth / 2, targetHeight / 2);
+        final SupportAnimator circularReveal = ViewAnimationUtils.createCircularReveal(mIvTemp,
+                targetWidth / 2 + targetLeft, targetHeight / 2 + targetTop, startRadius / 2,
+                (float) endRadius);
+        circularReveal.setStartDelay(100);
+        circularReveal.setDuration(250);
+        circularReveal.start();
+
+        mIvTemp.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                circularReveal.cancel();
                 mIvTemp.setVisibility(View.GONE);
                 mIvReal.setVisibility(View.VISIBLE);
             }
-        });
+        }, 350);
     }
 
     @Override
