@@ -1,0 +1,4 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="photo_viewpager_preview_size">160dp</dimen>
+</resources>
