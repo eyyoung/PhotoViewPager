@@ -17,13 +17,13 @@ import android.net.Uri;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Property;
 import android.widget.ImageView;
 
 public class RevealCircleImageView extends ImageView {
 
     public static final Property<RevealCircleImageView, Float> RADIUS = new RevealProperty();
+    private boolean mCircle;
 
     private static class RevealProperty extends Property<RevealCircleImageView, Float> {
 
@@ -140,13 +140,23 @@ public class RevealCircleImageView extends ImageView {
             return;
         }
 
+        final int width = getWidth();
+        final int height = getHeight();
         if (mFillColor != Color.TRANSPARENT) {
-            canvas.drawCircle(getWidth() / 2.0f, getHeight() / 2.0f, mDrawableRadius, mFillPaint);
+            canvas.drawCircle(width / 2.0f, height / 2.0f, mDrawableRadius, mFillPaint);
         }
-        canvas.drawRoundRect(mDrawableRect, mDrawableRadius, mDrawableRadius, mBitmapPaint);
+        if (mCircle) {
+            canvas.drawCircle(width / 2.0f, height / 2.0f, (width > height ? height : width) / 2, mBitmapPaint);
+        } else {
+            canvas.drawRoundRect(mDrawableRect, mDrawableRadius, mDrawableRadius, mBitmapPaint);
+        }
         if (mBorderWidth != 0) {
-            canvas.drawCircle(getWidth() / 2.0f, getHeight() / 2.0f, mBorderRadius, mBorderPaint);
+            canvas.drawCircle(width / 2.0f, height / 2.0f, mBorderRadius, mBorderPaint);
         }
+    }
+
+    public void alwaysCircle(boolean circle){
+        mCircle = circle;
     }
 
     @Override
