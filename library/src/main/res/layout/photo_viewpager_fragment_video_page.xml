@@ -4,10 +4,17 @@
                 android:layout_height="match_parent">
 
 
-    <com.nd.android.sdp.common.photoviewpager.widget.RevealImageView
-        android:id="@+id/ivTemp"
+    <com.nd.android.sdp.common.photoviewpager.reveal.widget.RevealFrameLayout
+        android:id="@+id/rvFrame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView
+            android:id="@+id/ivTemp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+    </com.nd.android.sdp.common.photoviewpager.reveal.widget.RevealFrameLayout>
 
     <com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView
         android:id="@+id/imageView"

@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.rahatarmanahmed.cpv.CircularProgressView;
@@ -266,7 +265,9 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
      * 无动画
      */
     private void noAnimateInit() {
-        ((RelativeLayout.LayoutParams) mFlPreview.getLayoutParams()).addRule(RelativeLayout.CENTER_IN_PARENT, 1);
+        final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mFlPreview.getLayoutParams();
+        layoutParams.leftMargin = (mSceenWidth - mFrameSize) / 2;
+        layoutParams.topMargin = (mSceenHeight - mFrameSize) / 2 + getStatusBarHeight();
         mFlPreview.requestLayout();
         mPb.setVisibility(View.VISIBLE);
         mIvReal.setVisibility(View.GONE);
