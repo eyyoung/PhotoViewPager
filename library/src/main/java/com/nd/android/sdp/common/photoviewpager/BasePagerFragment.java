@@ -447,13 +447,23 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         }
         mImageLoaded = true;
         mState = State.Loaded;
-        final int sHeight = mIvReal.getSHeight();
-        final int sWidth = mIvReal.getSWidth();
+
+        final int appliedOrientation = mIvReal.getAppliedOrientation();
+        int sHeight;
+        int sWidth;
+        if (appliedOrientation == 90
+                || appliedOrientation == 270) {
+            sHeight = mIvReal.getSWidth();
+            sWidth = mIvReal.getSHeight();
+        } else {
+            sHeight = mIvReal.getSHeight();
+            sWidth = mIvReal.getSWidth();
+        }
+        final boolean portrait = isPortrait(sWidth, sHeight);
         float doubleZoomScale;
         final float widthScale = ((float) sWidth) / ((float) mSceenWidth);
         final float heightScale = ((float) sHeight) / ((float) mSceenHeight);
         float currentScale;
-        final boolean portrait = isPortrait(sWidth, sHeight);
         if (portrait) {
             // 竖照片，放大宽
             doubleZoomScale = widthScale;
