@@ -172,6 +172,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mIvPreview = ((RevealCircleImageView) mView.findViewById(R.id.ivPreview));
         mIvTemp = (RevealCircleImageView) mView.findViewById(R.id.ivTemp);
         mIvReal = (SubsamplingScaleImageView) mView.findViewById(R.id.imageView);
+        mIvReal.setOrientation(SubsamplingScaleImageView.ORIENTATION_USE_EXIF);
         mIvExit = (ImageView) mView.findViewById(R.id.ivExitPreview);
         mTvError = (TextView) mView.findViewById(R.id.tvErrorHint);
         mFlPreview = mView.findViewById(R.id.flPreview);
