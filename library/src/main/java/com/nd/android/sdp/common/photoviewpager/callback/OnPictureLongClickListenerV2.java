@@ -1,11 +1,13 @@
 package com.nd.android.sdp.common.photoviewpager.callback;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import java.io.File;
 
 /**
- * Created by Administrator on 2015/12/23.
+ * OnPictureLongClickListenerV2
  */
 public interface OnPictureLongClickListenerV2 {
 
@@ -17,7 +19,7 @@ public interface OnPictureLongClickListenerV2 {
      * @param cache 图片缓存
      * @return 是否处理
      */
-    boolean onLongClick(View v, String mUrl,
-                        File cache);
+    boolean onLongClick(@NonNull View v, @NonNull String mUrl,
+                        @Nullable File cache);
 
 }

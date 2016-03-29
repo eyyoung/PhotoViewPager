@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_viewpager_view_picture_in_browse">Buka browser</string>
+    <string name="photo_viewpager_save">Simpan</string>
+    <string name="photo_viewpager_detect_qr_code">Mengidentifikasi QR Kode</string>
+    <string name="photo_viewpager_share">Bagikan</string>
+</resources>

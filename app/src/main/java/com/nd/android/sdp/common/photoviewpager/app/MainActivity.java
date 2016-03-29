@@ -1,6 +1,5 @@
 package com.nd.android.sdp.common.photoviewpager.app;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -8,22 +7,24 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
-import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.iml.ImageLoaderIniter;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
+import com.nd.android.sdp.photoviewpager.longclick.PluginPictureLongClickListener;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.SaveClickItem;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.SystemShareClickItem;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.ViewInBrowseClickItem;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements Callback, OnPictureLongClickListener, OnViewCreatedListener {
+public class MainActivity extends AppCompatActivity implements Callback, OnViewCreatedListener {
 
     String[] urls = new String[]{
             "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=960",
@@ -98,7 +99,12 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
                 picInfos,
                 mIv == view ? 0 : 1,
                 this);
-        mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
+        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder(this)
+                .addLongClickItem(new ViewInBrowseClickItem())
+                .addLongClickItem(new SaveClickItem())
+                .addLongClickItem(new SystemShareClickItem())
+                .build();
+        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(longClickListener);
         mPhotoViewPagerFragment.setOnViewCreatedListener(this);
     }
 
@@ -109,13 +115,6 @@ public class MainActivity extends AppCompatActivity implements Callback, OnPictu
         } else {
             return mIv2;
         }
-    }
-
-    @Override
-    public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
-        mPhotoViewPagerFragment.deletePosition(mPhotoViewPagerFragment.getCurrentPosition());
-        Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
-        return true;
     }
 
     @Override

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_viewpager_view_picture_in_browse">เปิดด้วยเรียกดู</string>
+    <string name="photo_viewpager_save">บันทึก</string>
+    <string name="photo_viewpager_detect_qr_code">ระบุรหัส QR</string>
+    <string name="photo_viewpager_share">หุ้น</string>
+</resources>
