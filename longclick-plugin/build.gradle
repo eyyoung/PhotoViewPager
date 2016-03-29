@@ -21,8 +21,13 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile project(":library")
-    compile project(":library-iml")
+//    compile project(":library")
+//    compile project(":library-iml")
+    compile("com.nd.android.sdp.common:photoview-iml:1.0.140") {
+        transitive = true
+        exclude group: 'com.android.support'
+    }
+    compile 'com.nd.android.sdp.common:photoview:1.1.146'
     compile "com.android.support:recyclerview-v7:23.1.0"
     compile('com.afollestad:material-dialogs:0.7.8.1@aar') {
         transitive true
@@ -32,5 +37,28 @@ dependencies {
         transitive = true
         changing = true
         exclude group:'android.support',module:'android-support-v4'
+    }
+}
+
+apply plugin: 'maven'
+task uploadLongClickPlugin(type: Upload) {
+    configuration = configurations.archives
+    uploadDescriptor = true
+    try {
+        repositories {
+            mavenDeployer {
+                repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
+                    authentication(userName: mavenUser, password: mavenPassword)
+                }
+                pom.version = rootProject.ext.module_version
+                pom.artifactId = "photoview-longclick"
+                pom.groupId = "com.nd.android.sdp.common"
+            }
+        }
+    } catch (java.lang.Exception e) {
+        e.printStackTrace()
+    }
+    doLast {
+        println(rootProject.ext.module_version)
     }
 }
