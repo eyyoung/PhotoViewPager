@@ -50,7 +50,7 @@ compile("com.nd.android.sdp.common:photoview:0.x.x") {
 本库需提供磁盘缓存规则，如使用Universal-ImageLoader库，请依赖
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile("com.nd.android.sdp.common:photoview-iml:0.3.73") {
+compile("com.nd.android.sdp.common:photoview-iml:1.0.140") {
     transitive = true
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -140,12 +140,16 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mFrameSize = getResources().getDimensionPixelSize(R.dimen.photo_viewpager_preview_size);
         final Bitmap previewBitmap = getPreviewBitmap();
         if (previewBitmap != null) {
-            Palette palette = Palette.from(previewBitmap).generate();
-            final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
-            if (lightVibrantSwatch != null) {
-                mPb.setColor(lightVibrantSwatch.getRgb());
+            try {
+                Palette palette = Palette.from(previewBitmap).generate();
+                final Palette.Swatch lightVibrantSwatch = palette.getLightVibrantSwatch();
+                if (lightVibrantSwatch != null) {
+                    mPb.setColor(lightVibrantSwatch.getRgb());
+                }
+                mIvPreview.setImageBitmap(previewBitmap);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            mIvPreview.setImageBitmap(previewBitmap);
         }
         final File fileCache = getShowFileCache();
         if (mNeedTransition) {
