@@ -53,28 +53,35 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
         if (bitmap == null) {
             return false;
         }
-        final Context context = v.getContext();
         final CompositeSubscription compositeSubscription = new CompositeSubscription();
-        new MaterialDialog.Builder(context)
-                .theme(Theme.LIGHT)
-                .negativeText(android.R.string.cancel)
-                .adapter(itemsAdapter,
-                        new MaterialDialog.ListCallback() {
-                            @Override
-                            public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-                                final ILongClickItem iLongClickItem = longClickItems.get(which);
-                                iLongClickItem.onClick(context, url, cache, bitmap);
-                                dialog.dismiss();
-                            }
-                        })
-                .dismissListener(new DialogInterface.OnDismissListener() {
+        final Context context = v.getContext();
+        final Subscription adapterSubscription = AdapterObservable.onceHasData(itemsAdapter)
+                .subscribe(new Action1<Boolean>() {
                     @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        bitmap.recycle();
-                        compositeSubscription.unsubscribe();
+                    public void call(Boolean aBoolean) {
+                        new MaterialDialog.Builder(context)
+                                .theme(Theme.LIGHT)
+                                .negativeText(android.R.string.cancel)
+                                .adapter(itemsAdapter,
+                                        new MaterialDialog.ListCallback() {
+                                            @Override
+                                            public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                                final ILongClickItem iLongClickItem = longClickItems.get(which);
+                                                iLongClickItem.onClick(context, url, cache, bitmap);
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                .dismissListener(new DialogInterface.OnDismissListener() {
+                                    @Override
+                                    public void onDismiss(DialogInterface dialog) {
+                                        bitmap.recycle();
+                                        compositeSubscription.unsubscribe();
+                                    }
+                                })
+                                .show();
                     }
-                })
-                .show();
+                });
+        compositeSubscription.add(adapterSubscription);
         for (final ILongClickItem item : longClickItems) {
             final Subscription subscription = item.isAvailable(context, url, cache, bitmap)
                     .subscribe(new Action1<Boolean>() {
