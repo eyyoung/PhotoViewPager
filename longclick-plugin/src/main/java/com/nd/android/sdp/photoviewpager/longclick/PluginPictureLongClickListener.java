@@ -45,7 +45,7 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
         final ArrayList<ILongClickItem> longClickItems = mBuilder.mLongClickItems;
         final ILongClickItemArrayAdapter itemsAdapter = new ILongClickItemArrayAdapter(mBuilder.mContext);
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
-                .cacheInMemory(true)
+                .cacheInMemory(false)
                 .cacheOnDisk(false)
                 .build();
         final Bitmap bitmap = ImageLoader.getInstance().loadImageSync(Uri.fromFile(cache).toString(),
