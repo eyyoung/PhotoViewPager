@@ -217,7 +217,7 @@ public class VideoPagerFragment extends BasePagerFragment {
         final File diskCache = mConfiguration.getPicDiskCache(mVideoInfo.videoUrl);
         if (!diskCache.exists()) {
             if (mExtraDownloader != null) {
-                mExtraDownloader.confirmDownload(new PhotoViewConfirmDownloadCallback() {
+                mExtraDownloader.confirmDownload(getActivity(), new PhotoViewConfirmDownloadCallback() {
                     @Override
                     public void confirm() {
                         if (initStartDownload()) return;
