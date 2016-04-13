@@ -112,16 +112,17 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
         private final Context context;
 
         public ILongClickItemArrayAdapter(Context context) {
-            super(context, android.R.layout.simple_list_item_1);
+            super(context, R.layout.photo_viewpager_dlg_item_long_click, R.id.title);
             this.context = context;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            final TextView view = (TextView) super.getView(position, convertView, parent);
+            final View itemView = super.getView(position, convertView, parent);
+            final TextView view = ((TextView) itemView.findViewById(R.id.title));
             final ILongClickItem item = getItem(position);
             view.setText(item.getLable(context));
-            return view;
+            return itemView;
         }
 
     }
