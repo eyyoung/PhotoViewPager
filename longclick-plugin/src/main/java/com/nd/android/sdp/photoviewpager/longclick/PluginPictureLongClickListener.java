@@ -59,26 +59,35 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
-                        new MaterialDialog.Builder(context)
-                                .theme(Theme.LIGHT)
-                                .negativeText(android.R.string.cancel)
-                                .adapter(itemsAdapter,
-                                        new MaterialDialog.ListCallback() {
-                                            @Override
-                                            public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
-                                                final ILongClickItem iLongClickItem = longClickItems.get(which);
-                                                iLongClickItem.onClick(context, url, cache, bitmap);
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                .dismissListener(new DialogInterface.OnDismissListener() {
-                                    @Override
-                                    public void onDismiss(DialogInterface dialog) {
-                                        bitmap.recycle();
-                                        compositeSubscription.unsubscribe();
-                                    }
-                                })
-                                .show();
+                        try {
+                            new MaterialDialog.Builder(context)
+                                    .theme(Theme.LIGHT)
+                                    .negativeText(android.R.string.cancel)
+                                    .adapter(itemsAdapter,
+                                            new MaterialDialog.ListCallback() {
+                                                @Override
+                                                public void onSelection(MaterialDialog dialog, View itemView, int which, CharSequence text) {
+                                                    final ILongClickItem iLongClickItem = itemsAdapter.getItem(which);
+                                                    iLongClickItem.onClick(context, url, cache, bitmap);
+                                                    dialog.dismiss();
+                                                }
+                                            })
+                                    .dismissListener(new DialogInterface.OnDismissListener() {
+                                        @Override
+                                        public void onDismiss(DialogInterface dialog) {
+                                            bitmap.recycle();
+                                            compositeSubscription.unsubscribe();
+                                        }
+                                    })
+                                    .show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
                     }
                 });
         compositeSubscription.add(adapterSubscription);
@@ -114,6 +123,7 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
             view.setText(item.getLable(context));
             return view;
         }
+
     }
 
     public static final class Builder {

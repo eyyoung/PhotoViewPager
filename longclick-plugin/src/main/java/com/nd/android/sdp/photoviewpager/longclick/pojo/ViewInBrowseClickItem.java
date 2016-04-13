@@ -23,7 +23,8 @@ public class ViewInBrowseClickItem implements ILongClickItem {
 
     @Override
     public Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @NonNull Bitmap bitmap) {
-        return Observable.just(url.startsWith("http") || url.startsWith("https"));
+//        return Observable.just(url.startsWith("http") || url.startsWith("https"));
+        return Observable.just(false);
     }
 
     @Override
