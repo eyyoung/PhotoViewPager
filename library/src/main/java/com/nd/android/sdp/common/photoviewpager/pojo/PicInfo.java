@@ -93,16 +93,19 @@ public class PicInfo implements Parcelable, Info {
         }
     };
 
+    @NonNull
     @Override
     public String getPreviewUrl() {
         return previewUrl;
     }
 
+    @NonNull
     @Override
     public String getUrl() {
         return url;
     }
 
+    @Nullable
     @Override
     public String getOrigUrl() {
         return origUrl;
@@ -119,7 +122,9 @@ public class PicInfo implements Parcelable, Info {
     public static final class Builder {
         private String url;
         private String previewUrl;
+        @Nullable
         private String origUrl;
+        @Nullable
         private String md5;
         private long size;
 
@@ -139,13 +144,13 @@ public class PicInfo implements Parcelable, Info {
         }
 
         @NonNull
-        public Builder origUrl(@NonNull String val) {
+        public Builder origUrl(@Nullable String val) {
             origUrl = val;
             return this;
         }
 
         @NonNull
-        public Builder md5(@NonNull String val) {
+        public Builder md5(@Nullable String val) {
             md5 = val;
             return this;
         }
