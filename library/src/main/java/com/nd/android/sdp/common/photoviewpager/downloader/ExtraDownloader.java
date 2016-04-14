@@ -1,5 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager.downloader;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -24,6 +25,6 @@ public interface ExtraDownloader {
             @NonNull
             String url);
 
-    void confirmDownload(PhotoViewConfirmDownloadCallback callback);
+    void confirmDownload(Context context, PhotoViewConfirmDownloadCallback callback);
 
 }
