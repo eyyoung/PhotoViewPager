@@ -44,7 +44,7 @@ Demo
 Gradle依赖
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile("com.nd.android.sdp.common:photoview:0.x.x") {
+compile("com.nd.android.sdp.common:photoview:1.x.x") {
     transitive = true
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
