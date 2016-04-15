@@ -1,6 +1,7 @@
 package com.nd.android.sdp.common.photoviewpager;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nd.android.sdp.common.photoviewpager.ability.IDefaultPicAble;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
@@ -26,7 +28,7 @@ import java.util.ArrayList;
  *
  * @author Young
  */
-class PhotoViewPager extends ViewPager {
+class PhotoViewPager extends ViewPager implements IDefaultPicAble {
 
     private ArrayList<? extends Info> mPicInfos;
     private Bundle mArguments;
@@ -40,6 +42,7 @@ class PhotoViewPager extends ViewPager {
     private OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
     private ExtraDownloader mExtraDownloader;
+    private Bitmap mBitmap;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -97,6 +100,11 @@ class PhotoViewPager extends ViewPager {
         mExtraDownloader = extraDownloader;
     }
 
+    @Override
+    public void setDefaultBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -124,6 +132,9 @@ class PhotoViewPager extends ViewPager {
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
                 mDefaultPosition = -1;
+            }
+            if (fragment instanceof IDefaultPicAble && mBitmap != null) {
+                ((IDefaultPicAble) fragment).setDefaultBitmap(mBitmap);
             }
             return fragment;
         }

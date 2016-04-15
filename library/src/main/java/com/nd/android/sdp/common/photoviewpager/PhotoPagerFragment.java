@@ -1,5 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,10 +13,12 @@ import android.view.ViewPropertyAnimator;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nd.android.sdp.common.photoviewpager.ability.IDefaultPicAble;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
+import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 
 import java.io.File;
 import java.util.Locale;
@@ -30,12 +33,13 @@ import rx.schedulers.Schedulers;
 /**
  * 静态图片页面
  */
-public class PhotoPagerFragment extends BasePagerFragment {
+public class PhotoPagerFragment extends BasePagerFragment implements IDefaultPicAble {
 
     private Subscription mFullSizeSubscription;
     private TextView mTvOrig;
     private PicInfo mPicInfo;
     private GifImageView mIvGif;
+    private Bitmap mDefaultBitmap;
 
 
     @Override
@@ -185,5 +189,22 @@ public class PhotoPagerFragment extends BasePagerFragment {
             mIvPreview.setVisibility(View.GONE);
             mIvGif.setOnClickListener(mFinishClickListener);
         }
+    }
+
+    @Override
+    public void onImageLoadError(Exception e) {
+        super.onImageLoadError(e);
+        if (mDefaultBitmap != null) {
+            mTvError.setVisibility(View.GONE);
+            mIvReal.setImage(ImageSource.cachedBitmap(mDefaultBitmap).tilingDisabled());
+            mIvReal.setZoomEnabled(false);
+            mIvReal.setPanEnabled(false);
+            mTvOrig.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void setDefaultBitmap(Bitmap bitmap) {
+        mDefaultBitmap = bitmap;
     }
 }

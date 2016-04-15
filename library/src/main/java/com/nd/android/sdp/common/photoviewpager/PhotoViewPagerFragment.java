@@ -2,8 +2,11 @@ package com.nd.android.sdp.common.photoviewpager;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -59,6 +62,8 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private View.OnClickListener mOnPictureClickListener;
     private IPhotoViewPagerConfiguration mConfiguration;
     private OnDetachCallBack mDetachCallBack;
+    private int mDefaultResId;
+    private Bitmap mDefaultBitmap;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<? extends Info> picInfos,
@@ -160,6 +165,10 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
         mVpPhoto.setOnPictureClickListener(mOnPictureClickListener);
+        if (mDefaultResId > 0) {
+            mDefaultBitmap = BitmapFactory.decodeResource(getResources(), mDefaultResId);
+            mVpPhoto.setDefaultBitmap(mDefaultBitmap);
+        }
         mVpPhoto.setConfigration(mConfiguration);
         mVpPhoto.post(new Runnable() {
             @Override
@@ -403,6 +412,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     public void onDestroyView() {
         super.onDestroyView();
         PhotoViewPagerManager.INSTANCE.removeFragment(this);
+        if (mDefaultBitmap != null) {
+            mDefaultBitmap.recycle();
+        }
     }
 
     @Override
@@ -419,5 +431,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         if (mDetachCallBack != null) {
             mDetachCallBack.onDetach();
         }
+    }
+
+    public void setDefaultRes(@DrawableRes int resId) {
+        mDefaultResId = resId;
     }
 }

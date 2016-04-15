@@ -21,13 +21,13 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-//    compile project(":library")
-//    compile project(":library-iml")
-    compile("com.nd.android.sdp.common:photoview-iml:1.0.140") {
-        transitive = true
-        exclude group: 'com.android.support'
-    }
-    compile 'com.nd.android.sdp.common:photoview:1.1.151'
+    compile project(":library")
+    compile project(":library-iml")
+//    compile("com.nd.android.sdp.common:photoview-iml:1.0.140") {
+//        transitive = true
+//        exclude group: 'com.android.support'
+//    }
+//    compile 'com.nd.android.sdp.common:photoview:1.1.151'
     compile "com.android.support:recyclerview-v7:23.1.0"
     compile('com.afollestad:material-dialogs:0.7.8.1@aar') {
         transitive true
