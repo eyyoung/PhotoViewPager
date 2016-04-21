@@ -597,7 +597,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     @Override
     public void onTileLoadError(Exception e) {
-
+        onImageLoadError(e);
     }
 
     public void selected() {

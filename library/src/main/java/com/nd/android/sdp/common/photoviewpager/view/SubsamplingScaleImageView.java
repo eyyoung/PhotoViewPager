@@ -1598,7 +1598,11 @@ public class SubsamplingScaleImageView extends View {
                             if (view.sRegion != null) {
                                 tile.fileSRect.offset(view.sRegion.left, view.sRegion.top);
                             }
-                            subscriber.onNext(decoder.decodeRegion(tile.fileSRect, tile.sampleSize));
+                            try {
+                                subscriber.onNext(decoder.decodeRegion(tile.fileSRect, tile.sampleSize));
+                            } catch (OutOfMemoryError e) {
+                                subscriber.onError(e);
+                            }
                         }
                     } else if (tile != null) {
                         tile.loading = false;
