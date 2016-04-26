@@ -37,7 +37,7 @@ Version](<http://nexus.sdp.nd/nexus/#nexus-search;gav~com.nd.android.sdp.common~
 Demo
 ----
 
-![](<http://git.sdp.nd/im-component/photoviewpager/blob/master/demo/demo.gif>)
+![](<http://git.sdp.nd/im-component/photoviewpager/raw/master/demo/demo.gif>)
 
  
 
