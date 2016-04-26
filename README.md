@@ -78,6 +78,20 @@ PhotoViewPagerManager#startView(FragmentActivity, //Activity
         IPhotoViewPagerConfiguration)//磁盘与内存缓存配置，为空使用全局配置
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+仅获取看大图Fragment
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+PhotoViewPagerManager.getView(java.util.ArrayList<? extends com.nd.android.sdp.common.photoviewpager.pojo.Info>, //图片信息
+        int）
+
+PhotoViewPagerManager.getView(java.util.ArrayList<? extends com.nd.android.sdp.common.photoviewpager.pojo.Info>, //图片信息
+        int, //默认页面
+        Callback, //回调（用于获取界面上对应的控件），可为空
+        IPhotoViewPagerConfiguration) //磁盘与内存缓存配置，为空使用全局配置
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 媒体信息
 ========
 
@@ -152,13 +166,20 @@ Callback#getPreviewView(String previewUrl)
 支持界面自定义，通过
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Deprecated
 PhotoViewPagerFragment#setOnViewCreatedListener
+
+
+PhotoViewPagerFragment#setOnViewCreatedListenerV2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 监听界面创建完成，其中回调的参数view为RelativeLayout，可在其上添加自定义元素（按钮）
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Deprecated
 OnViewCreatedListener#onViewCreated(View view)
+
+OnViewCreatedListenerV2#onViewCreated(RelativeLayout view)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  
