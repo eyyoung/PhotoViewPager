@@ -79,11 +79,14 @@ PhotoViewPagerManager#startView(FragmentActivity, //Activity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 仅获取看大图Fragment
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PhotoViewPagerManager.getView(java.util.ArrayList<? extends com.nd.android.sdp.common.photoviewpager.pojo.Info>, //图片信息
         int）
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PhotoViewPagerManager.getView(java.util.ArrayList<? extends com.nd.android.sdp.common.photoviewpager.pojo.Info>, //图片信息
         int, //默认页面
@@ -165,20 +168,20 @@ Callback#getPreviewView(String previewUrl)
 
 支持界面自定义，通过
 
+<h3>Deprecated<h3>
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Deprecated
 PhotoViewPagerFragment#setOnViewCreatedListener
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+监听界面创建完成，其中回调的参数view为RelativeLayout，可在其上添加自定义元素（按钮）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+OnViewCreatedListener#onViewCreated(View view)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
+v1.2.x中上述方法过期，使用
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PhotoViewPagerFragment#setOnViewCreatedListenerV2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-监听界面创建完成，其中回调的参数view为RelativeLayout，可在其上添加自定义元素（按钮）
-
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Deprecated
-OnViewCreatedListener#onViewCreated(View view)
-
 OnViewCreatedListenerV2#onViewCreated(RelativeLayout view)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
