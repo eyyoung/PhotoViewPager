@@ -22,8 +22,6 @@ public enum PhotoViewPagerManager {
 
     INSTANCE;
 
-    private static long sLastCallTime;
-
     private int mStatusHeight;
 
     private IPhotoViewPagerConfiguration mConfiguration;
@@ -126,6 +124,70 @@ public enum PhotoViewPagerManager {
                                                    @Nullable
                                                    Callback callback) {
         return startView(activity, imageView, picInfos, defaultPosition, callback, null);
+    }
+
+    /**
+     * Get view photo view pager fragment.
+     *
+     * @param picInfos        the pic infos
+     * @param defaultPosition the default position
+     * @return the photo view pager fragment
+     */
+    public static PhotoViewPagerFragment getView(
+            @NonNull
+            ArrayList<? extends Info> picInfos,
+            int defaultPosition) {
+        return getView(picInfos, defaultPosition, null, null);
+    }
+
+    /**
+     * Get view photo view pager fragment.
+     *
+     * @param picInfos        the pic infos
+     * @param defaultPosition the default position
+     * @param callback        the callback
+     * @return the photo view pager fragment
+     */
+    public static PhotoViewPagerFragment getView(
+            @NonNull
+            ArrayList<? extends Info> picInfos,
+            int defaultPosition,
+            @Nullable
+            Callback callback) {
+        return getView(picInfos, defaultPosition, callback, null);
+    }
+
+    /**
+     * Get view photo view pager fragment.
+     *
+     * @param picInfos                    the pic infos
+     * @param defaultPosition             the default position
+     * @param callback                    the callback
+     * @param photoViewPagerConfiguration the photo view pager configuration
+     * @return the photo view pager fragment
+     */
+    public static PhotoViewPagerFragment getView(
+            @NonNull
+            ArrayList<? extends Info> picInfos,
+            int defaultPosition,
+            @Nullable
+            Callback callback,
+            @Nullable
+            IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
+        if (callback == null) {
+            callback = new Callback() {
+                @Override
+                public ImageView getPreviewView(String previewUrl) {
+                    return null;
+                }
+            };
+        }
+        final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(null,
+                picInfos,
+                defaultPosition,
+                callback,
+                photoViewPagerConfiguration);
+        return fragment;
     }
 
     /**

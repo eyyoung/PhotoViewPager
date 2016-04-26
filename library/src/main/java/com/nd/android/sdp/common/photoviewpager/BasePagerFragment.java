@@ -62,6 +62,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     private static final int TRANSLATE_IN_ANIMATE_DURATION = 300;
     private int mMarginSize;
     private RevealFrameLayout mRvFrame;
+    private boolean mNoNeedBgAnim;
 
     protected enum State {
         Animate,
@@ -192,7 +193,9 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     private void animateToBigImage(final File fileCache) {
         mIsAreadyBigImage = true;
-        AnimateUtils.fadeInView(mBg);
+        if (!mNoNeedBgAnim) {
+            AnimateUtils.fadeInView(mBg);
+        }
         final ImageView previewView = mActivityCallback.getPreviewView(mInfo.getPreviewUrl());
         if (!Utils.isViewAvaliable(previewView)) {
             mIvPreview.setVisibility(View.GONE);
@@ -331,9 +334,13 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         animatorSet.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         final ObjectAnimator animator = ObjectAnimator.ofFloat(mIvPreview, RevealCircleImageView.RADIUS,
                 0, (mFrameSize - mMarginSize * 2) / 2);
-        final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 0, 1);
         AnimatorSet set = new AnimatorSet();
-        set.playTogether(animator, animator1);
+        if (mNoNeedBgAnim) {
+            set.playTogether(animator);
+        } else {
+            final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 0, 1);
+            set.playTogether(animator, animator1);
+        }
         set.setInterpolator(new AccelerateInterpolator());
         set.setDuration(TRANSLATE_IN_ANIMATE_DURATION).start();
         set.addListener(new AnimatorListenerAdapter() {
@@ -645,20 +652,20 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         mIsAnimateFinishing = true;
         final boolean animateFinish = animateFinish();
         if (animateFinish) {
-            final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
-            animator1.setDuration(mScaleDuration + EXIT_DURATION);
-            animator1.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    final FragmentActivity activity = getActivity();
-                    if (activity != null && !activity.isFinishing()) {
-                        activity.finish();
+            if (mNoNeedBgAnim) {
+                finishActivity();
+            } else {
+                final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
+                animator1.setDuration(mScaleDuration + EXIT_DURATION);
+                animator1.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        finishActivity();
                     }
-                    mState = State.Finished;
-                }
-            });
-            animator1.start();
+                });
+                animator1.start();
+            }
         } else {
             ViewPropertyAnimator animate;
             if (mIvReal.getVisibility() == View.VISIBLE) {
@@ -674,20 +681,20 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                         .setDuration(FADE_ANIMATE_DURATION)
                         .start();
             }
-            final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
-            animator1.setDuration(FADE_ANIMATE_DURATION);
-            animator1.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    super.onAnimationEnd(animation);
-                    final FragmentActivity activity = getActivity();
-                    if (activity != null && !activity.isFinishing()) {
-                        activity.finish();
+            if (mNoNeedBgAnim) {
+                finishActivity();
+            } else {
+                final ObjectAnimator animator1 = ObjectAnimator.ofFloat(mBg, View.ALPHA, 1, 0);
+                animator1.setDuration(FADE_ANIMATE_DURATION);
+                animator1.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        finishActivity();
                     }
-                    mState = State.Finished;
-                }
-            });
-            animator1.start();
+                });
+                animator1.start();
+            }
         }
         if (mPb.getVisibility() == View.VISIBLE) {
             final ObjectAnimator animator = ObjectAnimator.ofFloat(mFlPreview, View.ALPHA, 1, 0);
@@ -697,6 +704,14 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         if (mOnFinishListener != null) {
             mOnFinishListener.onFinish();
         }
+    }
+
+    private void finishActivity() {
+        final FragmentActivity activity = getActivity();
+        if (activity != null && !activity.isFinishing()) {
+            activity.finish();
+        }
+        mState = State.Finished;
     }
 
     @Nullable
@@ -863,4 +878,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         return mStatusBarHeight;
     }
 
+    public void setNoBgAnim(boolean noNeedBgAnim) {
+        mNoNeedBgAnim = noNeedBgAnim;
+    }
 }

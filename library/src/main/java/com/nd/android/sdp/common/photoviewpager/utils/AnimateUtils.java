@@ -16,6 +16,9 @@ public final class AnimateUtils {
      * @param view the view
      */
     public static void fadeInView(View view) {
+        if (view == null) {
+            return;
+        }
         view.setAlpha(0);
         view.animate()
                 .alpha(1.0f)

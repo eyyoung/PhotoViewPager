@@ -43,6 +43,7 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
     private IPhotoViewPagerConfiguration mConfiguration;
     private ExtraDownloader mExtraDownloader;
     private Bitmap mBitmap;
+    private boolean mNoBgAnim;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -105,6 +106,10 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
         mBitmap = bitmap;
     }
 
+    public void setNoBgAnim() {
+        mNoBgAnim = true;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -123,6 +128,7 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
                     mExtraDownloader);
             mFragmentMap.put(position, fragment);
             fragment.setBg(mBg);
+            fragment.setNoBgAnim(mNoBgAnim);
             fragment.setOnFinishListener(mOnFinishListener);
             fragment.setCallback(mCallback);
             fragment.setOnPictureClickListener(mOnPictureClickListener);

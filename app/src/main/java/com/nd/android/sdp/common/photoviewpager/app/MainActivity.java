@@ -81,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
             return true;
         }
 
+
+        if (id == R.id.action_only_view) {
+            OnlyViewActivity.start(this);
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

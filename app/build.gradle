@@ -34,6 +34,12 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':library')
     compile project(':library-iml')
-    compile project(':longclick-plugin')
+    compile("com.nd.android.sdp.common:photoview-longclick:1.1.+") {
+        transitive = true
+        exclude group: 'com.nd.android.sdp.common'
+        exclude group: 'com.android.support'
+        exclude group: 'com.nostra13.universalimageloader'
+    }
+//    compile project(':longclick-plugin')
 //    compile project(':library-uil')
 }

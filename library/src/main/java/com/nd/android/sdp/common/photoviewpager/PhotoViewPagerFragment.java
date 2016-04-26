@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.callback.OnDetachCallBack;
@@ -25,6 +26,7 @@ import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
+import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListenerV2;
 import com.nd.android.sdp.common.photoviewpager.downloader.ExtraDownloader;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
@@ -54,6 +56,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private ArrayList<Info> mImages;
     private Callback mCallback;
     private OnViewCreatedListener mOnViewCreatedListener;
+    private OnViewCreatedListenerV2 mOnViewCreatedListenerV2;
     private OnFinishListener mOnFinishListener;
     private ExtraDownloader mExtraDownloader;
 
@@ -64,6 +67,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private OnDetachCallBack mDetachCallBack;
     private int mDefaultResId;
     private Bitmap mDefaultBitmap;
+    private boolean mNoBgAnim;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<? extends Info> picInfos,
@@ -127,6 +131,9 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         if (mOnViewCreatedListener != null) {
             mOnViewCreatedListener.onViewCreated(view);
         }
+        if (mOnViewCreatedListenerV2 != null) {
+            mOnViewCreatedListenerV2.onViewCreated((RelativeLayout) view);
+        }
     }
 
     @Nullable
@@ -153,13 +160,17 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         final int defaultPosition = arguments.getInt(PARAM_DEFAULT_POSITION, 0);
 //        mVpPhoto.setPageTransformer(true, new DrawFromBackTransformer());
         mVpPhoto.setPageMargin(20);
-        mVpPhoto.setBg(findViewById(R.id.bg));
+        final View bg = findViewById(R.id.bg);
+        mVpPhoto.setBg(bg);
         // Use child fragment manager,prevent memory leak
         mVpPhoto.init(getChildFragmentManager(),
                 mImages,
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
+        if(mNoBgAnim){
+            mVpPhoto.setNoBgAnim();
+        }
         mVpPhoto.setExtraDownloader(mExtraDownloader);
         mVpPhoto.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
@@ -212,6 +223,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         fragmentByPosition.finish();
     }
 
+    @SuppressWarnings("unused")
     public void exitWithoutAnim() {
         final FragmentActivity activity = getActivity();
         if (activity == null) {
@@ -234,6 +246,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      *
      * @param position 序号
      */
+    @SuppressWarnings("unused")
     public void goPage(int position) {
         mVpPhoto.setCurrentItem(position);
     }
@@ -286,6 +299,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      *
      * @param onPageChangeListener the on page change listener
      */
+    @SuppressWarnings("unused")
     public void addOnPageChangeListener(ViewPager.OnPageChangeListener onPageChangeListener) {
         mOnPageListeners.add(onPageChangeListener);
         if (mVpPhoto != null) {
@@ -300,6 +314,16 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      */
     public void setOnViewCreatedListener(OnViewCreatedListener onViewCreatedListener) {
         mOnViewCreatedListener = onViewCreatedListener;
+    }
+
+    /**
+     * Sets on view created listener.
+     *
+     * @param onViewCreatedListenerV2 the on view created listener v2
+     */
+    @SuppressWarnings("unused")
+    public void setOnViewCreatedListenerV2(OnViewCreatedListenerV2 onViewCreatedListenerV2) {
+        mOnViewCreatedListenerV2 = onViewCreatedListenerV2;
     }
 
     @Deprecated
@@ -324,6 +348,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      *
      * @param onPictureClickListener the on picture click listener
      */
+    @SuppressWarnings("unused")
     public void setOnPictureClickListener(View.OnClickListener onPictureClickListener) {
         mOnPictureClickListener = onPictureClickListener;
         if (mVpPhoto != null) {
@@ -349,6 +374,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      *
      * @param extraDownloader the extra downloader
      */
+    @SuppressWarnings("unused")
     public void setExtraDownloader(ExtraDownloader extraDownloader) {
         mExtraDownloader = extraDownloader;
         if (mVpPhoto != null) {
@@ -376,6 +402,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      *
      * @param targetParentFile 保存父级位置
      */
+    @SuppressWarnings("unused")
     public void saveCurrentPhoto(File targetParentFile) {
         final Info currentInfo = getCurrentInfo();
         final String origUrl = currentInfo.getOrigUrl();
@@ -431,6 +458,10 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         if (mDetachCallBack != null) {
             mDetachCallBack.onDetach();
         }
+    }
+
+    public void setNoBgAnim() {
+        mNoBgAnim = true;
     }
 
     public void setDefaultRes(@DrawableRes int resId) {
