@@ -3,6 +3,10 @@ PhotoViewPager
 
  
 
+负责人：杨扬(949177)
+
+ 
+
 最新版本：
 
 [Nexus仓库Latest
