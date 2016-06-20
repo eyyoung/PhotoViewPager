@@ -68,12 +68,14 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private int mDefaultResId;
     private Bitmap mDefaultBitmap;
     private boolean mNoBgAnim;
+    private boolean mDisableOrigin;
 
     static PhotoViewPagerFragment newInstance(ImageView imageView,
                                               ArrayList<? extends Info> picInfos,
                                               int defaultPosition,
                                               Callback callback,
-                                              IPhotoViewPagerConfiguration configuration) {
+                                              IPhotoViewPagerConfiguration configuration,
+                                              boolean disableOrigin) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
         args.putParcelableArrayList(PARAM_PICINFOS, picInfos);
@@ -88,8 +90,13 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
         fragment.setCallbacks(callback);
         fragment.setConfiguration(configuration);
+        fragment.disableOrigin(disableOrigin);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void disableOrigin(boolean disableOrigin) {
+        mDisableOrigin = disableOrigin;
     }
 
     private void setConfiguration(IPhotoViewPagerConfiguration configuration) {
@@ -176,6 +183,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         mVpPhoto.setOnPictureLongClickListener(mOnPictureLongClickListener);
         mVpPhoto.setOnFinishListener(mOnFinishListener);
         mVpPhoto.setOnPictureClickListener(mOnPictureClickListener);
+        mVpPhoto.disableOrigin(mDisableOrigin);
         if (mDefaultResId > 0) {
             mDefaultBitmap = BitmapFactory.decodeResource(getResources(), mDefaultResId);
             mVpPhoto.setDefaultBitmap(mDefaultBitmap);

@@ -63,6 +63,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
     private int mMarginSize;
     private RevealFrameLayout mRvFrame;
     private boolean mNoNeedBgAnim;
+    private boolean mDisableOrigin;
 
     protected enum State {
         Animate,
@@ -261,6 +262,9 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             AnimateUtils.fadeInView(mIvReal);
         }
         final ImageSource source = ImageSource.uri(fileCache.getAbsolutePath());
+        if (mDisableOrigin) {
+            source.tilingDisabled();
+        }
         mIvReal.setImage(source);
         mIvTemp.setVisibility(View.VISIBLE);
         // 保持Preview状态，由调用方自己决定是否显示
@@ -876,6 +880,10 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             mStatusBarHeight = PhotoViewPagerManager.INSTANCE.getStatusHeight(getActivity());
         }
         return mStatusBarHeight;
+    }
+
+    public void disableOrigin(boolean disableOrigin) {
+        mDisableOrigin = disableOrigin;
     }
 
     public void setNoBgAnim(boolean noNeedBgAnim) {

@@ -186,7 +186,7 @@ public enum PhotoViewPagerManager {
                 picInfos,
                 defaultPosition,
                 callback,
-                photoViewPagerConfiguration);
+                photoViewPagerConfiguration, false);
         return fragment;
     }
 
@@ -212,7 +212,7 @@ public enum PhotoViewPagerManager {
                                                    Callback callback,
                                                    @Nullable
                                                    IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
-        return startView((Activity) activity, imageView, picInfos, defaultPosition, callback, photoViewPagerConfiguration);
+        return startView((Activity) activity, imageView, picInfos, defaultPosition, callback, photoViewPagerConfiguration, false);
     }
 
     /**
@@ -224,6 +224,7 @@ public enum PhotoViewPagerManager {
      * @param defaultPosition             the default position
      * @param callback                    the callback
      * @param photoViewPagerConfiguration Configuration
+     * @param disableOrigin
      * @return the photo view pager fragment
      */
     @NonNull
@@ -236,7 +237,8 @@ public enum PhotoViewPagerManager {
                                                    @Nullable
                                                    Callback callback,
                                                    @Nullable
-                                                   IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
+                                                   IPhotoViewPagerConfiguration photoViewPagerConfiguration,
+                                                   boolean disableOrigin) {
         if (callback == null) {
             callback = new Callback() {
                 @Override
@@ -249,7 +251,8 @@ public enum PhotoViewPagerManager {
                 picInfos,
                 defaultPosition,
                 callback,
-                photoViewPagerConfiguration);
+                photoViewPagerConfiguration,
+                disableOrigin);
         final long id = System.currentTimeMillis();
         PhotoViewPagerManager.INSTANCE.mFragmentMap.put(id, fragment);
         initStatusBarHeight(activity);

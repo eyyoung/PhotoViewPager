@@ -44,6 +44,7 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
     private ExtraDownloader mExtraDownloader;
     private Bitmap mBitmap;
     private boolean mNoBgAnim;
+    private boolean mDisableOrigin;
 
     public PhotoViewPager(Context context) {
         super(context);
@@ -110,6 +111,10 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
         mNoBgAnim = true;
     }
 
+    public void disableOrigin(boolean disableOrigin) {
+        mDisableOrigin = disableOrigin;
+    }
+
     private class ImagePagerAdapter extends FragmentStatePagerAdapter {
 
         public ImagePagerAdapter(FragmentManager fm) {
@@ -135,6 +140,7 @@ class PhotoViewPager extends ViewPager implements IDefaultPicAble {
             fragment.setOnPictureLongClickListener(mOnPictureLongClickListener);
             fragment.setOnPictureLongClickListenerV2(mOnPictureLongClickListenerV2);
             fragment.setConfiguration(mConfiguration);
+            fragment.disableOrigin(mDisableOrigin);
             if (position == mDefaultPosition) {
                 fragment.startDefaultTransition();
                 mDefaultPosition = -1;
