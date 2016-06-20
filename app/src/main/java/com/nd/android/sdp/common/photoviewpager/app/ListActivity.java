@@ -153,7 +153,7 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
         mPhotoViewPagerFragment = PhotoViewPagerManager.startView(this,
                 (ImageView) view, picInfos,
                 position,
-                this);
+                this, null, true);
         mPhotoViewPagerFragment.setOnViewCreatedListener(this);
         mPhotoViewPagerFragment.setOnFinishListener(this);
         mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(new OnPictureLongClickListenerV2() {

@@ -76,9 +76,9 @@ import rx.subscriptions.CompositeSubscription;
  * Displays an image subsampled as necessary to avoid loading too much image data into memory. After a pinch to zoom in,
  * a set of image tiles subsampled at higher resolution are loaded and displayed over the base layer. During pinch and
  * zoom, tiles off screen or higher/lower resolution than required are discarded from memory.
- * <p>
+ * <p/>
  * Tiles are no larger than the max supported bitmap size, so with large images tiling may be used even when zoomed out.
- * <p>
+ * <p/>
  * v prefixes - coordinates, translations and distances measured in screen (view) pixels
  * s prefixes - coordinates, translations and distances measured in source image pixels (scaled)
  */
@@ -88,7 +88,7 @@ public class SubsamplingScaleImageView extends View {
     private static final String TAG = SubsamplingScaleImageView.class.getSimpleName();
 
     private static String[] SOFT_LAYERTYPE_DEVICE = new String[]{
-      "ATH-AL00"
+            "ATH-AL00"
     };
 
     /**
@@ -392,7 +392,7 @@ public class SubsamplingScaleImageView extends View {
     /**
      * Set the image source from a bitmap, resource, asset, file or other URI, providing a preview image to be
      * displayed until the full size image is loaded.
-     * <p>
+     * <p/>
      * You must declare the dimensions of the full size image by calling {@link ImageSource#dimensions(int, int)}
      * on the imageSource object. The preview source will be ignored if you don't provide dimensions,
      * and if you provide a bitmap for the full size image.
@@ -409,7 +409,7 @@ public class SubsamplingScaleImageView extends View {
      * displayed until the full size image is loaded, starting with a given orientation setting, scale and center.
      * This is the best method to use when you want scale and center to be restored after screen orientation change;
      * it avoids any redundant loading of tiles in the wrong orientation.
-     * <p>
+     * <p/>
      * You must declare the dimensions of the full size image by calling {@link ImageSource#dimensions(int, int)}
      * on the imageSource object. The preview source will be ignored if you don't provide dimensions,
      * and if you provide a bitmap for the full size image.
@@ -468,7 +468,7 @@ public class SubsamplingScaleImageView extends View {
 //                task.execute();
             } else {
                 // Load the bitmap as a single image.
-                startBitmapLoad(this,getContext(),bitmapDecoderFactory, uri, false);
+                startBitmapLoad(this, getContext(), bitmapDecoderFactory, uri, false);
             }
         }
     }
@@ -1049,14 +1049,17 @@ public class SubsamplingScaleImageView extends View {
             }
             matrix.reset();
             matrix.postScale(xScale, yScale);
-            matrix.postRotate(getOrientation());
+            int orientation = getOrientation();
+            if (orientation > 0) {
+                matrix.postRotate(orientation);
+            }
             matrix.postTranslate(vTranslate.x, vTranslate.y);
 
-            if (getOrientation() == ORIENTATION_180) {
+            if (orientation == ORIENTATION_180) {
                 matrix.postTranslate(scale * sWidth, scale * sHeight);
-            } else if (getOrientation() == ORIENTATION_90) {
+            } else if (orientation == ORIENTATION_90) {
                 matrix.postTranslate(scale * sHeight, 0);
-            } else if (getOrientation() == ORIENTATION_270) {
+            } else if (orientation == ORIENTATION_270) {
                 matrix.postTranslate(0, scale * sWidth);
             }
 
@@ -1585,7 +1588,7 @@ public class SubsamplingScaleImageView extends View {
         requestLayout();
     }
 
-    private void startTileLoad(final SubsamplingScaleImageView view, final ImageRegionDecoder decoder, final Tile tile){
+    private void startTileLoad(final SubsamplingScaleImageView view, final ImageRegionDecoder decoder, final Tile tile) {
         tile.loading = true;
         final Subscription subscription = Observable.create(new Observable.OnSubscribe<Bitmap>() {
             @Override
@@ -1713,7 +1716,7 @@ public class SubsamplingScaleImageView extends View {
                                  final Context context,
                                  final DecoderFactory<? extends ImageDecoder> decoderFactory,
                                  final Uri source,
-                                 final boolean preview){
+                                 final boolean preview) {
         final Subscription subscription = Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
@@ -1843,7 +1846,7 @@ public class SubsamplingScaleImageView extends View {
         if (this.sWidth > 0 && this.sHeight > 0 && (this.sWidth != bitmap.getWidth() || this.sHeight != bitmap.getHeight())) {
             reset(false);
         }
-        if (this.bitmap != null && !bitmapIsCached) {
+        if (this.bitmap != null && !bitmapIsCached && bitmap != this.bitmap) {
             this.bitmap.recycle();
         }
         this.bitmapIsPreview = false;

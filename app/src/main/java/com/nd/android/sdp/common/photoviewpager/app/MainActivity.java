@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         ImageLoaderIniter.INSTANCE.init();
+        ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
