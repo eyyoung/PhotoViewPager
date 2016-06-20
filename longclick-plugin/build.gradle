@@ -50,7 +50,7 @@ task uploadLongClickPlugin(type: Upload) {
                 pom.groupId = "com.nd.android.sdp.common"
             }
             def list = [
-                    new LocalDependencies('library', 'com.nd.android.sdp.common', 'photoview-iml', rootProject.ext.moduleVersion),
+                    new LocalDependencies('library', 'com.nd.android.sdp.common', 'photoview-iml', rootProject.ext.module_version),
                     new LocalDependencies('library-iml', 'com.nd.android.sdp.common', 'photoview', rootProject.ext.module_version),
             ]
             pom.whenConfigured { pom ->

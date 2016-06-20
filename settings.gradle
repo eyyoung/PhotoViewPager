@@ -1,3 +1,6 @@
-include ':app', ':library', ':longclick-plugin'
+if(hasProperty('LOCAL_BUILD_ENV')) {
+    include ':app'
+}
+include ':library', ':longclick-plugin'
 include ':library-iml'
 include ':library-uil'
