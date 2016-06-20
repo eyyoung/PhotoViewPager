@@ -44,16 +44,14 @@ apply plugin: 'maven'
 task uploadPhotoViewIML(type: Upload) {
     configuration = configurations.archives
     uploadDescriptor = true
-    try {
-        repositories {
-            mavenDeployer {
-                repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
-                    authentication(userName: mavenUser, password: mavenPassword)
-                }
-                pom.version = rootProject.ext.module_version
-                pom.artifactId = "photoview-iml"
-                pom.groupId = "com.nd.android.sdp.common"
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
+                authentication(userName: mavenUser, password: mavenPassword)
             }
+            pom.version = rootProject.ext.module_version
+            pom.artifactId = "photoview-iml"
+            pom.groupId = "com.nd.android.sdp.common"
             def list = [
                     new LocalDependencies('library-iml', 'com.nd.android.sdp.common', 'photoview', rootProject.ext.module_version),
             ]
@@ -75,8 +73,6 @@ task uploadPhotoViewIML(type: Upload) {
                 }
             }
         }
-    } catch (java.lang.Exception e) {
-        e.printStackTrace()
     }
 }
 

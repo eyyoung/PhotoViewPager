@@ -39,16 +39,14 @@ apply plugin: 'maven'
 task uploadLongClickPlugin(type: Upload) {
     configuration = configurations.archives
     uploadDescriptor = true
-    try {
-        repositories {
-            mavenDeployer {
-                repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
-                    authentication(userName: mavenUser, password: mavenPassword)
-                }
-                pom.version = rootProject.ext.module_version
-                pom.artifactId = "photoview-longclick"
-                pom.groupId = "com.nd.android.sdp.common"
+    repositories {
+        mavenDeployer {
+            repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
+                authentication(userName: mavenUser, password: mavenPassword)
             }
+            pom.version = rootProject.ext.module_version
+            pom.artifactId = "photoview-longclick"
+            pom.groupId = "com.nd.android.sdp.common"
             def list = [
                     new LocalDependencies('library', 'com.nd.android.sdp.common', 'photoview-iml', rootProject.ext.module_version),
                     new LocalDependencies('library-iml', 'com.nd.android.sdp.common', 'photoview', rootProject.ext.module_version),
@@ -71,8 +69,6 @@ task uploadLongClickPlugin(type: Upload) {
                 }
             }
         }
-    } catch (java.lang.Exception e) {
-        e.printStackTrace()
     }
     doLast {
         println(rootProject.ext.module_version)
