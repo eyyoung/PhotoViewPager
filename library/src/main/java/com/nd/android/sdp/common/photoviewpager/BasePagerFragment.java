@@ -36,6 +36,7 @@ import com.nd.android.sdp.common.photoviewpager.utils.AnimateUtils;
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
 import com.nd.android.sdp.common.photoviewpager.view.ImageSource;
 import com.nd.android.sdp.common.photoviewpager.view.SubsamplingScaleImageView;
+import com.nd.android.sdp.common.photoviewpager.view.decoder.SafeImageDecoder;
 import com.nd.android.sdp.common.photoviewpager.widget.HeightEvaluator;
 import com.nd.android.sdp.common.photoviewpager.widget.RevealCircleImageView;
 import com.nd.android.sdp.common.photoviewpager.widget.WidthEvaluator;
@@ -264,6 +265,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         final ImageSource source = ImageSource.uri(fileCache.getAbsolutePath());
         if (mDisableOrigin) {
             source.tilingDisabled();
+            mIvReal.setBitmapDecoderClass(SafeImageDecoder.class);
         }
         mIvReal.setImage(source);
         mIvTemp.setVisibility(View.VISIBLE);
