@@ -62,27 +62,27 @@ public class SafeImageDecoder implements ImageDecoder {
             BitmapFactory.Options forMeasure = new BitmapFactory.Options();
             forMeasure.inJustDecodeBounds = true;
             BitmapFactory.decodeResource(context.getResources(), id, forMeasure);
-            options.inSampleSize = getScale(widthPixels, heightPixels, options);
+            options.inSampleSize = getScale(widthPixels, heightPixels, forMeasure);
             bitmap = BitmapFactory.decodeResource(context.getResources(), id, options);
         } else if (uriString.startsWith(ASSET_PREFIX)) {
             String assetName = uriString.substring(ASSET_PREFIX.length());
             BitmapFactory.Options forMeasure = new BitmapFactory.Options();
             forMeasure.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(context.getAssets().open(assetName), null, forMeasure);
-            options.inSampleSize = getScale(widthPixels, heightPixels, options);
+            options.inSampleSize = getScale(widthPixels, heightPixels, forMeasure);
             bitmap = BitmapFactory.decodeStream(context.getAssets().open(assetName), null, options);
         } else if (uriString.startsWith(FILE_PREFIX)) {
             BitmapFactory.Options forMeasure = new BitmapFactory.Options();
             forMeasure.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(uriString.substring(FILE_PREFIX.length()), forMeasure);
-            options.inSampleSize = getScale(widthPixels, heightPixels, options);
+            options.inSampleSize = getScale(widthPixels, heightPixels, forMeasure);
             bitmap = BitmapFactory.decodeFile(uriString.substring(FILE_PREFIX.length()), options);
         } else {
             ContentResolver contentResolver = context.getContentResolver();
             BitmapFactory.Options forMeasure = new BitmapFactory.Options();
             forMeasure.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, forMeasure);
-            options.inSampleSize = getScale(widthPixels, heightPixels, options);
+            options.inSampleSize = getScale(widthPixels, heightPixels, forMeasure);
             bitmap = BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, options);
         }
         if (bitmap == null) {
@@ -95,9 +95,7 @@ public class SafeImageDecoder implements ImageDecoder {
         int scale = 1;
         int outWidth = options.outWidth;
         int outHeight = options.outHeight;
-        final int halfWidth = outWidth / 2;
-        final int halfHeight = outHeight / 2;
-        while ((halfWidth / scale) > widthPixels || (halfHeight / scale) > heightPixels) {
+        while ((outWidth / scale) > widthPixels || (outHeight / scale) > heightPixels) {
             scale *= 2;
         }
         return scale;
