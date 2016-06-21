@@ -1049,7 +1049,7 @@ public class SubsamplingScaleImageView extends View {
             }
             matrix.reset();
             matrix.postScale(xScale, yScale);
-            int orientation = getOrientation();
+            int orientation = getRequiredRotation();
             if (orientation > 0) {
                 matrix.postRotate(orientation);
             }
