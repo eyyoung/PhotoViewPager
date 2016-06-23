@@ -47,7 +47,7 @@ task uploadPhotoViewIML(type: Upload) {
     repositories {
         mavenDeployer {
             repository(url: "http://nexus.sdp.nd/nexus/content/repositories/android-3rd/") {
-                authentication(userName: mavenUser, password: mavenPassword)
+                authentication(userName: NEXUS_USERNAME, password: NEXUS_PASSWORD)
             }
             pom.version = rootProject.ext.module_version
             pom.artifactId = "photoview-iml"
