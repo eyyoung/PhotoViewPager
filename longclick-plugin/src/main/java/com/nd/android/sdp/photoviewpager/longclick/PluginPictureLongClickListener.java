@@ -43,7 +43,8 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
             return false;
         }
         final ArrayList<ILongClickItem> longClickItems = mBuilder.mLongClickItems;
-        final ILongClickItemArrayAdapter itemsAdapter = new ILongClickItemArrayAdapter(mBuilder.mContext);
+        final Context context = v.getContext();
+        final ILongClickItemArrayAdapter itemsAdapter = new ILongClickItemArrayAdapter(context);
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
                 .cacheInMemory(false)
                 .cacheOnDisk(false)
@@ -54,7 +55,6 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
             return false;
         }
         final CompositeSubscription compositeSubscription = new CompositeSubscription();
-        final Context context = v.getContext();
         final Subscription adapterSubscription = AdapterObservable.onceHasData(itemsAdapter)
                 .subscribe(new Action1<Boolean>() {
                     @Override
@@ -131,11 +131,12 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
 
         @NonNull
         private final ArrayList<ILongClickItem> mLongClickItems = new ArrayList<>();
-        @NonNull
-        public final Context mContext;
 
+        @Deprecated
         public Builder(@NonNull Context context) {
-            mContext = context;
+        }
+
+        public Builder() {
         }
 
         public Builder addLongClickItem(ILongClickItem clickItem) {

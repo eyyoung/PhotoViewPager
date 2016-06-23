@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
                 picInfos,
                 mIv == view ? 0 : 1,
                 this);
-        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder(this)
+        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder()
                 .addLongClickItem(new ViewInBrowseClickItem())
                 .addLongClickItem(new SaveClickItem())
                 .addLongClickItem(new SystemShareClickItem())
