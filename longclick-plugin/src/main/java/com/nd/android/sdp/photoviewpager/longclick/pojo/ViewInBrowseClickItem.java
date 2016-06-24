@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.nd.android.sdp.photoviewpager.longclick.R;
 
@@ -22,12 +23,12 @@ public class ViewInBrowseClickItem implements ILongClickItem {
     }
 
     @Override
-    public Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @NonNull Bitmap bitmap) {
+    public Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @Nullable Bitmap bitmap) {
         return Observable.just(url.startsWith("http") || url.startsWith("https"));
     }
 
     @Override
-    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @NonNull Bitmap bmp) {
+    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @Nullable Bitmap bmp) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(imageUrl));
         context.startActivity(intent);

@@ -3,6 +3,7 @@ package com.nd.android.sdp.photoviewpager.longclick.pojo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.nd.android.sdp.photoviewpager.longclick.R;
 import com.nd.smartcan.appfactory.AppFactory;
@@ -43,11 +44,15 @@ public class QRDetectClickItem implements ILongClickItem {
     @Override
     public Observable<Boolean> isAvailable(@NonNull final Context context,
                                            @NonNull String url,
-                                           @NonNull File file, @NonNull final Bitmap bitmap) {
+                                           @NonNull File file, @Nullable final Bitmap bitmap) {
         return Observable.create(new Observable.OnSubscribe<Boolean>() {
             @Override
             public void call(Subscriber<? super Boolean> subscriber) {
                 try {
+                    if (bitmap == null) {
+                        subscriber.onNext(false);
+                        subscriber.onCompleted();
+                    }
                     MapScriptable param = new MapScriptable();
                     param.put(KEY_IMAGE, bitmap);
                     final MapScriptable[] mapScriptables = AppFactory.instance().triggerEventSync(context, EVENT_TRIGGER_IDENTIFY_QRCODE, param);
@@ -71,7 +76,8 @@ public class QRDetectClickItem implements ILongClickItem {
     }
 
     @Override
-    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @NonNull Bitmap bmp) {
+    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @Nullable Bitmap bmp) {
+        assert bmp != null;
         MapScriptable param = new MapScriptable();
         param.put(KEY_IMAGE, bmp);
         AppFactory.instance().triggerEvent(context, EVENT_TRIGGER_DECODE_QRCODE, param);

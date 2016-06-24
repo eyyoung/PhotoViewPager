@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.utils.Utils;
@@ -26,12 +27,12 @@ public class SaveClickItem implements ILongClickItem {
     }
 
     @Override
-    public Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @NonNull Bitmap bitmap) {
-        return Observable.just(true);
+    public Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @Nullable Bitmap bitmap) {
+        return Observable.just(file.exists());
     }
 
     @Override
-    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File inCache, @NonNull Bitmap bmp) {
+    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File inCache, @Nullable Bitmap bmp) {
         if (!inCache.exists()) {
             Toast.makeText(context, R.string.photo_viewpager_save_failed, Toast.LENGTH_SHORT).show();
             return;

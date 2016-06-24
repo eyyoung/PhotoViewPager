@@ -51,9 +51,6 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
                 .build();
         final Bitmap bitmap = ImageLoader.getInstance().loadImageSync(Uri.fromFile(cache).toString(),
                 new ImageSize(480, 480), displayImageOptions);
-        if (bitmap == null) {
-            return false;
-        }
         final CompositeSubscription compositeSubscription = new CompositeSubscription();
         final Subscription adapterSubscription = AdapterObservable.onceHasData(itemsAdapter)
                 .subscribe(new Action1<Boolean>() {
@@ -75,7 +72,9 @@ public class PluginPictureLongClickListener implements OnPictureLongClickListene
                                     .dismissListener(new DialogInterface.OnDismissListener() {
                                         @Override
                                         public void onDismiss(DialogInterface dialog) {
-                                            bitmap.recycle();
+                                            if (bitmap != null) {
+                                                bitmap.recycle();
+                                            }
                                             compositeSubscription.unsubscribe();
                                         }
                                     })

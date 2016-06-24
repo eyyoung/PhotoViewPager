@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.nd.android.sdp.photoviewpager.longclick.R;
 
@@ -25,12 +26,12 @@ public class SystemShareClickItem implements ILongClickItem {
     public Observable<Boolean> isAvailable(@NonNull Context context,
                                            @NonNull String url,
                                            @NonNull File file,
-                                           @NonNull Bitmap bitmap) {
-        return Observable.just(true);
+                                           @Nullable Bitmap bitmap) {
+        return Observable.just(file.exists());
     }
 
     @Override
-    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @NonNull Bitmap bmp) {
+    public void onClick(@NonNull Context context, @NonNull String imageUrl, @NonNull File file, @Nullable Bitmap bmp) {
         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));

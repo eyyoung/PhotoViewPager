@@ -3,6 +3,7 @@ package com.nd.android.sdp.photoviewpager.longclick.pojo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 
@@ -30,7 +31,7 @@ public interface ILongClickItem {
      * @param file
      *@param bitmap bitmap  @return 可用流
      */
-    Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @NonNull Bitmap bitmap);
+    Observable<Boolean> isAvailable(@NonNull Context context, @NonNull String url, @NonNull File file, @Nullable Bitmap bitmap);
 
     /**
      * 图片点击
@@ -43,6 +44,6 @@ public interface ILongClickItem {
     void onClick(@NonNull Context context,
                  @NonNull String imageUrl,
                  @NonNull File file,
-                 @NonNull Bitmap bmp);
+                 @Nullable Bitmap bmp);
 
 }
