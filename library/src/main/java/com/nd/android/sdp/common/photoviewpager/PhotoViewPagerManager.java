@@ -224,6 +224,31 @@ public enum PhotoViewPagerManager {
      * @param defaultPosition             the default position
      * @param callback                    the callback
      * @param photoViewPagerConfiguration Configuration
+     * @return the photo view pager fragment
+     */
+    @NonNull
+    public static PhotoViewPagerFragment startView(@NonNull Activity activity,
+                                                   @Nullable
+                                                   ImageView imageView,
+                                                   @NonNull
+                                                   ArrayList<? extends Info> picInfos,
+                                                   int defaultPosition,
+                                                   @Nullable
+                                                   Callback callback,
+                                                   @Nullable
+                                                   IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
+        return startView(activity, imageView, picInfos, defaultPosition, callback, photoViewPagerConfiguration, false);
+    }
+
+    /**
+     * Start
+     *
+     * @param activity                    the context
+     * @param imageView                   the image view
+     * @param picInfos                    the pic infos
+     * @param defaultPosition             the default position
+     * @param callback                    the callback
+     * @param photoViewPagerConfiguration Configuration
      * @param disableOrigin
      * @return the photo view pager fragment
      */
