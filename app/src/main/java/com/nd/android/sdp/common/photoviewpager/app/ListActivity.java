@@ -2,7 +2,6 @@ package com.nd.android.sdp.common.photoviewpager.app;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,18 +15,20 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
-import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
 import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.common.photoviewpager.pojo.VideoInfo;
+import com.nd.android.sdp.photoviewpager.longclick.PluginPictureLongClickListener;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.SaveClickItem;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.SystemShareClickItem;
+import com.nd.android.sdp.photoviewpager.longclick.pojo.ViewInBrowseClickItem;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -35,7 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnPictureLongClickListener, OnViewCreatedListener, OnFinishListener {
+public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnViewCreatedListener, OnFinishListener {
 
     String[] urls = new String[]{
             "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
@@ -163,8 +164,13 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
                 return true;
             }
         });
-        mPhotoViewPagerFragment.setOnPictureLongClickListener(this);
         mPhotoViewPagerFragment.setDefaultRes(R.drawable.contentservice_ic_default);
+        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder()
+                .addLongClickItem(new ViewInBrowseClickItem())
+                .addLongClickItem(new SaveClickItem())
+                .addLongClickItem(new SystemShareClickItem())
+                .build();
+        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(longClickListener);
     }
 
     @Override
@@ -179,23 +185,8 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
         return null;
     }
 
-
-    @Override
-    public boolean onLongClick(View v, String mUrl, Bitmap bitmap) {
-        mPhotoViewPagerFragment.deletePosition(mPhotoViewPagerFragment.getCurrentPosition());
-        Toast.makeText(this, mUrl, Toast.LENGTH_SHORT).show();
-        return false;
-    }
-
     @Override
     public void onViewCreated(View view) {
-//        final RelativeLayout relativeLayout = (RelativeLayout) view;
-//        final TextView textView = new TextView(this);
-//        textView.setText("EXIT");
-//        textView.setTextColor(Color.WHITE);
-//        textView.setPadding(20, 20, 0, 0);
-//        textView.setOnClickListener(this);
-//        relativeLayout.addView(textView);
     }
 
     @Override
