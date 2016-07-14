@@ -81,14 +81,6 @@ public class ListActivity extends AppCompatActivity implements Callback, View.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
-//        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "Test");
-//        final File[] files = file.listFiles();
-//        urls = new String[files.length];
-//        for (int i = 0, filesLength = files.length; i < filesLength; i++) {
-//            File f = files[i];
-//            urls[i] = "file://" + f.getAbsolutePath();
-//        }
-//        preview_urls = urls;
         mRecyclerView = ((RecyclerView) findViewById(R.id.lv));
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         mRecyclerView.setAdapter(new DemoAdapter());
