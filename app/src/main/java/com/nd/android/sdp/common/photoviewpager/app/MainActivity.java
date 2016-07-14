@@ -2,16 +2,14 @@ package com.nd.android.sdp.common.photoviewpager.app;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
-import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
+import com.nd.android.sdp.common.photoviewpager.PhotoViewOptions;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
-import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.iml.ImageLoaderIniter;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
 import com.nd.android.sdp.photoviewpager.longclick.PluginPictureLongClickListener;
@@ -24,7 +22,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements Callback, OnViewCreatedListener {
+public class MainActivity extends AppCompatActivity implements Callback {
 
     String[] urls = new String[]{
             "http://betacs.101.com/v0.1/download?dentryId=bd554eb7-fd48-407e-a834-9a3d903a0314&size=960",
@@ -37,7 +35,6 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
     };
     private ImageView mIv;
     private ImageView mIv2;
-    private PhotoViewPagerFragment mPhotoViewPagerFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +42,6 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
         ImageLoader.getInstance().init(ImageLoaderConfiguration.createDefault(this));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         ImageLoaderConfiguration imageLoaderConfiguration = new ImageLoaderConfiguration.Builder(this)
                 .memoryCacheSize(20 * 1024 * 1024)
                 .writeDebugLogs()
@@ -91,7 +86,16 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
         return super.onOptionsItemSelected(item);
     }
 
-    public void toView(View view) {
+    @Override
+    public ImageView getPreviewView(String previewUrl) {
+        if (previewUrl.equals(preview_urls[0])) {
+            return mIv;
+        } else {
+            return mIv2;
+        }
+    }
+
+    public void onCustomView(View view) {
         ArrayList<PicInfo> picInfos = new ArrayList<>();
         for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
             PicInfo picInfo = new PicInfo(urls[i],
@@ -101,33 +105,38 @@ public class MainActivity extends AppCompatActivity implements Callback, OnViewC
             );
             picInfos.add(picInfo);
         }
-        mPhotoViewPagerFragment = PhotoViewPagerManager.start(this,
-                (ImageView) view,
-                picInfos,
-                mIv == view ? 0 : 1,
-                this);
+        PhotoViewOptions viewOptions = new PhotoViewOptions.Builder()
+                .callback(this)
+                .externalView(CustomView.class)
+                .imageView((ImageView) view)
+                .build();
+        PhotoViewPagerManager.startView(this,
+                picInfos, viewOptions);
+    }
+
+    public void onCustomLongClick(View view) {
+        ArrayList<PicInfo> picInfos = new ArrayList<>();
+        for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
+            PicInfo picInfo = new PicInfo(urls[i],
+                    preview_urls[i],
+                    null,
+                    110
+            );
+            picInfos.add(picInfo);
+        }
         final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder()
                 .addLongClickItem(new ViewInBrowseClickItem())
                 .addLongClickItem(new SaveClickItem())
                 .addLongClickItem(new SystemShareClickItem())
                 .build();
-        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(longClickListener);
-        mPhotoViewPagerFragment.setOnViewCreatedListener(this);
+        PhotoViewOptions viewOptions = new PhotoViewOptions.Builder()
+                .callback(this)
+                .defaultPosition(1)
+                .onPictureLongClick(longClickListener)
+                .imageView((ImageView) view)
+                .build();
+        PhotoViewPagerManager.startView(this,
+                picInfos, viewOptions);
     }
-
-    @Override
-    public ImageView getPreviewView(String previewUrl) {
-        if (previewUrl.equals(preview_urls[0])) {
-            return null;
-        } else {
-            return mIv2;
-        }
-    }
-
-    @Override
-    public void onViewCreated(View view) {
-
-    }
-
 }
 

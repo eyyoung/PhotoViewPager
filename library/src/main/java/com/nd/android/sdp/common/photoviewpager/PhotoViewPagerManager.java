@@ -174,20 +174,13 @@ public enum PhotoViewPagerManager {
             Callback callback,
             @Nullable
             IPhotoViewPagerConfiguration photoViewPagerConfiguration) {
-        if (callback == null) {
-            callback = new Callback() {
-                @Override
-                public ImageView getPreviewView(String previewUrl) {
-                    return null;
-                }
-            };
-        }
-        final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(null,
-                picInfos,
-                defaultPosition,
-                callback,
-                photoViewPagerConfiguration, false);
-        return fragment;
+        PhotoViewOptions photoViewOptions = new PhotoViewOptions.Builder()
+                .photoViewPagerConfiguration(photoViewPagerConfiguration)
+                .callback(callback)
+                .defaultPosition(defaultPosition)
+                .build();
+        return PhotoViewPagerFragment.newInstance(null,
+                picInfos, photoViewOptions);
     }
 
     /**
@@ -264,25 +257,32 @@ public enum PhotoViewPagerManager {
                                                    @Nullable
                                                    IPhotoViewPagerConfiguration photoViewPagerConfiguration,
                                                    boolean disableOrigin) {
-        if (callback == null) {
-            callback = new Callback() {
-                @Override
-                public ImageView getPreviewView(String previewUrl) {
-                    return null;
-                }
-            };
-        }
+        PhotoViewOptions photoViewOptions = new PhotoViewOptions.Builder()
+                .imageView(imageView)
+                .defaultPosition(defaultPosition)
+                .callback(callback)
+                .photoViewPagerConfiguration(photoViewPagerConfiguration)
+                .disableOrigin(disableOrigin)
+                .build();
         final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(imageView,
-                picInfos,
-                defaultPosition,
-                callback,
-                photoViewPagerConfiguration,
-                disableOrigin);
+                picInfos, photoViewOptions);
         final long id = System.currentTimeMillis();
         PhotoViewPagerManager.INSTANCE.mFragmentMap.put(id, fragment);
         initStatusBarHeight(activity);
         ContainerActivity.start(activity, id);
         return fragment;
+    }
+
+    public static void startView(@NonNull Activity activity, @NonNull ArrayList<? extends Info> picInfos, @Nullable PhotoViewOptions photoViewOptions) {
+        if (photoViewOptions == null) {
+            photoViewOptions = PhotoViewOptions.createDefault();
+        }
+        final PhotoViewPagerFragment fragment = PhotoViewPagerFragment.newInstance(photoViewOptions.getImageView(),
+                picInfos, photoViewOptions);
+        final long id = System.currentTimeMillis();
+        PhotoViewPagerManager.INSTANCE.mFragmentMap.put(id, fragment);
+        initStatusBarHeight(activity);
+        ContainerActivity.start(activity, id);
     }
 
     private static void initStatusBarHeight(Activity activity) {
@@ -313,4 +313,5 @@ public enum PhotoViewPagerManager {
     public PhotoViewPagerFragment getFragmentById(long id) {
         return mFragmentMap.get(id);
     }
+
 }

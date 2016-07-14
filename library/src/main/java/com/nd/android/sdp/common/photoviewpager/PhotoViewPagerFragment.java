@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -21,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.nd.android.sdp.common.photoviewpager.ability.IExternalView;
 import com.nd.android.sdp.common.photoviewpager.callback.OnDetachCallBack;
 import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
 import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListener;
@@ -69,13 +71,13 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
     private Bitmap mDefaultBitmap;
     private boolean mNoBgAnim;
     private boolean mDisableOrigin;
+    @Nullable
+    private Class<? extends IExternalView> mExternalView;
 
-    static PhotoViewPagerFragment newInstance(ImageView imageView,
+    static PhotoViewPagerFragment newInstance(@Nullable ImageView imageView,
+                                              @NonNull
                                               ArrayList<? extends Info> picInfos,
-                                              int defaultPosition,
-                                              Callback callback,
-                                              IPhotoViewPagerConfiguration configuration,
-                                              boolean disableOrigin) {
+                                              PhotoViewOptions photoViewOptions) {
         Bundle args = new Bundle();
         PhotoViewPagerFragment fragment = new PhotoViewPagerFragment();
         args.putParcelableArrayList(PARAM_PICINFOS, picInfos);
@@ -87,12 +89,22 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             args.putInt(PARAM_WIDTH, imageView.getWidth());
             args.putInt(PARAM_HEIGHT, imageView.getHeight());
         }
-        args.putInt(PARAM_DEFAULT_POSITION, defaultPosition);
-        fragment.setCallbacks(callback);
-        fragment.setConfiguration(configuration);
-        fragment.disableOrigin(disableOrigin);
+        args.putInt(PARAM_DEFAULT_POSITION, photoViewOptions.getDefaultPosition());
+        fragment.setCallbacks(photoViewOptions.getCallback());
+        fragment.setConfiguration(photoViewOptions.getPhotoViewPagerConfiguration());
+        fragment.disableOrigin(photoViewOptions.isDisableOrigin());
         fragment.setArguments(args);
+        fragment.setExternalView(photoViewOptions.getExternalView());
+        fragment.setOnPictureLongClickListenerV2(photoViewOptions.getOnPictureLongClickListenerV2());
+        fragment.setOnViewCreatedListenerV2(photoViewOptions.getOnViewCreatedListenerV2());
+        fragment.setOnFinishListener(photoViewOptions.getOnFinishListener());
+        fragment.setExtraDownloader(photoViewOptions.getExtraDownload());
+        fragment.setDefaultRes(photoViewOptions.getDefaultResId());
         return fragment;
+    }
+
+    private void setExternalView(@Nullable Class<? extends IExternalView> externalView) {
+        mExternalView = externalView;
     }
 
     private void disableOrigin(boolean disableOrigin) {
@@ -111,6 +123,14 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
 
     private void setCallbacks(Callback callback) {
         mCallback = callback;
+        if (mCallback == null) {
+            mCallback = new Callback() {
+                @Override
+                public ImageView getPreviewView(String previewUrl) {
+                    return null;
+                }
+            };
+        }
     }
 
     @Nullable
@@ -138,8 +158,23 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         if (mOnViewCreatedListener != null) {
             mOnViewCreatedListener.onViewCreated(view);
         }
+        RelativeLayout relativeLayout = (RelativeLayout) view;
         if (mOnViewCreatedListenerV2 != null) {
-            mOnViewCreatedListenerV2.onViewCreated((RelativeLayout) view);
+            mOnViewCreatedListenerV2.onViewCreated(relativeLayout);
+        }
+        initExternalView(relativeLayout);
+    }
+
+    private void initExternalView(RelativeLayout relativeLayout) {
+        if (mExternalView == null) {
+            return;
+        }
+        try {
+            IExternalView externalView = mExternalView.newInstance();
+            View view = externalView.getView(getActivity(), this);
+            relativeLayout.addView(view);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -175,7 +210,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
                 arguments,
                 defaultPosition);
         mVpPhoto.setCallback(mCallback);
-        if(mNoBgAnim){
+        if (mNoBgAnim) {
             mVpPhoto.setNoBgAnim();
         }
         mVpPhoto.setExtraDownloader(mExtraDownloader);

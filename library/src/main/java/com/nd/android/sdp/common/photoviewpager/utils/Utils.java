@@ -35,7 +35,7 @@ public class Utils {
         window.getDecorView().getWindowVisibleDisplayFrame(rectangle);
         int statusBarHeight = rectangle.top;
         int contentViewTop =
-                window.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+                window.getDecorView().getTop();
         int titleBarHeight = contentViewTop - statusBarHeight;
         return titleBarHeight;
     }

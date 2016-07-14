@@ -3,28 +3,19 @@ package com.nd.android.sdp.common.photoviewpager.app;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import com.nd.android.sdp.common.photoviewpager.Callback;
-import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerFragment;
+import com.nd.android.sdp.common.photoviewpager.PhotoViewOptions;
 import com.nd.android.sdp.common.photoviewpager.PhotoViewPagerManager;
-import com.nd.android.sdp.common.photoviewpager.callback.OnFinishListener;
-import com.nd.android.sdp.common.photoviewpager.callback.OnPictureLongClickListenerV2;
-import com.nd.android.sdp.common.photoviewpager.callback.OnViewCreatedListener;
 import com.nd.android.sdp.common.photoviewpager.pojo.Info;
 import com.nd.android.sdp.common.photoviewpager.pojo.PicInfo;
-import com.nd.android.sdp.common.photoviewpager.pojo.VideoInfo;
 import com.nd.android.sdp.photoviewpager.longclick.PluginPictureLongClickListener;
 import com.nd.android.sdp.photoviewpager.longclick.pojo.SaveClickItem;
 import com.nd.android.sdp.photoviewpager.longclick.pojo.SystemShareClickItem;
@@ -32,80 +23,59 @@ import com.nd.android.sdp.photoviewpager.longclick.pojo.ViewInBrowseClickItem;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Random;
 
-public class ListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener, Callback, View.OnClickListener, OnViewCreatedListener, OnFinishListener {
+public class ListActivity extends AppCompatActivity implements Callback, View.OnClickListener {
 
     String[] urls = new String[]{
-            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
-            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=960",
-            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=960",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
-            "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c978",
-            ""
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpQTUpzNERFN2E0NHkrK0krclRlZnJuYUIvRFAxSjFhS250MTh1R1lqbE5BPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkL1YrL0tDNDhyUmo1Wmx3OWtBbjZ4M2kwTGc3c0g0dDlnPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkNW1GcHU3Z0xzcnB6VEpxVnl2cWdYemdpSGtLbW80RVlRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkd1BNWlk4bi9hNm5SbDNEV0Y5T1lGdG5EK2p0dHdRYXpBPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf1.ph.126.net/aQB_QR4U8Ki4tzHWpWui0w==/1165306403600135335.jpg",
+            "http://imglf2.ph.126.net/BBXvFL_V-CZHfeOZDTdm0w==/154529762314417994.jpg",
+            "http://imglf2.ph.126.net/KyMaPq7qm4MrJpHNNC7DNQ==/6608801555725099370.jpg",
+            "http://imglf0.ph.126.net/MXNvzEANuqns33T7xvLDXg==/6597921888170125284.jpg",
+            "http://imglf2.ph.126.net/KpUDdkylFSNdw4yjk18LYg==/6619448126817286061.jpg",
+            "http://imglf1.ph.126.net/LneZp4GjDd6aNn-g7WVoaQ==/50946970802621080.jpg",
+            "http://imglf1.ph.126.net/PlSDxdASZVtT3QXSatYBTw==/6630618065444392162.jpg",
+            "http://imglf1.nosdn.127.net/img/WU40NGcvaFE3Ymhpam1lY2E0VFFZV3hWSmgyc1hVS1BnZ3p3emdPNDZtVitaL3FWOVo1aWdRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmhuMjMxcWZyL2dSc01sWUNGUGFjVjZRR3RWaEErYXlGbnBQMTRRMnFNZkx3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg"
     };
 
     String[] preview_urls = new String[]{
-            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=1680x0&quality=96&stripmeta=0&type=jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
-            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d&size=160",
-            "http://imglf2.nosdn.127.net/img/Vyt1dU1tTVRXZmUweGdGWUpEdFY1UDZRNkIrT1psYWFHVmVtcjZBMnNwVFg0K29adFY2bTN3PT0.jpg?imageView&thumbnail=1680x0&quality=96&stripmeta=0&type=jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0&size=160",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
-            "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c978",
-            ""
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpQTUpzNERFN2E0NHkrK0krclRlZnJuYUIvRFAxSjFhS250MTh1R1lqbE5BPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkL1YrL0tDNDhyUmo1Wmx3OWtBbjZ4M2kwTGc3c0g0dDlnPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkNW1GcHU3Z0xzcnB6VEpxVnl2cWdYemdpSGtLbW80RVlRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkd1BNWlk4bi9hNm5SbDNEV0Y5T1lGdG5EK2p0dHdRYXpBPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf1.ph.126.net/aQB_QR4U8Ki4tzHWpWui0w==/1165306403600135335.jpg",
+            "http://imglf2.ph.126.net/BBXvFL_V-CZHfeOZDTdm0w==/154529762314417994.jpg",
+            "http://imglf2.ph.126.net/KyMaPq7qm4MrJpHNNC7DNQ==/6608801555725099370.jpg",
+            "http://imglf0.ph.126.net/MXNvzEANuqns33T7xvLDXg==/6597921888170125284.jpg",
+            "http://imglf2.ph.126.net/KpUDdkylFSNdw4yjk18LYg==/6619448126817286061.jpg",
+            "http://imglf1.ph.126.net/LneZp4GjDd6aNn-g7WVoaQ==/50946970802621080.jpg",
+            "http://imglf1.ph.126.net/PlSDxdASZVtT3QXSatYBTw==/6630618065444392162.jpg",
+            "http://imglf1.nosdn.127.net/img/WU40NGcvaFE3Ymhpam1lY2E0VFFZV3hWSmgyc1hVS1BnZ3p3emdPNDZtVitaL3FWOVo1aWdRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmhuMjMxcWZyL2dSc01sWUNGUGFjVjZRR3RWaEErYXlGbnBQMTRRMnFNZkx3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg"
     };
 
     String[] orig_urls = new String[]{
-            "http://ww2.sinaimg.cn/bmiddle/6f9303b5gw1ezhod4l65wj20pe0zkjxq.jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
-            "http://betacs.101.com/v0.1/download?dentryId=aea34439-6c63-4d67-9b87-03e461c4756d",
-            "http://ww2.sinaimg.cn/bmiddle/6f9303b5gw1ezhod4l65wj20pe0zkjxq.jpg",
-            "http://ww1.sinaimg.cn/bmiddle/6c7cbd31jw1ew7ibh0e7qj21kw11xe58.jpg",
-            "http://ww4.sinaimg.cn/bmiddle/5e0b3d25gw1ez3nb6aiejj21kw11x7dc.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/69b7d63agw1ez3nw371ybj20oc0ocaly.jpg",
-            "http://ww3.sinaimg.cn/bmiddle/71021e17gw1ez0wd1tktsg208b04okjn.gif",
-            "http://betacs.101.com/v0.1/download?dentryId=c15ffc92-c909-4253-ba2a-6c60e5a4d0a0",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "file:///storage/emulated/0/Pictures/JPEG_20160217_145525_1846374656.jpg",
-            "http://pms.sdp.nd/data/upload/1/201602/2317240017838678.jpg",
-            "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c978",
-            "http://betacs.101.com/v0.1/download?dentryId=b2525186-6f58-47ff-b216-d424fa62c977"
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpQTUpzNERFN2E0NHkrK0krclRlZnJuYUIvRFAxSjFhS250MTh1R1lqbE5BPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkL1YrL0tDNDhyUmo1Wmx3OWtBbjZ4M2kwTGc3c0g0dDlnPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkNW1GcHU3Z0xzcnB6VEpxVnl2cWdYemdpSGtLbW80RVlRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmpyMDJmd0thZURkd1BNWlk4bi9hNm5SbDNEV0Y5T1lGdG5EK2p0dHdRYXpBPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf1.ph.126.net/aQB_QR4U8Ki4tzHWpWui0w==/1165306403600135335.jpg",
+            "http://imglf2.ph.126.net/BBXvFL_V-CZHfeOZDTdm0w==/154529762314417994.jpg",
+            "http://imglf2.ph.126.net/KyMaPq7qm4MrJpHNNC7DNQ==/6608801555725099370.jpg",
+            "http://imglf0.ph.126.net/MXNvzEANuqns33T7xvLDXg==/6597921888170125284.jpg",
+            "http://imglf2.ph.126.net/KpUDdkylFSNdw4yjk18LYg==/6619448126817286061.jpg",
+            "http://imglf1.ph.126.net/LneZp4GjDd6aNn-g7WVoaQ==/50946970802621080.jpg",
+            "http://imglf1.ph.126.net/PlSDxdASZVtT3QXSatYBTw==/6630618065444392162.jpg",
+            "http://imglf1.nosdn.127.net/img/WU40NGcvaFE3Ymhpam1lY2E0VFFZV3hWSmgyc1hVS1BnZ3p3emdPNDZtVitaL3FWOVo1aWdRPT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg",
+            "http://imglf2.nosdn.127.net/img/WU40NGcvaFE3YmhuMjMxcWZyL2dSc01sWUNGUGFjVjZRR3RWaEErYXlGbnBQMTRRMnFNZkx3PT0.jpg?imageView&thumbnail=500x0&quality=96&stripmeta=0&type=jpg"
     };
 
-    private ListView mLv;
-    private PhotoViewPagerFragment mPhotoViewPagerFragment;
+    private RecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,11 +89,9 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
 //            urls[i] = "file://" + f.getAbsolutePath();
 //        }
 //        preview_urls = urls;
-        mLv = ((ListView) findViewById(R.id.lv));
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        mLv.setAdapter(new DemoAdapter());
-        mLv
-                .setOnItemClickListener(this);
+        mRecyclerView = ((RecyclerView) findViewById(R.id.lv));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        mRecyclerView.setAdapter(new DemoAdapter());
     }
 
     public static void start(Context context) {
@@ -132,74 +100,48 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ArrayList<Info> picInfos = new ArrayList<>();
-        for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
-            Info info;
-            if (i == urlsLength - 1) {
-                info = VideoInfo.newBuilder()
-                        .size(new Random().nextInt(10 * 1024 * 1024))
-                        .thumb("image://test.jpg")
-                        .videoUrl(orig_urls[i])
-                        .build();
-            } else {
-                info = new PicInfo(urls[i],
-                        preview_urls[i],
-                        orig_urls[i],
-                        new Random().nextInt(10 * 1024 * 1024)
-                );
-            }
-            picInfos.add(info);
-        }
-        mPhotoViewPagerFragment = PhotoViewPagerManager.startView(this,
-                (ImageView) view, picInfos,
-                position,
-                this, null, true);
-        mPhotoViewPagerFragment.setOnViewCreatedListener(this);
-        mPhotoViewPagerFragment.setOnFinishListener(this);
-        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(new OnPictureLongClickListenerV2() {
-            @Override
-            public boolean onLongClick(@NonNull View v, @NonNull String mUrl, @Nullable File cache) {
-                Log.d("ListActivity", "cache:" + cache);
-                return true;
-            }
-        });
-        mPhotoViewPagerFragment.setDefaultRes(R.drawable.contentservice_ic_default);
-        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder()
-                .addLongClickItem(new ViewInBrowseClickItem())
-                .addLongClickItem(new SaveClickItem())
-                .addLongClickItem(new SystemShareClickItem())
-                .build();
-        mPhotoViewPagerFragment.setOnPictureLongClickListenerV2(longClickListener);
-    }
-
-    @Override
     public ImageView getPreviewView(String previewUrl) {
-        final int childCount = mLv.getChildCount();
+        final int childCount = mRecyclerView.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final View iv = mLv.getChildAt(i);
-            if (iv.getTag().equals(previewUrl)) {
-                return (ImageView) iv;
+            final View childAt = mRecyclerView.getChildAt(i);
+            View imageView = childAt.findViewById(R.id.iv);
+            if (childAt.getTag().equals(previewUrl)) {
+                return (ImageView) imageView;
             }
         }
         return null;
     }
 
     @Override
-    public void onViewCreated(View view) {
-    }
-
-    @Override
     public void onClick(View v) {
-//        mPhotoViewPagerFragment.exit();
+        ArrayList<Info> picInfos = new ArrayList<>();
+        for (int i = 0, urlsLength = urls.length; i < urlsLength; i++) {
+            Info info = PicInfo.newBuilder()
+                    .previewUrl(preview_urls[i])
+                    .url(urls[i])
+                    .origUrl(orig_urls[i])
+                    .build();
+            picInfos.add(info);
+        }
+
+        final PluginPictureLongClickListener longClickListener = new PluginPictureLongClickListener.Builder()
+                .addLongClickItem(new ViewInBrowseClickItem())
+                .addLongClickItem(new SaveClickItem())
+                .addLongClickItem(new SystemShareClickItem())
+                .build();
+        RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(v);
+        View iv = v.findViewById(R.id.iv);
+        PhotoViewOptions photoViewOptions = new PhotoViewOptions.Builder()
+                .defaultResId(R.drawable.contentservice_ic_default)
+                .imageView((ImageView) iv)
+                .defaultPosition(childViewHolder.getAdapterPosition())
+                .onPictureLongClick(longClickListener)
+                .callback(this)
+                .build();
+        PhotoViewPagerManager.startView(this, picInfos, photoViewOptions);
     }
 
-    @Override
-    public void onFinish() {
-        mPhotoViewPagerFragment = null;
-    }
-
-    private class DemoAdapter extends BaseAdapter {
+    private class DemoAdapter extends RecyclerView.Adapter<ImageHolder> {
 
         DisplayImageOptions displayImageOptions = new DisplayImageOptions.Builder()
                 .cacheInMemory(true)
@@ -207,13 +149,16 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
                 .build();
 
         @Override
-        public int getCount() {
-            return urls.length;
+        public ImageHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+            View view = LayoutInflater.from(ListActivity.this).inflate(R.layout.img, viewGroup, false);
+            view.setOnClickListener(ListActivity.this);
+            return new ImageHolder(view);
         }
 
         @Override
-        public Object getItem(int position) {
-            return urls[position];
+        public void onBindViewHolder(ImageHolder imageHolder, int position) {
+            ImageLoader.getInstance().displayImage(preview_urls[position], imageHolder.imageView, displayImageOptions);
+            imageHolder.itemView.setTag(preview_urls[position]);
         }
 
         @Override
@@ -222,13 +167,19 @@ public class ListActivity extends AppCompatActivity implements AdapterView.OnIte
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(ListActivity.this).inflate(R.layout.img, parent, false);
-            }
-            ImageLoader.getInstance().displayImage(preview_urls[position], (ImageView) convertView, displayImageOptions);
-            convertView.setTag(preview_urls[position]);
-            return convertView;
+        public int getItemCount() {
+            return urls.length;
+        }
+
+    }
+
+    private static class ImageHolder extends RecyclerView.ViewHolder {
+
+        ImageView imageView;
+
+        public ImageHolder(View itemView) {
+            super(itemView);
+            imageView = (ImageView) itemView.findViewById(R.id.iv);
         }
     }
 }
