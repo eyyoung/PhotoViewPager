@@ -286,9 +286,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
         if (fileExists && (fileCache.length() < 500 * 1024 || mDisableOrigin)) {
             loadFileCache(fileCache, false);
             mIsLoaded = true;
-            mImageLoaded = true;
-            mIvTemp.setVisibility(View.GONE);
-            mIvPreview.setVisibility(View.GONE);
+            mIsAreadyBigImage = true;
         } else {
             final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mFlPreview.getLayoutParams();
             layoutParams.leftMargin = (mSceenWidth - mFrameSize) / 2;
@@ -533,6 +531,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             mIvTemp.setVisibility(View.GONE);
             mIvReal.setVisibility(View.VISIBLE);
             mIvExit.setVisibility(View.GONE);
+            mIvPreview.setVisibility(View.GONE);
             return;
         }
         mIvReal.setVisibility(View.GONE);
