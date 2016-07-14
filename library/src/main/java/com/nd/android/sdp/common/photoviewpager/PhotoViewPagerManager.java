@@ -101,6 +101,7 @@ public enum PhotoViewPagerManager {
      * @return the photo view pager fragment
      */
     @NonNull
+    @Deprecated
     public static PhotoViewPagerFragment start(FragmentActivity activity,
                                                @Nullable
                                                ImageView imageView,
@@ -115,6 +116,7 @@ public enum PhotoViewPagerManager {
     }
 
     @NonNull
+    @Deprecated
     public static PhotoViewPagerFragment startView(FragmentActivity activity,
                                                    @Nullable
                                                    ImageView imageView,
@@ -133,6 +135,7 @@ public enum PhotoViewPagerManager {
      * @param defaultPosition the default position
      * @return the photo view pager fragment
      */
+    @Deprecated
     public static PhotoViewPagerFragment getView(
             @NonNull
             ArrayList<? extends Info> picInfos,
@@ -148,6 +151,7 @@ public enum PhotoViewPagerManager {
      * @param callback        the callback
      * @return the photo view pager fragment
      */
+    @Deprecated
     public static PhotoViewPagerFragment getView(
             @NonNull
             ArrayList<? extends Info> picInfos,
@@ -166,6 +170,7 @@ public enum PhotoViewPagerManager {
      * @param photoViewPagerConfiguration the photo view pager configuration
      * @return the photo view pager fragment
      */
+    @Deprecated
     public static PhotoViewPagerFragment getView(
             @NonNull
             ArrayList<? extends Info> picInfos,
@@ -183,6 +188,18 @@ public enum PhotoViewPagerManager {
                 picInfos, photoViewOptions);
     }
 
+    public static PhotoViewPagerFragment getView(
+            @NonNull
+            ArrayList<? extends Info> picInfos,
+            @Nullable
+            PhotoViewOptions photoViewOptions) {
+        if (photoViewOptions == null) {
+            photoViewOptions = PhotoViewOptions.createDefault();
+        }
+        return PhotoViewPagerFragment.newInstance(null,
+                picInfos, photoViewOptions);
+    }
+
     /**
      * Start
      *
@@ -195,6 +212,7 @@ public enum PhotoViewPagerManager {
      * @return the photo view pager fragment
      */
     @NonNull
+    @Deprecated
     public static PhotoViewPagerFragment startView(@NonNull FragmentActivity activity,
                                                    @Nullable
                                                    ImageView imageView,
@@ -220,6 +238,7 @@ public enum PhotoViewPagerManager {
      * @return the photo view pager fragment
      */
     @NonNull
+    @Deprecated
     public static PhotoViewPagerFragment startView(@NonNull Activity activity,
                                                    @Nullable
                                                    ImageView imageView,
@@ -245,6 +264,7 @@ public enum PhotoViewPagerManager {
      * @param disableOrigin
      * @return the photo view pager fragment
      */
+    @Deprecated
     @NonNull
     public static PhotoViewPagerFragment startView(@NonNull Activity activity,
                                                    @Nullable
