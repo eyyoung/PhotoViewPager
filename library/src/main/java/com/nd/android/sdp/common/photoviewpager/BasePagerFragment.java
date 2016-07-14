@@ -166,7 +166,7 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
             }
             mIsLoaded = true;
         } else {
-            noAnimateInit();
+            noAnimateInit(fileCache);
         }
         // 如果进入Loading状态了则不需要设置，如直接放大的情况实际上已经进入加载了
         if (mState != State.Loading) {
@@ -277,20 +277,32 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
 
     /**
      * 无动画
+     *
+     * @param fileCache
      */
-    private void noAnimateInit() {
-        final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mFlPreview.getLayoutParams();
-        layoutParams.leftMargin = (mSceenWidth - mFrameSize) / 2;
-        layoutParams.topMargin = (mSceenHeight - mFrameSize) / 2 + getStatusBarHeight();
-        mFlPreview.requestLayout();
-        mPb.setVisibility(View.VISIBLE);
-        mIvReal.setVisibility(View.GONE);
-        mIvTemp.setVisibility(View.GONE);
-        mIvPreview.setVisibility(View.VISIBLE);
-        mTvError.setVisibility(View.GONE);
-        mIvPreview.setDrawableRadius(mFrameSize / 2);
-        Bitmap previewBitmap = getPreviewBitmap();
-        mIvPreview.setImageBitmap(previewBitmap);
+    private void noAnimateInit(File fileCache) {
+        final boolean fileExists = fileCache != null && fileCache.exists();
+        // 图片较小的情况直接加载
+        if (fileExists && (fileCache.length() < 500 * 1024 || mDisableOrigin)) {
+            loadFileCache(fileCache, false);
+            mIsLoaded = true;
+            mImageLoaded = true;
+            mIvTemp.setVisibility(View.GONE);
+            mIvPreview.setVisibility(View.GONE);
+        } else {
+            final ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) mFlPreview.getLayoutParams();
+            layoutParams.leftMargin = (mSceenWidth - mFrameSize) / 2;
+            layoutParams.topMargin = (mSceenHeight - mFrameSize) / 2 + getStatusBarHeight();
+            mFlPreview.requestLayout();
+            mPb.setVisibility(View.VISIBLE);
+            mIvReal.setVisibility(View.GONE);
+            mIvTemp.setVisibility(View.GONE);
+            mIvPreview.setVisibility(View.VISIBLE);
+            mTvError.setVisibility(View.GONE);
+            mIvPreview.setDrawableRadius(mFrameSize / 2);
+            Bitmap previewBitmap = getPreviewBitmap();
+            mIvPreview.setImageBitmap(previewBitmap);
+        }
     }
 
     @Nullable
@@ -378,7 +390,16 @@ public abstract class BasePagerFragment extends Fragment implements SubsamplingS
                         }
                     }
                 })
-                .throttleLast(1, TimeUnit.SECONDS)
+                .compose(new Observable.Transformer<Integer, Integer>() {
+                    @Override
+                    public Observable<Integer> call(Observable<Integer> integerObservable) {
+                        if (mNeedTransition) {
+                            return integerObservable.takeLast(1, TimeUnit.SECONDS);
+                        } else {
+                            return integerObservable;
+                        }
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
