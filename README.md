@@ -3,17 +3,6 @@ PhotoViewPager
 
  
 
-负责人：杨扬(949177)
-
- 
-
-最新版本：
-
-[Nexus仓库Latest
-Version](<http://nexus.sdp.nd/nexus/#nexus-search;gav~com.nd.android.sdp.common~photoview~~~>)
-
- 
-
 本库提供看大图功能，主要功能：
 
 -   图片打开动画
@@ -37,27 +26,12 @@ Version](<http://nexus.sdp.nd/nexus/#nexus-search;gav~com.nd.android.sdp.common~
 Demo
 ----
 
-![](<http://git.sdp.nd/im-component/photoviewpager/raw/master/demo/demo.gif>)
+![](<https://github.com/eyyoung/PhotoViewPager/raw/demo/demo.gif>)
 
  
 
 Gradle依赖
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile("com.nd.android.sdp.common:photoview:1.x.x") {
-    transitive = true
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
- 
-
-本库需提供磁盘缓存规则，如使用Universal-ImageLoader库，请依赖
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compile("com.nd.android.sdp.common:photoview-iml:1.0.140") {
-    transitive = true
-}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TODO
 
 并可在Application初始化时配置默认的磁盘缓存与内存缓存方案规则：
 
