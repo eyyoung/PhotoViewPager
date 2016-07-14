@@ -48,6 +48,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
      * URL列表，支持本地路径与URL路径
      */
     public static final String PARAM_PICINFOS = "picinfos";
+    private static final String PARAM_EXTERNAL_ARGS = "extern_view_args";
     public static final String PARAM_TOP = "top";
     public static final String PARAM_LEFT = "left";
     public static final String PARAM_WIDTH = "width";
@@ -90,6 +91,7 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
             args.putInt(PARAM_HEIGHT, imageView.getHeight());
         }
         args.putInt(PARAM_DEFAULT_POSITION, photoViewOptions.getDefaultPosition());
+        args.putBundle(PARAM_EXTERNAL_ARGS, photoViewOptions.getExternalViewArg());
         fragment.setCallbacks(photoViewOptions.getCallback());
         fragment.setConfiguration(photoViewOptions.getPhotoViewPagerConfiguration());
         fragment.disableOrigin(photoViewOptions.isDisableOrigin());
@@ -171,7 +173,8 @@ public class PhotoViewPagerFragment extends Fragment implements ViewPager.OnPage
         }
         try {
             IExternalView externalView = mExternalView.newInstance();
-            View view = externalView.getView(getActivity(), this);
+            Bundle bundle = getArguments().getBundle(PARAM_EXTERNAL_ARGS);
+            View view = externalView.getView(getActivity(), this, bundle);
             relativeLayout.addView(view);
         } catch (Exception e) {
             e.printStackTrace();

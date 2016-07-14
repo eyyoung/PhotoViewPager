@@ -105,10 +105,13 @@ public class MainActivity extends AppCompatActivity implements Callback {
             );
             picInfos.add(picInfo);
         }
+        Bundle bundle = new Bundle();
+        bundle.putString("TEST", "TEST");
         PhotoViewOptions viewOptions = new PhotoViewOptions.Builder()
                 .callback(this)
                 .externalView(CustomView.class)
                 .imageView((ImageView) view)
+                .externalViewArg(bundle)
                 .build();
         PhotoViewPagerManager.startView(this,
                 picInfos, viewOptions);

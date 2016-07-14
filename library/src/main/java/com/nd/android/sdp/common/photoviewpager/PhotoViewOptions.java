@@ -1,5 +1,6 @@
 package com.nd.android.sdp.common.photoviewpager;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.ImageView;
 
@@ -26,6 +27,7 @@ public class PhotoViewOptions {
     private OnFinishListener onFinishListener;
     private ExtraDownloader extraDownload;
     private int defaultResId;
+    private Bundle externalViewArg;
 
     public ImageView getImageView() {
         return imageView;
@@ -33,6 +35,10 @@ public class PhotoViewOptions {
 
     public int getDefaultPosition() {
         return defaultPosition;
+    }
+
+    public Bundle getExternalViewArg() {
+        return externalViewArg;
     }
 
     public Callback getCallback() {
@@ -81,6 +87,7 @@ public class PhotoViewOptions {
         onPictureLongClickListenerV2 = builder.onPictureLongClickListenerV2;
         onViewCreatedListenerV2 = builder.onViewCreatedListenerV2;
         onFinishListener = builder.onFinishListener;
+        externalViewArg = builder.externalViewArg;
         extraDownload = builder.extraDownload;
         defaultResId = builder.defaultResId;
         if (callback == null) {
@@ -105,12 +112,18 @@ public class PhotoViewOptions {
         private OnFinishListener onFinishListener;
         private int defaultResId;
         private ExtraDownloader extraDownload;
+        private Bundle externalViewArg;
 
         public Builder() {
         }
 
         public Builder imageView(ImageView val) {
             imageView = val;
+            return this;
+        }
+
+        public Builder externalViewArg(Bundle val) {
+            externalViewArg = val;
             return this;
         }
 

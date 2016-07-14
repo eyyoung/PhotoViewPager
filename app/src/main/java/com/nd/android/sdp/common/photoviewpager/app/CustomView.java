@@ -1,8 +1,10 @@
 package com.nd.android.sdp.common.photoviewpager.app;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -22,12 +24,14 @@ public class CustomView implements IExternalView, ViewPager.OnPageChangeListener
 
     @NonNull
     @Override
-    public View getView(Context context, PhotoViewPagerFragment fragment) {
+    public View getView(Context context, PhotoViewPagerFragment fragment, Bundle args) {
         mFragment = fragment;
         LayoutInflater from = LayoutInflater.from(context);
         mView = from.inflate(R.layout.view_custom, null);
         mTvCurrentPage = (TextView) mView.findViewById(R.id.tvCurrentPage);
         fragment.addOnPageChangeListener(this);
+        String test = args.getString("TEST");
+        Log.d("CustomView", test);
         return mView;
     }
 
